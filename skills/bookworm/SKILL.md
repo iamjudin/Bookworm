@@ -30,8 +30,11 @@ For PDFs under 100 pages, inspect first. They may be articles, reports, contract
 - If a likely Obsidian vault exists, treat it as the preferred final destination.
 - When the vault is writable, write the Markdown note and assets there by default unless the user asked for another location.
 - When filesystem permissions or sandbox rules prevent direct vault writes, create the deliverable in the writable `outputs` area first, then ask the user to confirm copying it into the detected vault. Do not silently leave the vault-ready result only in `outputs`.
-- Store visual assets in a stable folder such as `assets/<book-slug>/<chapter-slug>/`.
-- Embed important images directly in the note body using Obsidian syntax: `![[assets/book-slug/chapter-06/figure-01.png|700]]`.
+- If the vault has a `Library/` folder, use it as the default destination for book notes.
+- The note filename must match the human-readable book title, not a slug and not a Bookworm implementation name. Do not append `bookworm` to the final note filename.
+- If the note filename is the book title and Obsidian will show the inline title, do not add a duplicate top-level `# Book Title` heading inside the note. Start with the first useful section such as `## Коротко`.
+- Store visual assets in a shared library assets folder, such as `Library/assets/<book-slug>/<chapter-slug>/` for notes in `Library/`.
+- For notes stored in `Library/`, embed important images with paths relative to the library folder: `![[assets/book-slug/chapter-06/figure-01.png|700]]`.
 - Use simple ASCII-safe asset filenames.
 - Use the book's language for visible headings, navigation labels, figure notes, and reader-facing text unless the user asks otherwise.
 - Keep tags, frontmatter, and broader Obsidian metadata out of the MVP unless the user is designing the whole vault workflow.
@@ -47,10 +50,12 @@ When a final digest is created outside the vault because of workspace permission
 
 If the user confirms, copy:
 
-- the Markdown file to the vault root or the user-specified vault folder;
-- the asset directory to `assets/<book-slug>/` inside that same vault.
+- the Markdown file to the vault `Library/` folder when present, otherwise to the vault root or the user-specified vault folder;
+- the asset directory to the shared assets folder for that book, e.g. `Library/assets/<book-slug>/` when the note is in `Library/`.
 
 After copying, verify that every Obsidian embed in the copied note resolves relative to the vault root.
+
+After a successful vault copy and embed verification, clean transient working files created for the handoff, such as scratch extraction folders, temporary contact sheets, and duplicate `outputs` copies. Do not delete the original source book, the copied vault note, or copied vault assets.
 
 ## Reader-Facing Tone
 
@@ -89,6 +94,13 @@ Adapt headings to the book language. For Russian books, use:
 - `Опоры в источнике`
 
 The final note may omit sections that would feel empty or mechanical. It must not omit context needed for future Q&A.
+
+When a method uses an abbreviation, keep the original English expansion in parentheses instead of replacing the Russian reader-facing label:
+
+- `Проекты (Projects)`, `Сферы жизни (Areas)`, `Ресурсы (Resources)`, `Архивы (Archives)`.
+- `Сохраняем (Capture)`, `Организуем (Organize)`, `Извлекаем суть (Distill)`, `Демонстрируем (Express)`.
+
+Avoid slash labels like `Capture / Сохраняем` in final reader-facing text.
 
 ## Fullness Standard
 
@@ -152,6 +164,7 @@ If a visual is essential or technical, the digest is incomplete unless it includ
 8. Run the internal quality gate.
 9. Write one Obsidian-ready Markdown file plus local assets.
 10. If a vault was detected but the output was written elsewhere, ask to copy the finished deliverable into the vault and verify the copied embeds after confirmation.
+11. After confirmed vault copy and verification, remove temporary working files from the scratch workspace so repeated book runs do not leave clutter.
 
 ## Internal Quality Gate
 
