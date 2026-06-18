@@ -167,11 +167,17 @@ def parse_html(source: BookSource, name: str) -> dict:
     parser = TextAndImageParser()
     parser.feed(raw)
     headings = [text for tag, text in parser.parts if tag.startswith("h")]
+    paragraphs = [text for tag, text in parser.parts if tag in {"p", "li"}]
+    fallback_headings = [
+        text for text in paragraphs
+        if 2 <= len(text.split()) <= 18 and len(text) <= 140
+    ][:4]
+    visible_headings = headings or fallback_headings
     text_words = len(normalize_text(re.sub(r"<[^>]+>", " ", raw)).split())
     return {
         "file": name,
-        "title": headings[0] if headings else "",
-        "headings": headings[:12],
+        "title": visible_headings[0] if visible_headings else "",
+        "headings": visible_headings[:12],
         "word_count": text_words,
         "image_count": len(parser.images),
         "images": parser.images,
