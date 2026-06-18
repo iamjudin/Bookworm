@@ -11,7 +11,9 @@ MVP focus:
 - enough context for future Q&A and implementation help;
 - internal quality checks that do not appear in the final note.
 
-The plugin is skill-first: Codex uses `skills/bookworm/SKILL.md` as the workflow and `scripts/bookworm_helper.py` for deterministic file inspection, image extraction, and vault discovery.
+The plugin is skill-first: Bookworm is the plugin/brand, while `skills/digest/SKILL.md` is the action it performs. Codex uses that skill workflow and `scripts/bookworm_helper.py` for deterministic file inspection, image extraction, and vault discovery.
+
+For local test iterations, prefer a clean reinstall: remove the old Bookworm plugin cache and transient test artifacts, then add the fresh local plugin again from the Codex plugin directory.
 
 ## Helper Script
 
@@ -22,4 +24,3 @@ python3 scripts/bookworm_helper.py extract-epub-assets /path/to/book.epub --out 
 ```
 
 The helper uses only the Python standard library.
-

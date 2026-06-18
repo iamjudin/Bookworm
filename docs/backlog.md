@@ -15,5 +15,5 @@
 
 ## Cleanup
 
-- Remove or de-emphasize non-working auto-start tails from Bookworm docs/instructions, especially promises around hooks or automatic handling of empty EPUB uploads that the current Codex plugin model cannot reliably enforce.
-- Avoid duplicated naming in Codex skill invocation lists. The current `Bookworm: Bookworm` label is noisy; adjust plugin/skill naming or display metadata so manual invocation reads as a single clear `Bookworm` entry if the platform allows it.
+- Verify after reinstall that Codex shows the plugin action as `Bookworm: Digest` or an equivalent non-duplicated label.
+- Verify after reinstall that Bookworm no longer presents empty EPUB auto-start as a guaranteed behavior.

@@ -1,6 +1,6 @@
 {
   "name": "bookworm",
-  "version": "0.1.0+codex.20260618214647",
+  "version": "0.1.0+codex.20260619020315",
   "description": "Bookworm turns long EPUB/PDF books into Obsidian-ready working digests with visual assets.",
   "author": {
     "name": "iamjudin"

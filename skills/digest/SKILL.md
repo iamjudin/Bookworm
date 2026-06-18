@@ -1,13 +1,17 @@
 ---
-name: bookworm
-description: Create Obsidian-ready working digests when the user attaches or mentions an EPUB/book-like PDF, even if the message has no text, with important images preserved in the note body.
+name: digest
+description: Digest long EPUB/PDF books into Obsidian-ready working notes, with important images preserved in the note body.
 ---
 
-# Bookworm / Букворм
+# Digest
 
 Use this skill when the user asks Codex to read, digest, summarize, extract the essence of, or prepare an Obsidian note for a book. Also use it when an input looks like a book: an `EPUB` file or a `PDF` with roughly 100+ pages.
 
-If the user attaches an EPUB and the written request is empty or vague, assume the intended request is: create an Obsidian-ready working digest for that book. Do not ask "what should I do with this file?" unless there are multiple plausible non-digest tasks.
+This skill is the main action bundled by the Bookworm / Букворм plugin. Think of the plugin as the bookworm character and this skill as what it does: it digests a book into a useful working note.
+
+Prefer explicit invocation for the MVP, such as `$Bookworm`, `$Bookworm: Digest`, or "Букворм, обработай EPUB". Do not promise or depend on automatic handling of empty attachment-only EPUB messages; Codex may not route those messages to this skill reliably in every surface.
+
+If this skill is already explicitly invoked and the user attaches an EPUB with an empty or vague written request, assume the intended request is: create an Obsidian-ready working digest for that book. Do not ask "what should I do with this file?" unless there are multiple plausible non-digest tasks.
 
 Bookworm's goal is not a short summary. It creates a working book note that can later serve as Codex memory for Q&A, implementation help, and method application.
 
@@ -16,7 +20,6 @@ Bookworm's goal is not a short summary. It creates a working book note that can 
 Start Bookworm confidently when:
 
 - the user gives an EPUB;
-- the user gives only an EPUB attachment with no text;
 - the user gives a PDF that appears to be a book, especially 100+ pages;
 - the user asks to make a book digest, book note, practical summary, or Obsidian-ready summary.
 
@@ -37,6 +40,7 @@ For PDFs under 100 pages, inspect first. They may be articles, reports, contract
 - For notes stored in `Library/`, embed important images with paths relative to the library folder: `![[assets/book-slug/chapter-06/figure-01.png|700]]`.
 - Use simple ASCII-safe asset filenames.
 - Use the book's language for visible headings, navigation labels, figure notes, and reader-facing text unless the user asks otherwise.
+- Use the book's language or the user's request language for user-facing progress updates and final chat messages. For example, when processing a Russian book for a Russian-speaking user, write progress updates in Russian instead of defaulting to English.
 - Keep tags, frontmatter, and broader Obsidian metadata out of the MVP unless the user is designing the whole vault workflow.
 
 ## Vault Handoff
@@ -55,7 +59,13 @@ If the user confirms, copy:
 
 After copying, verify that every Obsidian embed in the copied note resolves relative to the vault root.
 
-After a successful vault copy and embed verification, clean transient working files created for the handoff, such as scratch extraction folders, temporary contact sheets, and duplicate `outputs` copies. Do not delete the original source book, the copied vault note, or copied vault assets.
+After a successful vault copy and embed verification, clean transient working files created for the handoff:
+
+- scratch extraction folders such as `work/`;
+- temporary contact sheets and intermediate JSON/text dumps;
+- duplicate generated note/assets left under `outputs/` after the verified vault copy exists.
+
+Do not delete the original source book, the copied vault note, or copied vault assets. If cleanup is blocked by permissions, say exactly which temporary paths remain and ask the user whether to remove them.
 
 ## Reader-Facing Tone
 
