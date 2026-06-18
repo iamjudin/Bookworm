@@ -26,13 +26,31 @@ For PDFs under 100 pages, inspect first. They may be articles, reports, contract
 
 - Produce one Markdown file per book.
 - Optimize for Obsidian.
-- If a likely Obsidian vault exists, use it as the default output destination or ask before writing there when filesystem permissions require it.
 - Detect likely vaults by looking for folders containing `.obsidian`.
+- If a likely Obsidian vault exists, treat it as the preferred final destination.
+- When the vault is writable, write the Markdown note and assets there by default unless the user asked for another location.
+- When filesystem permissions or sandbox rules prevent direct vault writes, create the deliverable in the writable `outputs` area first, then ask the user to confirm copying it into the detected vault. Do not silently leave the vault-ready result only in `outputs`.
 - Store visual assets in a stable folder such as `assets/<book-slug>/<chapter-slug>/`.
 - Embed important images directly in the note body using Obsidian syntax: `![[assets/book-slug/chapter-06/figure-01.png|700]]`.
 - Use simple ASCII-safe asset filenames.
 - Use the book's language for visible headings, navigation labels, figure notes, and reader-facing text unless the user asks otherwise.
 - Keep tags, frontmatter, and broader Obsidian metadata out of the MVP unless the user is designing the whole vault workflow.
+
+## Vault Handoff
+
+When a final digest is created outside the vault because of workspace permissions, the final answer should include:
+
+- the detected vault path;
+- the generated note path;
+- the generated assets path;
+- a clear question asking whether to copy the note and assets into the vault.
+
+If the user confirms, copy:
+
+- the Markdown file to the vault root or the user-specified vault folder;
+- the asset directory to `assets/<book-slug>/` inside that same vault.
+
+After copying, verify that every Obsidian embed in the copied note resolves relative to the vault root.
 
 ## Reader-Facing Tone
 
@@ -133,6 +151,7 @@ If a visual is essential or technical, the digest is incomplete unless it includ
 7. Include important figures in place, with explanations.
 8. Run the internal quality gate.
 9. Write one Obsidian-ready Markdown file plus local assets.
+10. If a vault was detected but the output was written elsewhere, ask to copy the finished deliverable into the vault and verify the copied embeds after confirmation.
 
 ## Internal Quality Gate
 
