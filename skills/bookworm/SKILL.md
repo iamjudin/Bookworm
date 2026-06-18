@@ -1,11 +1,13 @@
 ---
 name: bookworm
-description: Create Obsidian-ready working digests for long books, especially practical non-fiction EPUB/PDF files, with important images preserved in the note body.
+description: Create Obsidian-ready working digests when the user attaches or mentions an EPUB/book-like PDF, even if the message has no text, with important images preserved in the note body.
 ---
 
 # Bookworm / Букворм
 
 Use this skill when the user asks Codex to read, digest, summarize, extract the essence of, or prepare an Obsidian note for a book. Also use it when an input looks like a book: an `EPUB` file or a `PDF` with roughly 100+ pages.
+
+If the user attaches an EPUB and the written request is empty or vague, assume the intended request is: create an Obsidian-ready working digest for that book. Do not ask "what should I do with this file?" unless there are multiple plausible non-digest tasks.
 
 Bookworm's goal is not a short summary. It creates a working book note that can later serve as Codex memory for Q&A, implementation help, and method application.
 
@@ -14,6 +16,7 @@ Bookworm's goal is not a short summary. It creates a working book note that can 
 Start Bookworm confidently when:
 
 - the user gives an EPUB;
+- the user gives only an EPUB attachment with no text;
 - the user gives a PDF that appears to be a book, especially 100+ pages;
 - the user asks to make a book digest, book note, practical summary, or Obsidian-ready summary.
 
@@ -148,4 +151,3 @@ Only show this checklist if the user explicitly asks for diagnostics.
 ## Copyright And Privacy
 
 Assume local personal use. Do not publish or redistribute extracted copyrighted images outside the user's private digest. When writing to an Obsidian vault, keep source assets local to the vault.
-
