@@ -10,6 +10,7 @@
 - Do not duplicate Obsidian's inline file title with a redundant top-level `# Book Title` heading in the Markdown body.
 - When abbreviations have English originals, keep the English expansion in parentheses after the Russian label, for example `Сохраняем (Capture)` or `Проекты (Projects)`.
 - After a confirmed vault handoff, clean transient working files so scratch folders do not accumulate.
+- For local test iterations, prefer a clean reinstall cycle over upgrading in place: remove the old Bookworm plugin cache and transient test artifacts, then install the fresh local marketplace version.
 
 ## Cleanup
 
