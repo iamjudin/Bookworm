@@ -35,7 +35,8 @@ For PDFs under 100 pages, inspect first. They may be articles, reports, contract
 - When filesystem permissions or sandbox rules prevent direct vault writes, create the deliverable in the writable `outputs` area first, then ask the user to confirm copying it into the detected vault. Do not silently leave the vault-ready result only in `outputs`.
 - If the vault has a `Library/` folder, use it as the default destination for book notes.
 - The note filename must match the human-readable book title, not a slug and not a Bookworm implementation name. Do not append `bookworm` to the final note filename.
-- If the note filename is the book title and Obsidian will show the inline title, do not add a duplicate top-level `# Book Title` heading inside the note. Start with the first useful section such as `## Коротко`.
+- If the note filename is the book title and Obsidian will show the inline title, do not add a duplicate top-level `# Book Title` heading inside the note.
+- For substantial notes, add a compact manual table of contents near the top. When relying on Obsidian's inline title, make `## Содержание` the first section in the file, followed by links to the main `##` sections, then continue with `## Коротко`.
 - Store visual assets in a shared library assets folder, such as `Library/assets/<book-slug>/<chapter-slug>/` for notes in `Library/`.
 - For notes stored in `Library/`, embed important images with paths relative to the library folder: `![[assets/book-slug/chapter-06/figure-01.png|700]]`.
 - After selecting final visuals, keep only the assets that are actually embedded in the final note, plus a manifest if useful. Do not copy the whole extraction dump into the vault.
