@@ -144,6 +144,64 @@ def assert_sources_preserved(before: dict[str, int], after: dict[str, int]) -> N
         )
 
 
+def document_title(source: str, fallback: str) -> str:
+    """Return the inline title that should become the final Obsidian filename."""
+    lines = source.splitlines()
+    start = 0
+    if lines and lines[0].strip() == "---":
+        for index in range(1, len(lines)):
+            if lines[index].strip() == "---":
+                start = index + 1
+                break
+    for line in lines[start:]:
+        match = re.match(r"^#\s+(.+?)\s*$", line)
+        if match:
+            return normalize_text(match.group(1))
+        if line.strip():
+            break
+    return fallback
+
+
+def note_filename(source: str, fallback: str) -> str:
+    title = document_title(source, fallback)
+    safe_title = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "-", title)
+    safe_title = re.sub(r"\s+", " ", safe_title).strip(" .")
+    return f"{safe_title or fallback}.md"
+
+
+def handoff_refined_note(
+    source_path: Path,
+    refined_path: Path,
+    destination_dir: Path,
+    *,
+    confirmation: str | None,
+) -> Path:
+    """Create the final note only after an explicit user confirmation token."""
+    if confirmation != "user-confirmed":
+        raise PermissionError("Final handoff requires explicit user confirmation")
+    if not source_path.is_file() or not refined_path.is_file():
+        raise FileNotFoundError("Source and refined files must exist before handoff")
+
+    destination_dir.mkdir(parents=True, exist_ok=True)
+    destination = destination_dir / note_filename(
+        source_path.read_text(encoding="utf-8"),
+        source_path.stem,
+    )
+    if destination.exists():
+        raise FileExistsError(f"Destination already exists: {destination}")
+
+    payload = refined_path.read_bytes()
+    destination.write_bytes(payload)
+    if destination.read_bytes() != payload:
+        destination.unlink(missing_ok=True)
+        raise OSError("Final note verification failed")
+
+    source_path.unlink()
+    if refined_path.resolve() != source_path.resolve():
+        refined_path.unlink()
+    return destination
+
+
 def strip_inline_title(lines: list[str]) -> list[str]:
     """Remove one document-title H1, preserving optional YAML frontmatter."""
     start = 0
@@ -437,6 +495,12 @@ def main(argv: list[str]) -> int:
     refine_cmd.add_argument("--out", required=True, type=Path)
     refine_cmd.add_argument("--toc-title", default="Содержание")
 
+    handoff_cmd = sub.add_parser("handoff-refined-note")
+    handoff_cmd.add_argument("--source", required=True, type=Path)
+    handoff_cmd.add_argument("--refined", required=True, type=Path)
+    handoff_cmd.add_argument("--destination-dir", required=True, type=Path)
+    handoff_cmd.add_argument("--confirmation", required=True)
+
     args = parser.parse_args(argv)
 
     if args.command == "inspect":
@@ -455,7 +519,16 @@ def main(argv: list[str]) -> int:
             "input": str(args.path),
             "output": str(args.out),
             "source_counts": source_counts(source),
+            "suggested_filename": note_filename(source, args.path.stem),
         }, ensure_ascii=False))
+    elif args.command == "handoff-refined-note":
+        destination = handoff_refined_note(
+            args.source,
+            args.refined,
+            args.destination_dir,
+            confirmation=args.confirmation,
+        )
+        print(json.dumps({"destination": str(destination)}, ensure_ascii=False))
     else:
         parser.error(f"Unknown command: {args.command}")
     return 0

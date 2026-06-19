@@ -98,21 +98,35 @@ Refine improves presentation without discarding content:
    ```
 
    Use `Contents` instead of `Содержание` when the note/request language is
-   English. Keep the original human-readable filename unless the user asks to
-   rename it.
+   English. Read `suggested_filename` from the command output. It is derived
+   from the note's human title H1; never use a technical source name such as
+   `deep-research-report.md` when a title exists.
 5. Inspect the result before handoff. Verify that all source-bearing counts are
    unchanged, ordinary title links and source sections remain, the body has no
    duplicate top H1, and the TOC links only to real main sections.
 6. If a selected vault contains `Library/`, make that the default destination.
    Otherwise use the best matching existing folder, or the vault root when no
    better match exists. State the selected path and why it was chosen, then ask
-   for confirmation before transferring anything.
-7. After the user confirms, write the final refined file to the destination and
-   verify it exists and contains the expected note body. If a file already
-   exists at that destination, ask before overwriting it.
-8. Only after successful final-write verification, remove the original source
-   file and all temporary Refine files. The result is one final note, normally
-   in `Library/`.
+   for confirmation before transferring anything. Do not create a file in the
+   selected vault at this stage.
+7. Only after the user explicitly confirms the transfer, run the handoff helper.
+   Never use direct `cp`, `mv`, `rm`, or another filesystem shortcut for this
+   handoff:
+
+   ```bash
+   python3 scripts/bookworm_helper.py handoff-refined-note \
+     --source /path/to/original.md \
+     --refined /path/to/scratch/refined.md \
+     --destination-dir /path/to/vault/Library \
+     --confirmation user-confirmed
+   ```
+
+   The helper refuses to run without the confirmation token, refuses to
+   overwrite an existing note, verifies the final bytes, and only then removes
+   the original and temporary copy.
+8. Report the verified final path. After this confirmed handoff, offer
+   `Букворм: Enrich` as an optional next step for a new verified source layer.
+   Do not start Enrich automatically.
 
 ## No Vault Found
 
@@ -135,6 +149,7 @@ The final note should look like a normal Obsidian note, not a cleanup report.
 ## Safety Gate
 
 Never delete the source file merely because the temporary copy was generated.
+Do not write any final note into the selected vault before explicit confirmation.
 If final transfer or verification fails, preserve both source and temporary copy
-and report their paths. The deterministic helper only creates copies; transfer
-and cleanup remain explicit, confirmation-gated actions in the chat.
+and report their paths. The deterministic helper owns final transfer and cleanup
+so those actions remain explicit and confirmation-gated.

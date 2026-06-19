@@ -10,10 +10,46 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from bookworm_helper import refine_markdown, source_counts
+from bookworm_helper import handoff_refined_note, refine_markdown, source_counts
 
 
 class RefineMarkdownTests(unittest.TestCase):
+    def test_handoff_requires_confirmation_and_uses_title_filename(self) -> None:
+        source = "# Принципы хороших интерфейсов\n\nИсходный текст.\n"
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source_path = root / "Inbox" / "deep-research-report.md"
+            refined_path = root / "scratch" / "deep-research-report.md"
+            destination_dir = root / "Library"
+            source_path.parent.mkdir()
+            refined_path.parent.mkdir()
+            source_path.write_text(source, encoding="utf-8")
+            refined_path.write_text("## Содержание\n", encoding="utf-8")
+
+            with self.assertRaises(PermissionError):
+                handoff_refined_note(
+                    source_path,
+                    refined_path,
+                    destination_dir,
+                    confirmation=None,
+                )
+
+            self.assertTrue(source_path.exists())
+            self.assertTrue(refined_path.exists())
+
+            destination = handoff_refined_note(
+                source_path,
+                refined_path,
+                destination_dir,
+                confirmation="user-confirmed",
+            )
+
+            self.assertEqual(destination.name, "Принципы хороших интерфейсов.md")
+            self.assertTrue(destination.exists())
+            self.assertFalse(source_path.exists())
+            self.assertFalse(refined_path.exists())
+
     def test_preserves_citation_only_source_markers(self) -> None:
         citation = "citeturn0search1"
         source = f"# Title\n\nClaim supported only by {citation}.\n\n## Findings\n"
@@ -90,6 +126,7 @@ Footnote reference[^source].
             self.assertTrue(output_path.exists())
             self.assertIn("cite", output_path.read_text(encoding="utf-8"))
             self.assertIn(str(output_path), completed.stdout)
+            self.assertIn('"suggested_filename": "Title.md"', completed.stdout)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-# Bookworm / Букворм
+# Букворм / Bookworm
 
 Bookworm is a local Codex plugin for turning long books and existing research
 exports into reader-facing Obsidian notes.
