@@ -25,6 +25,10 @@
   wide diagram as an image when the environment can do so reliably.
 - In Russian user-facing text and plugin metadata, write the brand as
   `Букворм / Bookworm`; use `Bookworm / Букворм` only in an English context.
+- After a successful Refine handoff, offer the next two optional steps in
+  order: move the note to the selected vault `Library/`, then run Enrich to add
+  a fresh verified source layer. Enrich must remain confirmation-gated and must
+  not start automatically.
 
 ## Cleanup
 
