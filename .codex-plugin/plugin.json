@@ -1,15 +1,15 @@
 {
   "name": "bookworm",
   "version": "0.1.0+codex.20260619151533",
-  "description": "Bookworm turns long EPUB/PDF books into Obsidian-ready working digests with visual assets.",
+  "description": "Bookworm digests long books and refines research notes into Obsidian-ready working material.",
   "author": {
     "name": "iamjudin"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "Bookworm / Букворм",
-    "shortDescription": "Digest books into Obsidian-ready notes.",
-    "longDescription": "Bookworm helps Codex read practical non-fiction books from EPUB or long PDF files, extract the core ideas, preserve important diagrams, and produce one reader-facing Obsidian Markdown note per book.",
+    "shortDescription": "Digest books and refine research for Obsidian.",
+    "longDescription": "Bookworm helps Codex turn practical books and existing Markdown research into clean, reader-facing Obsidian notes. Digest reads long EPUB/PDF books; Refine cleans research exports without rewriting their substance.",
     "developerName": "iamjudin",
     "category": "Productivity",
     "capabilities": [
@@ -17,8 +17,9 @@
       "PDF book heuristic",
       "Obsidian Markdown output",
       "Image asset extraction",
-      "Practical non-fiction digestion"
+      "Practical non-fiction digestion",
+      "Research Markdown refinement"
     ],
-    "defaultPrompt": "Use Bookworm to create an Obsidian-ready working digest for this book."
+    "defaultPrompt": "Use Bookworm to create an Obsidian-ready book digest or refine an existing research note."
   }
 }
