@@ -10,11 +10,19 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from bookworm_helper import refine_markdown
+from bookworm_helper import refine_markdown, source_counts
 
 
 class RefineMarkdownTests(unittest.TestCase):
-    def test_removes_chatgpt_citations_preserves_urls_and_adds_toc(self) -> None:
+    def test_preserves_citation_only_source_markers(self) -> None:
+        citation = "citeturn0search1"
+        source = f"# Title\n\nClaim supported only by {citation}.\n\n## Findings\n"
+
+        result = refine_markdown(source, toc_title="Содержание")
+
+        self.assertIn(citation, result)
+
+    def test_preserves_citations_and_urls_and_adds_toc(self) -> None:
         source = """# Board Game Mechanics
 
 Intro citeturn0search1 with a [source](https://example.com/research).
@@ -30,12 +38,30 @@ Useful text.
 
         result = refine_markdown(source, toc_title="Содержание")
 
-        self.assertNotIn("cite", result)
+        self.assertIn("cite", result)
         self.assertNotIn("# Board Game Mechanics", result)
         self.assertIn("[source](https://example.com/research)", result)
         self.assertIn("## Содержание", result)
         self.assertIn("- [Findings](#findings)", result)
         self.assertIn("- [Sources](#sources)", result)
+
+    def test_counts_each_source_bearing_construct(self) -> None:
+        source = """Claim citeturn0search1 [named source](https://example.com/a).
+
+Bare source: https://example.org/b.
+
+Footnote reference[^source].
+"""
+
+        self.assertEqual(
+            source_counts(source),
+            {
+                "citation_markers": 1,
+                "markdown_links": 1,
+                "bare_urls": 1,
+                "footnote_references": 1,
+            },
+        )
 
     def test_cli_writes_refined_copy_without_changing_source(self) -> None:
         source = "# Title\n\nText citeturn1search2\n\n## Section\n"
@@ -62,7 +88,7 @@ Useful text.
 
             self.assertEqual(input_path.read_text(encoding="utf-8"), source)
             self.assertTrue(output_path.exists())
-            self.assertNotIn("cite", output_path.read_text(encoding="utf-8"))
+            self.assertIn("cite", output_path.read_text(encoding="utf-8"))
             self.assertIn(str(output_path), completed.stdout)
 
 

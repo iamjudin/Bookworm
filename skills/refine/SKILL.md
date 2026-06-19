@@ -6,8 +6,10 @@ description: Use when the user wants to clean an existing Markdown research expo
 # Refine
 
 `Bookworm: Refine` turns an existing Markdown research note into an
-Obsidian-ready working note. It is for research exports, not for digesting a
-book from source material; use `Bookworm: Digest` for EPUBs and long book PDFs.
+Obsidian-ready working note without losing its evidence trail. It is for
+research exports, not for digesting a book from source material; use
+`Bookworm: Digest` for EPUBs and long book PDFs and `Bookworm: Enrich` when the
+user wants fresh research and replacement sources.
 
 Prefer explicit invocation, for example `$Bookworm: Refine` with a Markdown
 file or “Букворм, подчисти этот Deep Research”.
@@ -20,7 +22,6 @@ source lists, or replace the author's claims unless the user explicitly asks.
 
 It may:
 
-- remove raw ChatGPT citation/export tokens such as `citeturn0search1`;
 - remove empty export fragments and normalize Markdown spacing;
 - repair a clearly malformed heading hierarchy without changing section
   meaning;
@@ -28,8 +29,50 @@ It may:
 - remove one redundant top-level H1 when Obsidian will already display the
   filename as the inline title.
 
-It must preserve prose, Markdown links, URL-only source lists, tables, images,
-embedded media, callouts, code blocks, and meaningful metadata.
+It must preserve prose, Markdown links, URL-only source lists, ChatGPT citation
+markers such as `citeturn0search1`, footnotes, images, embedded media,
+callouts, code blocks, and meaningful metadata.
+
+ChatGPT citation markers are not URLs. Do not remove, rewrite, or call them
+preserved unless the input includes a trustworthy citation-to-URL map. A raw
+Markdown export often does not contain that map; in this case retain the marker
+and say that clickable URLs cannot be reconstructed from the file alone.
+
+## Source Integrity Gate
+
+Before and after the temporary refinement, run the helper:
+
+```bash
+python3 scripts/bookworm_helper.py refine-markdown \
+  /path/to/research.md \
+  --out /path/to/scratch/refined-note.md \
+  --toc-title "Содержание"
+```
+
+The command fails if any source-bearing count would decrease. Do not bypass
+that failure, and do not ask for final-transfer confirmation until it passes.
+
+When a Markdown source link already exists, keep the human title as the link
+text. Do not replace it with a naked URL.
+
+## Obsidian Layout Rules
+
+Refine improves presentation without discarding content:
+
+- Keep a Markdown table only when it is a compact comparison: at most four
+  columns, short cells, and readable at normal note width.
+- Turn wider or prose-heavy tables into titled item sections with labeled
+  fields such as `**Сильные стороны:**` and `**Риски:**`.
+- Turn procedural tables into numbered steps.
+- Keep Mermaid only when it is naturally portrait and top-to-bottom, without
+  horizontal scrolling. Prefer `flowchart TB` or `TD` and concise labels.
+- When a diagram cannot be made readable vertically, render it as a raster
+  asset under the note's assets folder, embed the image, and add a title plus a
+  short explanation. Keep the Mermaid source beside it only when future editing
+  is useful.
+- If the current environment cannot render the raster asset reliably, preserve
+  the original Mermaid and report that limitation rather than pretending the
+  conversion happened.
 
 ## Workflow
 
@@ -57,9 +100,9 @@ embedded media, callouts, code blocks, and meaningful metadata.
    Use `Contents` instead of `Содержание` when the note/request language is
    English. Keep the original human-readable filename unless the user asks to
    rename it.
-5. Inspect the result before handoff. Verify that raw citation tokens are gone,
-   ordinary URLs and source sections remain, the body has no duplicate top H1,
-   and the TOC links only to real main sections.
+5. Inspect the result before handoff. Verify that all source-bearing counts are
+   unchanged, ordinary title links and source sections remain, the body has no
+   duplicate top H1, and the TOC links only to real main sections.
 6. If a selected vault contains `Library/`, make that the default destination.
    Otherwise use the best matching existing folder, or the vault root when no
    better match exists. State the selected path and why it was chosen, then ask

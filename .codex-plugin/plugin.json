@@ -1,15 +1,15 @@
 {
   "name": "bookworm",
-  "version": "0.1.0+codex.20260619164452",
-  "description": "Bookworm digests long books and refines research notes into Obsidian-ready working material.",
+  "version": "0.1.0+codex.20260619201308",
+  "description": "Bookworm digests books, safely refines research, and enriches notes with verified sources.",
   "author": {
     "name": "iamjudin"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "Bookworm / \u0411\u0443\u043a\u0432\u043e\u0440\u043c",
-    "shortDescription": "Digest books and refine research for Obsidian.",
-    "longDescription": "Bookworm helps Codex turn practical books and existing Markdown research into clean, reader-facing Obsidian notes. Digest reads long EPUB/PDF books; Refine cleans research exports without rewriting their substance.",
+    "shortDescription": "Digest books and improve research for Obsidian.",
+    "longDescription": "Bookworm helps Codex turn practical books and existing Markdown research into clean, reader-facing Obsidian notes. Digest reads long EPUB/PDF books; Refine preserves sources while cleaning exports; Enrich adds a fresh verified source layer.",
     "developerName": "iamjudin",
     "category": "Productivity",
     "capabilities": [
@@ -18,8 +18,9 @@
       "Obsidian Markdown output",
       "Image asset extraction",
       "Practical non-fiction digestion",
-      "Research Markdown refinement"
+      "Research Markdown refinement",
+      "Verified research enrichment"
     ],
-    "defaultPrompt": "Use Bookworm to create an Obsidian-ready book digest or refine an existing research note."
+    "defaultPrompt": "Use Bookworm to digest a book, safely refine a research note, or enrich it with verified sources."
   }
 }

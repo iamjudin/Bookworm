@@ -14,12 +14,17 @@
 - Bookworm's user-facing process should use the relevant language of the book/request instead of switching to English by default.
 - Vault destinations must be discovered from actual Obsidian vaults (`.obsidian`) and selected by request, folder names, note structure, and nearby content. Do not hard-code a personal vault path.
 - If no Obsidian vault is detected, keep the deliverable in the current output location and do not propose moving it to a vault.
+- Refine must preserve every source-bearing construct. It must fail closed when
+  citation markers, Markdown source links, bare URLs, or footnote references
+  would decrease.
+- Use title links for reader-facing sources. Replacing an unusable source layer
+  with fresh research is an explicit Enrich action, never a hidden Refine step.
+- Keep only compact Obsidian tables; convert wide/prose-heavy tables into
+  labeled sections and process tables into numbered steps.
+- Mermaid diagrams must be portrait and top-to-bottom. Render an unreadably
+  wide diagram as an image when the environment can do so reliably.
 
 ## Cleanup
 
 - Verify after reinstall that Codex shows the plugin action as `Bookworm: Digest` or an equivalent non-duplicated label.
 - Verify after reinstall that Bookworm no longer presents empty EPUB auto-start as a guaranteed behavior.
-
-## Future Skills
-
-- Add `Bookworm: Refine` for cleaning existing Markdown research exports, especially ChatGPT Deep Research dumps, into Obsidian-ready notes. Preserve the substantive content by default; focus on cosmetic cleanup, citation/export artifact removal, heading normalization, TOC insertion, and moving from `Inbox` to the selected vault `Library/` after confirmation.

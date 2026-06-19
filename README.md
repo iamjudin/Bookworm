@@ -17,12 +17,16 @@ Actions:
 - `Bookworm: Digest` reads a practical non-fiction EPUB or long PDF and creates
   a working book note with important visuals.
 - `Bookworm: Refine` cosmetically cleans an existing Markdown research export,
-  such as a ChatGPT Deep Research note, without substantively rewriting it.
+  such as a ChatGPT Deep Research note, without substantively rewriting it or
+  losing source-bearing constructs.
+- `Bookworm: Enrich` refreshes an existing research note with verified sources
+  linked by their descriptive titles.
 
 The plugin is skill-first: Bookworm is the plugin/brand, while
-`skills/digest/SKILL.md` and `skills/refine/SKILL.md` are its actions. Codex
-uses those workflows and `scripts/bookworm_helper.py` for deterministic file
-inspection, Markdown cleanup, image extraction, and vault discovery.
+`skills/digest/SKILL.md`, `skills/refine/SKILL.md`, and
+`skills/enrich/SKILL.md` are its actions. Codex uses those workflows and
+`scripts/bookworm_helper.py` for deterministic file inspection, Markdown
+cleanup, image extraction, and vault discovery.
 
 For local test iterations, prefer a clean reinstall: remove the old Bookworm plugin cache and transient test artifacts, then add the fresh local plugin again from the Codex plugin directory.
 

@@ -27,6 +27,9 @@ HTML_EXTENSIONS = (".html", ".xhtml", ".htm")
 IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg")
 CHATGPT_CITATION_PATTERN = re.compile(r"cite[^]*")
 MARKDOWN_HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
+MARKDOWN_SOURCE_LINK_PATTERN = re.compile(r"(?<!!)\[[^\]]+\]\(\s*https?://[^)\s]+[^)]*\)")
+BARE_URL_PATTERN = re.compile(r"(?<!\]\()(?<!\()https?://[^\s<>)\]]+")
+FOOTNOTE_REFERENCE_PATTERN = re.compile(r"(?<!\\)\[\^[^\]]+\]")
 
 
 class TextAndImageParser(HTMLParser):
@@ -121,6 +124,26 @@ def obsidian_anchor(value: str, fallback: str = "section") -> str:
     return value or fallback
 
 
+def source_counts(source: str) -> dict[str, int]:
+    """Count source-bearing constructs that Refine must not silently lose."""
+    markdown_links = MARKDOWN_SOURCE_LINK_PATTERN.findall(source)
+    source_without_markdown_links = MARKDOWN_SOURCE_LINK_PATTERN.sub("", source)
+    return {
+        "citation_markers": len(CHATGPT_CITATION_PATTERN.findall(source)),
+        "markdown_links": len(markdown_links),
+        "bare_urls": len(BARE_URL_PATTERN.findall(source_without_markdown_links)),
+        "footnote_references": len(FOOTNOTE_REFERENCE_PATTERN.findall(source)),
+    }
+
+
+def assert_sources_preserved(before: dict[str, int], after: dict[str, int]) -> None:
+    lost = [name for name, count in before.items() if after[name] < count]
+    if lost:
+        raise ValueError(
+            "Refine would remove source-bearing constructs: " + ", ".join(lost)
+        )
+
+
 def strip_inline_title(lines: list[str]) -> list[str]:
     """Remove one document-title H1, preserving optional YAML frontmatter."""
     start = 0
@@ -184,8 +207,8 @@ def main_sections(lines: list[str], toc_title: str) -> list[tuple[str, str]]:
 
 def refine_markdown(source: str, toc_title: str = "Содержание") -> str:
     """Make a cosmetic Obsidian-ready copy without rewriting research content."""
-    cleaned = CHATGPT_CITATION_PATTERN.sub("", source)
-    lines = [line.rstrip() for line in cleaned.splitlines()]
+    before_sources = source_counts(source)
+    lines = [line.rstrip() for line in source.splitlines()]
     lines = strip_inline_title(lines)
     lines = remove_generated_toc(lines, toc_title)
 
@@ -197,13 +220,17 @@ def refine_markdown(source: str, toc_title: str = "Содержание") -> str
     body = "\n".join(lines)
     sections = main_sections(lines, toc_title)
     if not sections:
-        return f"{body}\n" if body else ""
+        result = f"{body}\n" if body else ""
+        assert_sources_preserved(before_sources, source_counts(result))
+        return result
 
     toc = "\n".join(
         [f"## {toc_title}", ""]
         + [f"- [{title}](#{anchor})" for title, anchor in sections]
     )
-    return f"{toc}\n\n{body}\n" if body else f"{toc}\n"
+    result = f"{toc}\n\n{body}\n" if body else f"{toc}\n"
+    assert_sources_preserved(before_sources, source_counts(result))
+    return result
 
 
 def parse_opf(source: BookSource) -> dict:
@@ -420,10 +447,15 @@ def main(argv: list[str]) -> int:
     elif args.command == "extract-epub-assets":
         print(json.dumps(extract_epub_assets(args.path, args.out, args.book_slug), ensure_ascii=False, indent=2))
     elif args.command == "refine-markdown":
-        refined = refine_markdown(args.path.read_text(encoding="utf-8"), args.toc_title)
+        source = args.path.read_text(encoding="utf-8")
+        refined = refine_markdown(source, args.toc_title)
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(refined, encoding="utf-8")
-        print(json.dumps({"input": str(args.path), "output": str(args.out)}, ensure_ascii=False))
+        print(json.dumps({
+            "input": str(args.path),
+            "output": str(args.out),
+            "source_counts": source_counts(source),
+        }, ensure_ascii=False))
     else:
         parser.error(f"Unknown command: {args.command}")
     return 0
