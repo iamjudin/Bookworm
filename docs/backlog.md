@@ -12,8 +12,14 @@
 - After a confirmed vault handoff, clean transient working files so scratch folders do not accumulate.
 - For local test iterations, prefer a clean reinstall cycle over upgrading in place: remove the old Bookworm plugin cache and transient test artifacts, then install the fresh local marketplace version.
 - Bookworm's user-facing process should use the relevant language of the book/request instead of switching to English by default.
+- Vault destinations must be discovered from actual Obsidian vaults (`.obsidian`) and selected by request, folder names, note structure, and nearby content. Do not hard-code a personal vault path.
+- If no Obsidian vault is detected, keep the deliverable in the current output location and do not propose moving it to a vault.
 
 ## Cleanup
 
 - Verify after reinstall that Codex shows the plugin action as `Bookworm: Digest` or an equivalent non-duplicated label.
 - Verify after reinstall that Bookworm no longer presents empty EPUB auto-start as a guaranteed behavior.
+
+## Future Skills
+
+- Add `Bookworm: Refine` for cleaning existing Markdown research exports, especially ChatGPT Deep Research dumps, into Obsidian-ready notes. Preserve the substantive content by default; focus on cosmetic cleanup, citation/export artifact removal, heading normalization, TOC insertion, and moving from `Inbox` to the selected vault `Library/` after confirmation.

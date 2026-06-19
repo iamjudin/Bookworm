@@ -30,10 +30,11 @@ For PDFs under 100 pages, inspect first. They may be articles, reports, contract
 - Produce one Markdown file per book.
 - Optimize for Obsidian.
 - Detect likely vaults by looking for folders containing `.obsidian`.
-- If a likely Obsidian vault exists, treat it as the preferred final destination.
-- When the vault is writable, write the Markdown note and assets there by default unless the user asked for another location.
-- When filesystem permissions or sandbox rules prevent direct vault writes, create the deliverable in the writable `outputs` area first, then ask the user to confirm copying it into the detected vault. Do not silently leave the vault-ready result only in `outputs`.
-- If the vault has a `Library/` folder, use it as the default destination for book notes.
+- If one or more likely Obsidian vaults exist, select the best target from the detected vaults by matching the user's explicit request, existing folder names, note/library structure, and nearby content. Do not hard-code or assume a personal vault path.
+- When the selected vault is writable, write the Markdown note and assets there by default unless the user asked for another location.
+- When filesystem permissions or sandbox rules prevent direct vault writes, create the deliverable in the writable `outputs` area first, then ask the user to confirm copying it into the selected detected vault. Do not silently leave the vault-ready result only in `outputs` when a suitable vault was detected.
+- If no Obsidian vault is detected, keep the deliverable in the current writable output location and do not propose moving it to a vault. Mention that no vault was detected.
+- If the selected vault has a `Library/` folder, use it as the default destination for book notes. Otherwise use the best matching existing folder by title/content, or the vault root if there is no clear match.
 - The note filename must match the human-readable book title, not a slug and not a Bookworm implementation name. Do not append `bookworm` to the final note filename.
 - If the note filename is the book title and Obsidian will show the inline title, do not add a duplicate top-level `# Book Title` heading inside the note.
 - For substantial notes, add a compact manual table of contents near the top. When relying on Obsidian's inline title, make `## Содержание` the first section in the file, followed by links to the main `##` sections, then continue with `## Коротко`.
@@ -47,12 +48,14 @@ For PDFs under 100 pages, inspect first. They may be articles, reports, contract
 
 ## Vault Handoff
 
-When a final digest is created outside the vault because of workspace permissions, the final answer should include:
+When a final digest is created outside a detected vault because of workspace permissions, the final answer should include:
 
-- the detected vault path;
+- the selected detected vault path and why it was selected;
 - the generated note path;
 - the generated assets path;
 - a clear question asking whether to copy the note and assets into the vault.
+
+If no vault was detected, do not ask for vault copy confirmation. Just provide the generated note/assets paths and say that no Obsidian vault was found.
 
 If the user confirms, copy:
 
