@@ -1,13 +1,13 @@
 {
   "name": "bookworm",
-  "version": "0.1.0+codex.20260619151533",
+  "version": "0.1.0+codex.20260619164452",
   "description": "Bookworm digests long books and refines research notes into Obsidian-ready working material.",
   "author": {
     "name": "iamjudin"
   },
   "skills": "./skills/",
   "interface": {
-    "displayName": "Bookworm / Букворм",
+    "displayName": "Bookworm / \u0411\u0443\u043a\u0432\u043e\u0440\u043c",
     "shortDescription": "Digest books and refine research for Obsidian.",
     "longDescription": "Bookworm helps Codex turn practical books and existing Markdown research into clean, reader-facing Obsidian notes. Digest reads long EPUB/PDF books; Refine cleans research exports without rewriting their substance.",
     "developerName": "iamjudin",
