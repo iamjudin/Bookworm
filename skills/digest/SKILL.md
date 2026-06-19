@@ -38,6 +38,7 @@ For PDFs under 100 pages, inspect first. They may be articles, reports, contract
 - If the note filename is the book title and Obsidian will show the inline title, do not add a duplicate top-level `# Book Title` heading inside the note. Start with the first useful section such as `## Коротко`.
 - Store visual assets in a shared library assets folder, such as `Library/assets/<book-slug>/<chapter-slug>/` for notes in `Library/`.
 - For notes stored in `Library/`, embed important images with paths relative to the library folder: `![[assets/book-slug/chapter-06/figure-01.png|700]]`.
+- After selecting final visuals, keep only the assets that are actually embedded in the final note, plus a manifest if useful. Do not copy the whole extraction dump into the vault.
 - Use simple ASCII-safe asset filenames.
 - Use the book's language for visible headings, navigation labels, figure notes, and reader-facing text unless the user asks otherwise.
 - Use the book's language or the user's request language for user-facing progress updates and final chat messages. For example, when processing a Russian book for a Russian-speaking user, write progress updates in Russian instead of defaulting to English.
@@ -82,6 +83,8 @@ Do not include:
 - English template labels when the source book is in another language.
 
 Internal metadata may be used while working, but it must be removed before final output.
+
+When including fenced code templates in the final note, avoid Markdown heading markers inside the template unless the heading syntax itself is the subject. Prefer field labels such as `Намерение:` and `Что уже известно:` so the template does not pollute Obsidian outlines or heading searches.
 
 ## Practical Non-Fiction Template
 
@@ -139,11 +142,14 @@ During analysis, classify visuals internally:
 - `supporting`: helpful illustration, but not required;
 - `essential`: meaning is lost without it;
 - `technical`: diagram, table, graph, screenshot, workflow, architecture, or dense figure.
+- `practical example`: real folder structures, checklists, before/after examples, worked examples, or screenshots that show how to apply the method.
 
 In the final note:
 
 - do not show the classification labels;
 - include or reconstruct `essential` and `technical` visuals;
+- include a compact selection of `practical example` visuals when they make the method easier to implement, especially folder structures, workflow screenshots, and worked examples;
+- omit redundant examples only after the note preserves the underlying pattern clearly;
 - use a natural reader-facing block:
 
 ```markdown
@@ -160,7 +166,7 @@ In the final note:
 **Как применить:** ...
 ```
 
-If a visual is essential or technical, the digest is incomplete unless it includes the image, a faithful verbal explanation, or a useful reconstruction such as a table, Mermaid diagram, or step-by-step reading guide.
+If a visual is essential, technical, or a practical example that teaches implementation, the digest is incomplete unless it includes the image, a faithful verbal explanation, or a useful reconstruction such as a table, Mermaid diagram, or step-by-step reading guide.
 
 ## Workflow
 
@@ -173,8 +179,9 @@ If a visual is essential or technical, the digest is incomplete unless it includ
 7. Include important figures in place, with explanations.
 8. Run the internal quality gate.
 9. Write one Obsidian-ready Markdown file plus local assets.
-10. If a vault was detected but the output was written elsewhere, ask to copy the finished deliverable into the vault and verify the copied embeds after confirmation.
-11. After confirmed vault copy and verification, remove temporary working files from the scratch workspace so repeated book runs do not leave clutter.
+10. Prune generated assets so only embedded visuals and useful manifests remain with the final note.
+11. If a vault was detected but the output was written elsewhere, ask to copy the finished deliverable into the vault and verify the copied embeds after confirmation.
+12. After confirmed vault copy and verification, remove temporary working files from the scratch workspace so repeated book runs do not leave clutter.
 
 ## Internal Quality Gate
 
