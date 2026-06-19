@@ -23,6 +23,8 @@
   labeled sections and process tables into numbered steps.
 - Mermaid diagrams must be portrait and top-to-bottom. Render an unreadably
   wide diagram as an image when the environment can do so reliably.
+- In Russian user-facing text and plugin metadata, write the brand as
+  `Букворм / Bookworm`; use `Bookworm / Букворм` only in an English context.
 
 ## Cleanup
 
