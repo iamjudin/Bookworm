@@ -175,12 +175,20 @@ def handoff_refined_note(
     destination_dir: Path,
     *,
     confirmation: str | None,
+    run_dir: Path | None = None,
 ) -> Path:
     """Create the final note only after an explicit user confirmation token."""
     if confirmation != "user-confirmed":
         raise PermissionError("Final handoff requires explicit user confirmation")
     if not source_path.is_file() or not refined_path.is_file():
         raise FileNotFoundError("Source and refined files must exist before handoff")
+
+    resolved_run_dir = run_dir.resolve() if run_dir is not None else None
+    if resolved_run_dir is not None:
+        try:
+            refined_path.resolve().relative_to(resolved_run_dir)
+        except ValueError as error:
+            raise ValueError("Refined note must be inside the declared run directory") from error
 
     destination_dir.mkdir(parents=True, exist_ok=True)
     destination = destination_dir / note_filename(
@@ -197,7 +205,9 @@ def handoff_refined_note(
         raise OSError("Final note verification failed")
 
     source_path.unlink()
-    if refined_path.resolve() != source_path.resolve():
+    if resolved_run_dir is not None:
+        shutil.rmtree(resolved_run_dir)
+    elif refined_path.resolve() != source_path.resolve():
         refined_path.unlink()
     return destination
 
@@ -500,6 +510,7 @@ def main(argv: list[str]) -> int:
     handoff_cmd.add_argument("--refined", required=True, type=Path)
     handoff_cmd.add_argument("--destination-dir", required=True, type=Path)
     handoff_cmd.add_argument("--confirmation", required=True)
+    handoff_cmd.add_argument("--run-dir", type=Path)
 
     args = parser.parse_args(argv)
 
@@ -527,6 +538,7 @@ def main(argv: list[str]) -> int:
             args.refined,
             args.destination_dir,
             confirmation=args.confirmation,
+            run_dir=args.run_dir,
         )
         print(json.dumps({"destination": str(destination)}, ensure_ascii=False))
     else:

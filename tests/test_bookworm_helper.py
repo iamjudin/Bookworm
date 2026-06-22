@@ -26,6 +26,7 @@ class RefineMarkdownTests(unittest.TestCase):
             refined_path.parent.mkdir()
             source_path.write_text(source, encoding="utf-8")
             refined_path.write_text("## Содержание\n", encoding="utf-8")
+            (refined_path.parent / "manifest.json").write_text("{}", encoding="utf-8")
 
             with self.assertRaises(PermissionError):
                 handoff_refined_note(
@@ -33,6 +34,7 @@ class RefineMarkdownTests(unittest.TestCase):
                     refined_path,
                     destination_dir,
                     confirmation=None,
+                    run_dir=refined_path.parent,
                 )
 
             self.assertTrue(source_path.exists())
@@ -43,12 +45,13 @@ class RefineMarkdownTests(unittest.TestCase):
                 refined_path,
                 destination_dir,
                 confirmation="user-confirmed",
+                run_dir=refined_path.parent,
             )
 
             self.assertEqual(destination.name, "Принципы хороших интерфейсов.md")
             self.assertTrue(destination.exists())
             self.assertFalse(source_path.exists())
-            self.assertFalse(refined_path.exists())
+            self.assertFalse(refined_path.parent.exists())
 
     def test_preserves_citation_only_source_markers(self) -> None:
         citation = "citeturn0search1"

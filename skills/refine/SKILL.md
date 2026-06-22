@@ -87,13 +87,16 @@ Refine improves presentation without discarding content:
 3. If vaults exist, choose the best one from the user's explicit request,
    folder names, note/library structure, and nearby content. Never hard-code a
    personal vault name or path.
-4. Create a temporary refined copy in a writable scratch area. Do not modify,
-   move, or delete the source file at this stage:
+4. Create one dedicated run directory such as
+   `/path/to/scratch/refine-<run-id>/`. Every temporary file for this run,
+   including the refined note, manifests, contact sheets, and rendered diagram
+   assets, must stay inside it. Do not modify, move, or delete the source file
+   at this stage:
 
    ```bash
    python3 scripts/bookworm_helper.py refine-markdown \
      /path/to/research.md \
-     --out /path/to/scratch/refined-note.md \
+     --out /path/to/scratch/refine-<run-id>/refined-note.md \
      --toc-title "Содержание"
    ```
 
@@ -118,15 +121,25 @@ Refine improves presentation without discarding content:
      --source /path/to/original.md \
      --refined /path/to/scratch/refined.md \
      --destination-dir /path/to/vault/Library \
-     --confirmation user-confirmed
+     --confirmation user-confirmed \
+     --run-dir /path/to/scratch/refine-<run-id>
    ```
 
    The helper refuses to run without the confirmation token, refuses to
    overwrite an existing note, verifies the final bytes, and only then removes
    the original and temporary copy.
-8. Report the verified final path. After this confirmed handoff, offer
-   `Букворм: Enrich` as an optional next step for a new verified source layer.
-   Do not start Enrich automatically.
+8. Use the required final response below. Do not start Enrich automatically.
+
+## Required Final Response
+
+After a verified handoff, the final answer must state the destination path and
+end with this exact question in the relevant language:
+
+> Обогатить заметку свежими проверенными источниками с Букворм: Enrich?
+
+The question is mandatory even when the original citation markers were
+preserved. It is an offer only; wait for the user's answer before starting
+Enrich.
 
 ## No Vault Found
 
