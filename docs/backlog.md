@@ -45,5 +45,8 @@
 
 ## Cleanup
 
+- Update the Refine action's visible name and description: it accepts Markdown,
+  Word (`.docx`), PDF, and PowerPoint (`.pptx`), so it must not be presented as
+  a Markdown-only action in Codex UI.
 - Verify after reinstall that Codex shows the plugin action as `Bookworm: Digest` or an equivalent non-duplicated label.
 - Verify after reinstall that Bookworm no longer presents empty EPUB auto-start as a guaranteed behavior.
