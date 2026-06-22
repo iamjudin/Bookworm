@@ -74,6 +74,26 @@ The helper reports `markers_scanned`, `verified_title_links_inserted`, and
 `unresolved`. Include those exact three counts in the final user-facing
 message. An unresolved marker is removed without changing its claim.
 
+Numbered citations from DOCX exports, such as `[66]`, are a separate raw
+citation format. Inspect the final `## Источники` / `## Sources` section and
+put the verified title and URL under the citation number in
+`verified-sources.json` when the converted source list has no usable URL:
+
+```json
+{
+  "66": {
+    "title": "Worker Placement | BoardGameGeek",
+    "url": "https://boardgamegeek.com/browse/boardgamemechanic"
+  }
+}
+```
+
+`refine-markdown` removes only numbers declared in that source section, turns
+their resolved entries into a reader-facing title-link list, and reports
+`numeric_citations_scanned`, `numeric_sources_resolved`, and
+`numeric_unresolved`. Never hand off a note with a remaining raw numeric
+citation.
+
 When a Markdown source link already exists, keep the human title as the link
 text. Do not replace it with a naked URL.
 

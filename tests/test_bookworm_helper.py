@@ -18,6 +18,7 @@ from bookworm_helper import (
     handoff_refined_note,
     refine_markdown,
     resolve_citation_markers,
+    resolve_numeric_citations,
     source_counts,
     convert_refine_input,
 )
@@ -344,6 +345,57 @@ Footnote reference[^source].
             {"markers_scanned": 1, "verified_title_links_inserted": 0, "unresolved": 1},
         )
 
+    def test_replaces_numeric_citations_with_readable_sources_section(self) -> None:
+        source = """## Mechanics
+
+Worker placement creates scarcity [1]. It can pair with deckbuilding [2].
+
+## Sources
+
+[1] [Worker Placement | BoardGameGeek](https://boardgamegeek.com/browse/boardgamemechanic)
+[2] [Dune: Imperium](https://duneimperium.com/)
+"""
+
+        result, report = resolve_numeric_citations(source)
+
+        self.assertNotIn("[1]", result)
+        self.assertNotIn("[2]", result)
+        self.assertIn("## Sources", result)
+        self.assertIn("- [Worker Placement | BoardGameGeek](https://boardgamegeek.com/browse/boardgamemechanic)", result)
+        self.assertIn("- [Dune: Imperium](https://duneimperium.com/)", result)
+        self.assertEqual(report, {"numeric_citations_scanned": 2, "numeric_sources_resolved": 2, "numeric_unresolved": 0})
+
+    def test_uses_verified_mapping_for_numbered_source_without_url(self) -> None:
+        source = """Claim about a mechanism [66].
+
+## Источники
+
+[66] Worker Placement | Board Game Mechanic
+"""
+
+        result, report = resolve_numeric_citations(
+            source,
+            {"66": {"title": "Worker Placement | BoardGameGeek", "url": "https://boardgamegeek.com/browse/boardgamemechanic"}},
+        )
+
+        self.assertNotIn("[66]", result)
+        self.assertIn("- [Worker Placement | BoardGameGeek](https://boardgamegeek.com/browse/boardgamemechanic)", result)
+        self.assertEqual(report["numeric_unresolved"], 0)
+
+    def test_removes_unmapped_numeric_citation_and_reports_unresolved(self) -> None:
+        source = """Claim [9].
+
+## Sources
+
+[9] Unknown article
+"""
+
+        result, report = resolve_numeric_citations(source)
+
+        self.assertNotIn("[9]", result)
+        self.assertNotIn("Unknown article", result)
+        self.assertEqual(report, {"numeric_citations_scanned": 1, "numeric_sources_resolved": 0, "numeric_unresolved": 1})
+
     def test_cli_writes_refined_copy_without_changing_source(self) -> None:
         source = "# Title\n\nText citeturn1search2\n\n## Section\n"
 
@@ -407,6 +459,38 @@ Footnote reference[^source].
             self.assertEqual(report["verified_title_links_inserted"], 1)
             self.assertEqual(report["unresolved"], 0)
             self.assertIn("[Source](https://example.com/)", output_path.read_text(encoding="utf-8"))
+
+    def test_cli_normalizes_numbered_sources_and_reports_numeric_counts(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            input_path = root / "research.md"
+            output_path = root / "refined.md"
+            input_path.write_text(
+                "## Claim\n\nFact [1].\n\n## Sources\n\n[1] [Primary source](https://example.com/)\n",
+                encoding="utf-8",
+            )
+
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts" / "bookworm_helper.py"),
+                    "refine-markdown",
+                    str(input_path),
+                    "--out",
+                    str(output_path),
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            report = json.loads(completed.stdout)
+            refined = output_path.read_text(encoding="utf-8")
+            self.assertNotIn("[1]", refined)
+            self.assertIn("- [Primary source](https://example.com/)", refined)
+            self.assertEqual(report["numeric_citations_scanned"], 1)
+            self.assertEqual(report["numeric_sources_resolved"], 1)
+            self.assertEqual(report["numeric_unresolved"], 0)
 
 
 if __name__ == "__main__":

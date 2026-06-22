@@ -27,6 +27,7 @@ HTML_EXTENSIONS = (".html", ".xhtml", ".htm")
 IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg")
 REFINE_INPUT_EXTENSIONS = (".md", ".docx", ".pdf", ".pptx")
 CHATGPT_CITATION_PATTERN = re.compile(r"cite[^]*")
+NUMERIC_CITATION_PATTERN = re.compile(r"(?<!\w)\[(\d{1,4})\]")
 MARKDOWN_HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
 MARKDOWN_SOURCE_LINK_PATTERN = re.compile(r"(?<!!)\[[^\]]+\]\(\s*https?://[^)\s]+[^)]*\)")
 BARE_URL_PATTERN = re.compile(r"(?<!\]\()(?<!\()https?://[^\s<>)\]]+")
@@ -179,6 +180,104 @@ def resolve_citation_markers(
     result = CHATGPT_CITATION_PATTERN.sub(replace, source)
     result = re.sub(r"[ \t]+(\[[^]]+\]\(https?://)", r" \1", result)
     return result, report
+
+
+def _source_section_bounds(lines: list[str]) -> tuple[int, int] | None:
+    for index, line in enumerate(lines):
+        heading = MARKDOWN_HEADING_PATTERN.match(line)
+        if not heading or heading.group(2).strip().casefold() not in {"sources", "источники"}:
+            continue
+        level = len(heading.group(1))
+        end = index + 1
+        while end < len(lines):
+            next_heading = MARKDOWN_HEADING_PATTERN.match(lines[end])
+            if next_heading and len(next_heading.group(1)) <= level:
+                break
+            end += 1
+        return index, end
+    return None
+
+
+def _source_entry(line: str) -> tuple[list[str], str, str] | None:
+    match = re.match(r"^\s*((?:\[\d{1,4}\]\s*)+)(.+?)\s*$", line)
+    if not match:
+        return None
+    numbers = NUMERIC_CITATION_PATTERN.findall(match.group(1))
+    payload = match.group(2).strip()
+    title_link = re.search(r"\[([^\]]+)\]\((https?://[^)\s]+)\)", payload)
+    if title_link:
+        return numbers, title_link.group(1).strip(), title_link.group(2).strip()
+    titled_url = re.match(r"(.+?)\s+(https?://\S+)$", payload)
+    if titled_url:
+        return numbers, titled_url.group(1).strip(), titled_url.group(2).rstrip(".,;)")
+    return numbers, payload, ""
+
+
+def resolve_numeric_citations(
+    source: str,
+    verified_sources: dict[str, dict[str, str]] | None = None,
+) -> tuple[str, dict[str, int]]:
+    """Turn a numbered bibliography into reader-facing title links.
+
+    Only numeric references declared inside an explicit Sources/Источники
+    section are touched, avoiding accidental removal of ordinary bracketed data.
+    """
+    verified_sources = verified_sources or {}
+    lines = source.splitlines()
+    bounds = _source_section_bounds(lines)
+    report = {
+        "numeric_citations_scanned": 0,
+        "numeric_sources_resolved": 0,
+        "numeric_unresolved": 0,
+    }
+    if bounds is None:
+        return source, report
+
+    start, end = bounds
+    references: dict[str, dict[str, str]] = {}
+    ordered: list[dict[str, str]] = []
+    seen_urls: set[str] = set()
+    for line in lines[start + 1:end]:
+        entry = _source_entry(line)
+        if entry is None:
+            continue
+        numbers, detected_title, detected_url = entry
+        for number in numbers:
+            verified = verified_sources.get(number, {})
+            title = verified.get("title") or detected_title
+            url = verified.get("url") or detected_url
+            if title and url:
+                reference = {"title": title, "url": url}
+                references[number] = reference
+                if url not in seen_urls:
+                    ordered.append(reference)
+                    seen_urls.add(url)
+
+    body = lines[:start] + lines[end:]
+
+    def replace(match: re.Match[str]) -> str:
+        number = match.group(1)
+        if number not in references and not any(
+            number in (_source_entry(line) or ([], "", ""))[0]
+            for line in lines[start + 1:end]
+        ):
+            return match.group(0)
+        report["numeric_citations_scanned"] += 1
+        if number in references:
+            report["numeric_sources_resolved"] += 1
+        else:
+            report["numeric_unresolved"] += 1
+        return ""
+
+    cleaned_body = [NUMERIC_CITATION_PATTERN.sub(replace, line).rstrip() for line in body]
+    while cleaned_body and not cleaned_body[-1].strip():
+        cleaned_body.pop()
+    sources_block: list[str] = []
+    if ordered:
+        heading = lines[start]
+        sources_block = [heading, "", *[f"- [{entry['title']}]({entry['url']})" for entry in ordered]]
+    result_lines = cleaned_body + ([""] if cleaned_body and sources_block else []) + sources_block
+    return "\n".join(result_lines).strip() + "\n", report
 
 
 def assert_sources_preserved(
@@ -745,6 +844,7 @@ def main(argv: list[str]) -> int:
             else {}
         )
         resolved, citation_report = resolve_citation_markers(source, verified_sources)
+        resolved, numeric_report = resolve_numeric_citations(resolved, verified_sources)
         refined = refine_markdown(resolved, args.toc_title)
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(refined, encoding="utf-8")
@@ -755,6 +855,7 @@ def main(argv: list[str]) -> int:
             "removed_citation_markers": source_counts(source)["citation_markers"],
             "suggested_filename": note_filename(source, args.path.stem),
             **citation_report,
+            **numeric_report,
         }, ensure_ascii=False))
     elif args.command == "convert-refine-input":
         print(json.dumps(
