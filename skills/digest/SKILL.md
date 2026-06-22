@@ -94,6 +94,8 @@ When including fenced code templates in the final note, avoid Markdown heading m
 
 Use a two-column parameter-description table for repeated profiles, reference cards, and comparable records when it is more scannable than prose. Keep narrative reasoning and long explanations outside tables.
 
+Use an ordered list for a long enumeration of peer items that a reader may need to refer to by position, such as a catalogue of mechanisms, methods, cases, or options. Use ordinary bullets for short, unordered sets of attributes or alternatives.
+
 Do not leave reader-facing numeric citations such as `[47]`. When a named example, book, product, method, or official document is useful to open, link its name directly with a descriptive title-link.
 
 When external sources support a whole section, collect them at the end of the note under `## Источники` / `## Sources`, grouped by the relevant main section. Each entry must be a descriptive title-link, never a naked URL or numeric-only reference.

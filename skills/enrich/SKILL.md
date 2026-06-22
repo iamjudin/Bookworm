@@ -56,6 +56,10 @@ the later enrichment.
   editable diagrams and add a title and explanatory text. Never render Mermaid as a raster image.
 - Preserve visual assets that materially explain the research; prune unused
   generated assets after selection.
+- Use an ordered list for a long enumeration of peer items that a reader may
+  need to refer to by position, such as a catalogue of mechanisms, methods,
+  cases, or options. Use ordinary bullets for short, unordered attributes or
+  alternatives.
 
 ## Sources
 

@@ -111,6 +111,10 @@ Refine improves presentation without discarding content:
 - Never render Mermaid as a raster image. Mermaid must remain editable in the
   final Obsidian note. When a diagram is too wide, simplify it, split it into
   smaller portrait diagrams, or pair it with a concise textual explanation.
+- Use an ordered list for a long enumeration of peer items that a reader may
+  need to refer to by position, such as a catalogue of mechanisms, methods,
+  cases, or options. Use ordinary bullets for short, unordered attributes or
+  alternatives.
 
 ## Sources
 

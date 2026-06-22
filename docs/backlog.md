@@ -27,6 +27,9 @@
 - Keep only compact Obsidian tables. Prefer a two-column `Параметр | Описание`
   table for repeated profiles and reference cards; convert wide/prose-heavy
   tables into labeled sections and process tables into numbered steps.
+- Use a numbered list for a long, referable catalogue of peer items (for
+  example, mechanics, methods, cases, or options); keep short unordered
+  attributes and alternatives as bullets.
 - Reader-facing named examples (games, books, products, methods, official
   documents) should link from their names. Gather proof for whole sections at
   the end under `## Источники` / `## Sources`, grouped by section, with
