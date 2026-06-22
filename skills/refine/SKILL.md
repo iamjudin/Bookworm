@@ -59,6 +59,21 @@ The command fails if Markdown source links, bare URLs, or footnote references
 would decrease. Clean up citation markers only after reviewing their nearby
 claims for source repair.
 
+For each marker, use the actual nearby claim to find and open a reliable
+source. Do not treat a raw marker as if it contained a URL. Write only sources
+that were opened and verified into `verified-sources.json`, then apply them:
+
+```bash
+python3 scripts/bookworm_helper.py refine-markdown \
+  /path/to/run/converted.md \
+  --out /path/to/run/refined-note.md \
+  --verified-sources /path/to/run/verified-sources.json
+```
+
+The helper reports `markers_scanned`, `verified_title_links_inserted`, and
+`unresolved`. Include those exact three counts in the final user-facing
+message. An unresolved marker is removed without changing its claim.
+
 When a Markdown source link already exists, keep the human title as the link
 text. Do not replace it with a naked URL.
 
@@ -103,7 +118,23 @@ Refine improves presentation without discarding content:
    assets, must stay inside it. Do not modify, move, or delete the source file
    at this stage:
 
-   First inventory raw citation context before cleanup:
+   First convert every input to a temporary Markdown copy. Keep important
+   images in the same run directory under `assets/`:
+
+   ```bash
+   python3 scripts/bookworm_helper.py convert-refine-input \
+     /path/to/input.docx \
+     --out /path/to/scratch/refine-<run-id>/converted.md \
+     --assets-dir /path/to/scratch/refine-<run-id>/assets
+   ```
+
+   For DOCX preserve headings, paragraphs, lists, compact tables, and useful
+   images. For PDF preserve extracted text and useful images. For PPTX create
+   one section per slide, include visible text, speaker notes, and useful
+   illustrations. The converter fails with a clear reader/runtime error rather
+   than creating an empty note.
+
+   Then inventory raw citation context before cleanup:
 
    ```bash
    python3 scripts/bookworm_helper.py inspect-citations /path/to/research.md
@@ -113,7 +144,7 @@ Refine improves presentation without discarding content:
 
    ```bash
    python3 scripts/bookworm_helper.py refine-markdown \
-     /path/to/research.md \
+     /path/to/scratch/refine-<run-id>/converted.md \
      --out /path/to/scratch/refine-<run-id>/refined-note.md \
      --toc-title "Содержание"
    ```
@@ -123,7 +154,8 @@ Refine improves presentation without discarding content:
    from the note's human title H1; never use a technical source name such as
    `deep-research-report.md` when a title exists. For every inventory entry,
    repair the matching claim in the refined copy with a verified title link when
-   a reliable source is available.
+   a reliable source is available. The helper's report must be retained for
+   the final response.
 5. Inspect the result before handoff. Verify that ordinary title links, bare
    URLs, and source sections remain; raw citation markers are gone; the body has
    no duplicate top H1; and the TOC links only to real main sections. Confirm
@@ -143,12 +175,14 @@ Refine improves presentation without discarding content:
      --refined /path/to/scratch/refined.md \
      --destination-dir /path/to/vault/Library \
      --confirmation user-confirmed \
-     --run-dir /path/to/scratch/refine-<run-id>
+     --run-dir /path/to/scratch/refine-<run-id> \
+     --assets-dir /path/to/scratch/refine-<run-id>/assets
    ```
 
    The helper refuses to run without the confirmation token, refuses to
-   overwrite an existing note, verifies the final bytes, and only then removes
-   the original and temporary copy.
+   overwrite an existing note, verifies the final bytes and assets, and only
+   then removes the original and all temporary run files. For a `Library/`
+   destination, assets live in `Library/assets/<note-slug>/`.
 8. Use the required final response below. Do not start Enrich automatically.
 
 ## Required Final Response

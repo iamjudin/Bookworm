@@ -25,6 +25,7 @@ import xml.etree.ElementTree as ET
 
 HTML_EXTENSIONS = (".html", ".xhtml", ".htm")
 IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg")
+REFINE_INPUT_EXTENSIONS = (".md", ".docx", ".pdf", ".pptx")
 CHATGPT_CITATION_PATTERN = re.compile(r"cite[^]*")
 MARKDOWN_HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
 MARKDOWN_SOURCE_LINK_PATTERN = re.compile(r"(?<!!)\[[^\]]+\]\(\s*https?://[^)\s]+[^)]*\)")
@@ -222,6 +223,132 @@ def note_filename(source: str, fallback: str) -> str:
     return f"{safe_title or fallback}.md"
 
 
+def _require_reader(module: str, label: str):
+    try:
+        return __import__(module)
+    except ImportError as error:
+        raise RuntimeError(
+            f"Missing {label} reader. Run Bookworm with the Codex bundled Python runtime."
+        ) from error
+
+
+def _write_asset(assets_dir: Path, number: int, extension: str, payload: bytes) -> Path:
+    assets_dir.mkdir(parents=True, exist_ok=True)
+    extension = extension.lower() if extension.lower() in IMAGE_EXTENSIONS else ".png"
+    asset = assets_dir / f"figure-{number:03d}{extension}"
+    asset.write_bytes(payload)
+    return asset
+
+
+def _markdown_table(rows: list[list[str]]) -> list[str]:
+    if not rows:
+        return []
+    width = max(len(row) for row in rows)
+    normalized = [row + [""] * (width - len(row)) for row in rows]
+    clean = [[cell.replace("|", "\\|").replace("\n", "<br>").strip() for cell in row] for row in normalized]
+    return [
+        "| " + " | ".join(clean[0]) + " |",
+        "| " + " | ".join("---" for _ in range(width)) + " |",
+        *["| " + " | ".join(row) + " |" for row in clean[1:]],
+    ]
+
+
+def convert_refine_input(source_path: Path, output_path: Path, assets_dir: Path | None = None) -> dict:
+    """Convert a supported source into a temporary Markdown copy without mutation."""
+    suffix = source_path.suffix.lower()
+    if suffix not in REFINE_INPUT_EXTENSIONS:
+        raise ValueError(f"Unsupported Refine input: {source_path.suffix or source_path}")
+    if not source_path.is_file():
+        raise FileNotFoundError(f"Refine input does not exist: {source_path}")
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    assets_dir = assets_dir or output_path.parent / "assets"
+    assets: list[str] = []
+    if suffix == ".md":
+        markdown = source_path.read_text(encoding="utf-8")
+        kind = "markdown"
+    elif suffix == ".docx":
+        document_module = _require_reader("docx", "python-docx")
+        document = document_module.Document(source_path)
+        lines: list[str] = []
+        for paragraph in document.paragraphs:
+            text = paragraph.text.strip()
+            if not text:
+                continue
+            style = (paragraph.style.name or "").lower()
+            heading = re.search(r"heading\s+([1-6])", style)
+            if heading:
+                lines.append("#" * int(heading.group(1)) + " " + text)
+            elif "list" in style:
+                lines.append("- " + text)
+            else:
+                lines.append(text)
+        for table in document.tables:
+            rows = [[cell.text for cell in row.cells] for row in table.rows]
+            if lines:
+                lines.append("")
+            lines.extend(_markdown_table(rows))
+        asset_slug = slugify(document_title("\n".join(lines), source_path.stem))
+        for relationship in document.part.rels.values():
+            if "image" not in relationship.reltype:
+                continue
+            image_part = relationship.target_part
+            extension = "." + image_part.content_type.rsplit("/", 1)[-1]
+            asset = _write_asset(assets_dir, len(assets) + 1, extension, image_part.blob)
+            assets.append(str(asset))
+            lines.extend(["", f"![[assets/{asset_slug}/{asset.name}]]"])
+        markdown = "\n\n".join(lines) + ("\n" if lines else "")
+        kind = "docx"
+    elif suffix == ".pdf":
+        pdfplumber = _require_reader("pdfplumber", "pdfplumber")
+        with pdfplumber.open(source_path) as pdf:
+            pages = [page.extract_text() or "" for page in pdf.pages]
+        markdown = "\n\n".join(
+            f"## Page {index}\n\n{text.strip()}" for index, text in enumerate(pages, start=1) if text.strip()
+        )
+        pypdf = _require_reader("pypdf", "pypdf")
+        reader = pypdf.PdfReader(source_path)
+        asset_slug = slugify(source_path.stem)
+        embeds: list[str] = []
+        for page in reader.pages:
+            for image in page.images:
+                asset = _write_asset(assets_dir, len(assets) + 1, Path(image.name).suffix, image.data)
+                assets.append(str(asset))
+                embeds.append(f"![[assets/{asset_slug}/{asset.name}]]")
+        if embeds:
+            markdown += "\n\n" + "\n\n".join(embeds)
+        markdown += "\n" if markdown else ""
+        kind = "pdf"
+    else:
+        pptx = _require_reader("pptx", "python-pptx")
+        presentation = pptx.Presentation(source_path)
+        sections: list[str] = []
+        for index, slide in enumerate(presentation.slides, start=1):
+            text = [shape.text.strip() for shape in slide.shapes if getattr(shape, "has_text_frame", False) and shape.text.strip()]
+            sections.append(f"## Slide {index}\n\n" + "\n\n".join(text))
+            asset_slug = slugify(source_path.stem)
+            for shape in slide.shapes:
+                try:
+                    image = shape.image
+                except (AttributeError, ValueError):
+                    continue
+                asset = _write_asset(assets_dir, len(assets) + 1, image.ext, image.blob)
+                assets.append(str(asset))
+                sections.append(f"![[assets/{asset_slug}/{asset.name}]]")
+            notes = getattr(slide, "notes_slide", None)
+            if notes is not None:
+                note_text = [shape.text.strip() for shape in notes.shapes if getattr(shape, "has_text_frame", False) and shape.text.strip()]
+                if note_text:
+                    sections.append("### Notes\n\n" + "\n\n".join(note_text))
+        markdown = "\n\n".join(section for section in sections if section.strip()) + "\n"
+        kind = "pptx"
+
+    if not markdown.strip():
+        raise ValueError(f"No readable content extracted from {source_path}; no note was created")
+    output_path.write_text(markdown, encoding="utf-8")
+    return {"kind": kind, "output": str(output_path), "assets": assets}
+
+
 def handoff_refined_note(
     source_path: Path,
     refined_path: Path,
@@ -229,6 +356,7 @@ def handoff_refined_note(
     *,
     confirmation: str | None,
     run_dir: Path | None = None,
+    assets_dir: Path | None = None,
 ) -> Path:
     """Create the final note only after an explicit user confirmation token."""
     if confirmation != "user-confirmed":
@@ -244,10 +372,12 @@ def handoff_refined_note(
             raise ValueError("Refined note must be inside the declared run directory") from error
 
     destination_dir.mkdir(parents=True, exist_ok=True)
-    destination = destination_dir / note_filename(
-        source_path.read_text(encoding="utf-8"),
-        source_path.stem,
+    title_source = (
+        source_path.read_text(encoding="utf-8")
+        if source_path.suffix.lower() == ".md"
+        else refined_path.read_text(encoding="utf-8")
     )
+    destination = destination_dir / note_filename(title_source, source_path.stem)
     if destination.exists():
         raise FileExistsError(f"Destination already exists: {destination}")
 
@@ -256,6 +386,18 @@ def handoff_refined_note(
     if destination.read_bytes() != payload:
         destination.unlink(missing_ok=True)
         raise OSError("Final note verification failed")
+
+    if assets_dir is not None and assets_dir.exists():
+        asset_root = destination_dir / "assets" if destination_dir.name == "Library" else destination_dir / "assets"
+        final_assets = asset_root / slugify(document_title(title_source, source_path.stem))
+        if final_assets.exists():
+            destination.unlink(missing_ok=True)
+            raise FileExistsError(f"Asset destination already exists: {final_assets}")
+        shutil.copytree(assets_dir, final_assets)
+        if not any(final_assets.iterdir()):
+            shutil.rmtree(final_assets)
+            destination.unlink(missing_ok=True)
+            raise OSError("Asset handoff verification failed")
 
     source_path.unlink()
     if resolved_run_dir is not None:
@@ -568,6 +710,12 @@ def main(argv: list[str]) -> int:
     refine_cmd.add_argument("path", type=Path)
     refine_cmd.add_argument("--out", required=True, type=Path)
     refine_cmd.add_argument("--toc-title", default="Содержание")
+    refine_cmd.add_argument("--verified-sources", type=Path)
+
+    convert_cmd = sub.add_parser("convert-refine-input")
+    convert_cmd.add_argument("path", type=Path)
+    convert_cmd.add_argument("--out", required=True, type=Path)
+    convert_cmd.add_argument("--assets-dir", type=Path)
 
     citations_cmd = sub.add_parser("inspect-citations")
     citations_cmd.add_argument("path", type=Path)
@@ -578,6 +726,7 @@ def main(argv: list[str]) -> int:
     handoff_cmd.add_argument("--destination-dir", required=True, type=Path)
     handoff_cmd.add_argument("--confirmation", required=True)
     handoff_cmd.add_argument("--run-dir", type=Path)
+    handoff_cmd.add_argument("--assets-dir", type=Path)
 
     args = parser.parse_args(argv)
 
@@ -590,7 +739,13 @@ def main(argv: list[str]) -> int:
         print(json.dumps(extract_epub_assets(args.path, args.out, args.book_slug), ensure_ascii=False, indent=2))
     elif args.command == "refine-markdown":
         source = args.path.read_text(encoding="utf-8")
-        refined = refine_markdown(source, args.toc_title)
+        verified_sources = (
+            json.loads(args.verified_sources.read_text(encoding="utf-8"))
+            if args.verified_sources is not None
+            else {}
+        )
+        resolved, citation_report = resolve_citation_markers(source, verified_sources)
+        refined = refine_markdown(resolved, args.toc_title)
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(refined, encoding="utf-8")
         print(json.dumps({
@@ -599,7 +754,13 @@ def main(argv: list[str]) -> int:
             "source_counts": source_counts(source),
             "removed_citation_markers": source_counts(source)["citation_markers"],
             "suggested_filename": note_filename(source, args.path.stem),
+            **citation_report,
         }, ensure_ascii=False))
+    elif args.command == "convert-refine-input":
+        print(json.dumps(
+            convert_refine_input(args.path, args.out, args.assets_dir),
+            ensure_ascii=False,
+        ))
     elif args.command == "inspect-citations":
         source = args.path.read_text(encoding="utf-8")
         print(json.dumps({"citations": citation_inventory(source)}, ensure_ascii=False, indent=2))
@@ -610,6 +771,7 @@ def main(argv: list[str]) -> int:
             args.destination_dir,
             confirmation=args.confirmation,
             run_dir=args.run_dir,
+            assets_dir=args.assets_dir,
         )
         print(json.dumps({"destination": str(destination)}, ensure_ascii=False))
     else:

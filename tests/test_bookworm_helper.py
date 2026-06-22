@@ -4,6 +4,9 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from io import BytesIO
+import importlib.util
+import json
 from pathlib import Path
 
 
@@ -16,6 +19,7 @@ from bookworm_helper import (
     refine_markdown,
     resolve_citation_markers,
     source_counts,
+    convert_refine_input,
 )
 
 
@@ -82,6 +86,146 @@ class RefineMarkdownTests(unittest.TestCase):
             self.assertTrue(destination.exists())
             self.assertFalse(source_path.exists())
             self.assertFalse(refined_path.parent.exists())
+
+    def test_handoff_copies_assets_to_shared_library_assets_folder(self) -> None:
+        source = "# Принципы интерфейсов\n\nИсходный текст.\n"
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source_path = root / "Inbox" / "report.md"
+            run_dir = root / "scratch"
+            refined_path = run_dir / "refined.md"
+            assets_dir = run_dir / "assets"
+            destination_dir = root / "Vault" / "Library"
+            source_path.parent.mkdir()
+            assets_dir.mkdir(parents=True)
+            source_path.write_text(source, encoding="utf-8")
+            refined_path.write_text("## Содержание\n", encoding="utf-8")
+            (assets_dir / "figure-001.png").write_bytes(b"png")
+
+            destination = handoff_refined_note(
+                source_path,
+                refined_path,
+                destination_dir,
+                confirmation="user-confirmed",
+                run_dir=run_dir,
+                assets_dir=assets_dir,
+            )
+
+            self.assertTrue(destination.exists())
+            self.assertTrue(
+                (destination_dir / "assets" / "printsipy-interfeysov" / "figure-001.png").exists()
+            )
+            self.assertFalse(run_dir.exists())
+
+    def test_converts_markdown_to_temp_copy_without_changing_original(self) -> None:
+        source = "# Title\n\nBody.\n"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            input_path = root / "source.md"
+            output_path = root / "run" / "converted.md"
+            input_path.write_text(source, encoding="utf-8")
+
+            result = convert_refine_input(input_path, output_path)
+
+            self.assertEqual(input_path.read_text(encoding="utf-8"), source)
+            self.assertEqual(output_path.read_text(encoding="utf-8"), source)
+            self.assertEqual(result["kind"], "markdown")
+            self.assertEqual(result["assets"], [])
+
+    def test_rejects_unsupported_refine_input_without_creating_note(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            input_path = root / "source.txt"
+            output_path = root / "run" / "converted.md"
+            input_path.write_text("plain text", encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "Unsupported Refine input"):
+                convert_refine_input(input_path, output_path)
+
+            self.assertFalse(output_path.exists())
+
+    @unittest.skipUnless(importlib.util.find_spec("docx"), "requires bundled python-docx")
+    def test_converts_docx_structure_and_embeds_extracted_image(self) -> None:
+        from docx import Document
+
+        png = (
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01"
+            b"\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x0dIDAT\x08\xd7c\xf8\xcf\xc0\xf0\x1f\x00\x05\x00\x01\xff\x89\x99=\x1d\x00\x00\x00\x00IEND\xaeB`\x82"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "input.docx"
+            output = root / "run" / "note.md"
+            document = Document()
+            document.add_heading("Document title", level=1)
+            document.add_paragraph("A paragraph")
+            document.add_paragraph("A list item", style="List Bullet")
+            table = document.add_table(rows=2, cols=2)
+            table.cell(0, 0).text = "Key"
+            table.cell(0, 1).text = "Value"
+            table.cell(1, 0).text = "A"
+            table.cell(1, 1).text = "B"
+            document.add_picture(BytesIO(png))
+            document.save(source)
+
+            result = convert_refine_input(source, output)
+
+            rendered = output.read_text(encoding="utf-8")
+            self.assertIn("# Document title", rendered)
+            self.assertIn("- A list item", rendered)
+            self.assertIn("| Key | Value |", rendered)
+            self.assertEqual(len(result["assets"]), 1)
+            self.assertTrue(Path(result["assets"][0]).exists())
+
+    @unittest.skipUnless(importlib.util.find_spec("pptx"), "requires bundled python-pptx")
+    def test_converts_pptx_text_notes_and_illustrations(self) -> None:
+        from pptx import Presentation
+        from pptx.util import Inches
+
+        png = (
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01"
+            b"\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x0dIDAT\x08\xd7c\xf8\xcf\xc0\xf0\x1f\x00\x05\x00\x01\xff\x89\x99=\x1d\x00\x00\x00\x00IEND\xaeB`\x82"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "slides.pptx"
+            output = root / "run" / "note.md"
+            presentation = Presentation()
+            slide = presentation.slides.add_slide(presentation.slide_layouts[6])
+            slide.shapes.add_textbox(Inches(1), Inches(1), Inches(5), Inches(1)).text_frame.text = "Slide claim"
+            slide.shapes.add_picture(BytesIO(png), Inches(1), Inches(2))
+            presentation.save(source)
+
+            result = convert_refine_input(source, output)
+
+            self.assertIn("## Slide 1", output.read_text(encoding="utf-8"))
+            self.assertIn("Slide claim", output.read_text(encoding="utf-8"))
+            self.assertEqual(len(result["assets"]), 1)
+
+    @unittest.skipUnless(importlib.util.find_spec("pdfplumber"), "requires bundled PDF libraries")
+    def test_converts_pdf_text_and_embedded_image(self) -> None:
+        from reportlab.pdfgen.canvas import Canvas
+
+        png = (
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01"
+            b"\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x0dIDAT\x08\xd7c\xf8\xcf\xc0\xf0\x1f\x00\x05\x00\x01\xff\x89\x99=\x1d\x00\x00\x00\x00IEND\xaeB`\x82"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.pdf"
+            image = root / "image.png"
+            output = root / "run" / "note.md"
+            image.write_bytes(png)
+            canvas = Canvas(str(source))
+            canvas.drawString(72, 720, "PDF claim")
+            canvas.drawImage(str(image), 72, 600, width=20, height=20)
+            canvas.save()
+
+            result = convert_refine_input(source, output)
+
+            self.assertIn("PDF claim", output.read_text(encoding="utf-8"))
+            self.assertEqual(len(result["assets"]), 1)
 
     def test_removes_raw_citation_markers_from_reader_output(self) -> None:
         citation = "citeturn0search1"
@@ -228,6 +372,41 @@ Footnote reference[^source].
             self.assertNotIn("cite", output_path.read_text(encoding="utf-8"))
             self.assertIn(str(output_path), completed.stdout)
             self.assertIn('"suggested_filename": "Title.md"', completed.stdout)
+
+    def test_cli_reports_verified_and_unresolved_citation_markers(self) -> None:
+        marker = "citeturn1search2"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            input_path = root / "research.md"
+            output_path = root / "refined.md"
+            verified_path = root / "verified.json"
+            input_path.write_text(f"# Title\n\nClaim {marker}.\n", encoding="utf-8")
+            verified_path.write_text(
+                json.dumps({marker: {"title": "Source", "url": "https://example.com/"}}),
+                encoding="utf-8",
+            )
+
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts" / "bookworm_helper.py"),
+                    "refine-markdown",
+                    str(input_path),
+                    "--out",
+                    str(output_path),
+                    "--verified-sources",
+                    str(verified_path),
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            report = json.loads(completed.stdout)
+            self.assertEqual(report["markers_scanned"], 1)
+            self.assertEqual(report["verified_title_links_inserted"], 1)
+            self.assertEqual(report["unresolved"], 0)
+            self.assertIn("[Source](https://example.com/)", output_path.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":
