@@ -46,6 +46,13 @@ class RefineSkillContractTests(unittest.TestCase):
             skill = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
             self.assertIn("Never render Mermaid as a raster image", skill)
 
+    def test_bookworm_uses_scannable_tables_and_reader_facing_sources(self) -> None:
+        for name in ("digest", "refine", "enrich"):
+            skill = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("two-column parameter-description table", skill)
+            self.assertIn("## Sources", skill)
+            self.assertIn("Do not leave reader-facing numeric citations", skill)
+
 
 if __name__ == "__main__":
     unittest.main()

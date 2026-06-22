@@ -48,7 +48,7 @@ the later enrichment.
 ## Obsidian Layout Rules
 
 - Keep only compact comparison tables: at most four columns, short cells, and
-  no horizontal scrolling at normal note width.
+  no horizontal scrolling at normal note width. Use a two-column parameter-description table for repeated profiles or reference cards; keep narrative reasoning in prose.
 - Convert wide/prose-heavy tables to titled item sections with labeled fields;
   convert process tables to numbered steps.
 - Use Mermaid only in portrait, top-to-bottom form. If the relationship cannot
@@ -56,6 +56,12 @@ the later enrichment.
   editable diagrams and add a title and explanatory text. Never render Mermaid as a raster image.
 - Preserve visual assets that materially explain the research; prune unused
   generated assets after selection.
+
+## Sources
+
+Do not leave reader-facing numeric citations such as `[47]` or source labels that force the reader to hunt through a reference list. Use descriptive title-links for the source of each added block and for named examples that are useful to open directly, such as `[CATAN](https://...)`.
+
+When sources support a whole section, collect them at the end under `## Источники` / `## Sources`, grouped by the relevant main section. Every entry is a descriptive title-link; do not use naked URLs or numeric-only references.
 
 ## Handoff
 

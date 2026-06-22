@@ -24,8 +24,13 @@
   explanation, never personal opinion. Each added block must use
   `#### Дополнение — [название источника](https://...)` so it is visibly not
   part of the original book or source note.
-- Keep only compact Obsidian tables; convert wide/prose-heavy tables into
-  labeled sections and process tables into numbered steps.
+- Keep only compact Obsidian tables. Prefer a two-column `Параметр | Описание`
+  table for repeated profiles and reference cards; convert wide/prose-heavy
+  tables into labeled sections and process tables into numbered steps.
+- Reader-facing named examples (games, books, products, methods, official
+  documents) should link from their names. Gather proof for whole sections at
+  the end under `## Источники` / `## Sources`, grouped by section, with
+  descriptive title-links. Do not leave bare numeric citations or naked URLs.
 - Mermaid diagrams must be portrait and top-to-bottom. Keep them as editable
   Mermaid: simplify or split an unreadably wide diagram instead of rendering it
   as an image.

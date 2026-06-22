@@ -82,7 +82,7 @@ text. Do not replace it with a naked URL.
 Refine improves presentation without discarding content:
 
 - Keep a Markdown table only when it is a compact comparison: at most four
-  columns, short cells, and readable at normal note width.
+  columns, short cells, and readable at normal note width. A two-column parameter-description table is preferred for repeated profiles, cards, or reference entries (for example: definition, strengths, risks, variants, and examples).
 - Turn wider or prose-heavy tables into titled item sections with labeled
   fields such as `**Сильные стороны:**` and `**Риски:**`.
 - Turn procedural tables into numbered steps.
@@ -91,6 +91,14 @@ Refine improves presentation without discarding content:
 - Never render Mermaid as a raster image. Mermaid must remain editable in the
   final Obsidian note. When a diagram is too wide, simplify it, split it into
   smaller portrait diagrams, or pair it with a concise textual explanation.
+
+## Sources
+
+Make sources useful to a reader, not merely traceable to a processor. Do not leave reader-facing numeric citations such as `[47]`, `[1]`, or a bare reference list. Resolve a reliable source into a descriptive Markdown title-link, or remove the raw marker and report it as unresolved.
+
+When a source proves a section rather than a specific named item, collect it at the end of the note under `## Источники` / `## Sources`, grouped by the relevant main section. Each entry must be a descriptive title-link, for example `- [Worker Placement | BoardGameGeek](https://...)`, never a naked URL.
+
+When a reader-facing named example itself is useful to open — such as a game, book, product, method, or official document — link the name directly: `[CATAN](https://...)`, not `CATAN [48]`. Prefer an official page, publisher, documentation, or primary source; use a reputable catalogue only as a fallback.
 
 ## Workflow
 
