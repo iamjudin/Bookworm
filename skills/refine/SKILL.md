@@ -83,8 +83,11 @@ Refine improves presentation without discarding content:
 
 ## Workflow
 
-1. Confirm the input is a readable `.md` file. Use the source/request language
-   for progress updates and visible headings.
+1. Confirm the input is a readable `.md`, `.docx`, `.pdf`, or `.pptx` file.
+   Use the source/request language for progress updates and visible headings.
+   Convert non-Markdown input with the bundled Python runtime and its
+   `python-docx`, `pypdf`/`pdfplumber`, and `python-pptx` libraries. Do not create an empty note when a required reader or runtime is unavailable:
+   report the missing dependency clearly and preserve the original.
 2. Detect likely Obsidian vaults with:
 
    ```bash

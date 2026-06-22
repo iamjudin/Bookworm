@@ -149,6 +149,37 @@ def citation_inventory(source: str) -> list[dict[str, str | int]]:
     return entries
 
 
+def resolve_citation_markers(
+    source: str,
+    verified_sources: dict[str, dict[str, str]],
+) -> tuple[str, dict[str, int]]:
+    """Replace raw markers only with sources a caller has already verified.
+
+    The resolver deliberately accepts no search terms or guessed URLs: source
+    discovery and opening happen in the Refine workflow, while this helper
+    deterministically applies those verified choices and reports every gap.
+    """
+    report = {
+        "markers_scanned": 0,
+        "verified_title_links_inserted": 0,
+        "unresolved": 0,
+    }
+
+    def replace(match: re.Match[str]) -> str:
+        marker = match.group(0)
+        report["markers_scanned"] += 1
+        verified = verified_sources.get(marker)
+        if not verified or not verified.get("title") or not verified.get("url"):
+            report["unresolved"] += 1
+            return ""
+        report["verified_title_links_inserted"] += 1
+        return f" [{verified['title']}]({verified['url']})"
+
+    result = CHATGPT_CITATION_PATTERN.sub(replace, source)
+    result = re.sub(r"[ \t]+(\[[^]]+\]\(https?://)", r" \1", result)
+    return result, report
+
+
 def assert_sources_preserved(
     before: dict[str, int],
     after: dict[str, int],
@@ -268,7 +299,9 @@ def remove_generated_toc(lines: list[str], toc_title: str) -> list[str]:
             next_heading = MARKDOWN_HEADING_PATTERN.match(lines[end])
             if next_heading and len(next_heading.group(1)) <= 2:
                 break
-            if re.match(r"^\s*- \[[^]]+\]\(#[^)]+\)\s*$", lines[end]):
+            if re.match(r"^\s*- \[[^]]+\]\(#[^)]+\)\s*$", lines[end]) or re.match(
+                r"^\s*- \[\[#[^|\]]+\|[^\]]+\]\]\s*$", lines[end]
+            ):
                 has_generated_link = True
             end += 1
         if has_generated_link:
@@ -291,7 +324,7 @@ def main_sections(lines: list[str], toc_title: str) -> list[tuple[str, str]]:
             continue
         title = heading.group(2).strip()
         if title.casefold() != toc_title.casefold():
-            sections.append((title, obsidian_anchor(title)))
+            sections.append((title, title))
     return sections
 
 
@@ -321,7 +354,7 @@ def refine_markdown(source: str, toc_title: str = "Содержание") -> str
 
     toc = "\n".join(
         [f"## {toc_title}", ""]
-        + [f"- [{title}](#{anchor})" for title, anchor in sections]
+        + [f"- [[#{anchor}|{title}]]" for title, anchor in sections]
     )
     result = f"{toc}\n\n{body}\n" if body else f"{toc}\n"
     assert_sources_preserved(

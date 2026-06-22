@@ -10,7 +10,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from bookworm_helper import citation_inventory, handoff_refined_note, refine_markdown, source_counts
+from bookworm_helper import (
+    citation_inventory,
+    handoff_refined_note,
+    refine_markdown,
+    resolve_citation_markers,
+    source_counts,
+)
 
 
 class RefineMarkdownTests(unittest.TestCase):
@@ -105,8 +111,43 @@ Useful text.
         self.assertNotIn("# Board Game Mechanics", result)
         self.assertIn("[source](https://example.com/research)", result)
         self.assertIn("## Содержание", result)
-        self.assertIn("- [Findings](#findings)", result)
-        self.assertIn("- [Sources](#sources)", result)
+        self.assertIn("- [[#Findings|Findings]]", result)
+        self.assertIn("- [[#Sources|Sources]]", result)
+
+    def test_replaces_legacy_markdown_anchor_toc_without_duplicates(self) -> None:
+        source = """# Title
+
+## Содержание
+
+- [Findings](#findings)
+
+## Findings
+
+Useful text.
+"""
+
+        result = refine_markdown(source, toc_title="Содержание")
+
+        self.assertEqual(result.count("## Содержание"), 1)
+        self.assertNotIn("- [Findings](#findings)", result)
+        self.assertIn("- [[#Findings|Findings]]", result)
+
+    def test_replaces_legacy_obsidian_toc_without_duplicates(self) -> None:
+        source = """# Заголовок
+
+## Содержание
+
+- [[#Находки|Находки]]
+
+## Находки
+
+Полезный текст.
+"""
+
+        result = refine_markdown(source, toc_title="Содержание")
+
+        self.assertEqual(result.count("## Содержание"), 1)
+        self.assertEqual(result.count("- [[#Находки|Находки]]"), 1)
 
     def test_counts_each_source_bearing_construct(self) -> None:
         source = """Claim citeturn0search1 [named source](https://example.com/a).
@@ -124,6 +165,39 @@ Footnote reference[^source].
                 "bare_urls": 1,
                 "footnote_references": 1,
             },
+        )
+
+    def test_inserts_verified_title_link_at_raw_citation_claim(self) -> None:
+        marker = "citeturn0search1"
+        source = f"A mechanic is documented by BoardGameGeek {marker}."
+
+        result, report = resolve_citation_markers(
+            source,
+            {
+                marker: {
+                    "title": "BoardGameGeek",
+                    "url": "https://boardgamegeek.com/",
+                }
+            },
+        )
+
+        self.assertEqual(
+            result,
+            "A mechanic is documented by BoardGameGeek [BoardGameGeek](https://boardgamegeek.com/).",
+        )
+        self.assertEqual(
+            report,
+            {"markers_scanned": 1, "verified_title_links_inserted": 1, "unresolved": 0},
+        )
+
+    def test_removes_unverified_marker_and_reports_it_without_inventing_link(self) -> None:
+        marker = "citeturn0search1"
+        result, report = resolve_citation_markers("Claim " + marker + ".", {})
+
+        self.assertEqual(result, "Claim .")
+        self.assertEqual(
+            report,
+            {"markers_scanned": 1, "verified_title_links_inserted": 0, "unresolved": 1},
         )
 
     def test_cli_writes_refined_copy_without_changing_source(self) -> None:

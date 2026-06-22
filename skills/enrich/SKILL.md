@@ -63,3 +63,14 @@ Follow the same vault discovery and confirmation rules as Refine. Work on a
 temporary copy, report the selected destination and enrichment scope, then
 ask before replacing or moving the original. Do not delete the source file
 until the final note and its source links have been verified.
+
+## Interaction and Repository Boundary
+
+Ask at most one short, content-focused question, and only when the requested
+focus cannot be inferred. Once the user confirms the scope, research and
+enrich directly; Enrich must not ask about agents or execution modes.
+
+Enrich must not create plans, specs, commits, worktrees, or repository files.
+It must not modify Bookworm itself. Make every proposed note change on a
+temporary copy first, and replace the original only after the user explicitly
+confirms the final handoff.
