@@ -136,8 +136,17 @@ def source_counts(source: str) -> dict[str, int]:
     }
 
 
-def assert_sources_preserved(before: dict[str, int], after: dict[str, int]) -> None:
-    lost = [name for name, count in before.items() if after[name] < count]
+def assert_sources_preserved(
+    before: dict[str, int],
+    after: dict[str, int],
+    *,
+    allowed_removed: set[str] | None = None,
+) -> None:
+    allowed_removed = allowed_removed or set()
+    lost = [
+        name for name, count in before.items()
+        if after[name] < count and name not in allowed_removed
+    ]
     if lost:
         raise ValueError(
             "Refine would remove source-bearing constructs: " + ", ".join(lost)
@@ -276,7 +285,8 @@ def main_sections(lines: list[str], toc_title: str) -> list[tuple[str, str]]:
 def refine_markdown(source: str, toc_title: str = "Содержание") -> str:
     """Make a cosmetic Obsidian-ready copy without rewriting research content."""
     before_sources = source_counts(source)
-    lines = [line.rstrip() for line in source.splitlines()]
+    cleaned = CHATGPT_CITATION_PATTERN.sub("", source)
+    lines = [line.rstrip() for line in cleaned.splitlines()]
     lines = strip_inline_title(lines)
     lines = remove_generated_toc(lines, toc_title)
 
@@ -289,7 +299,11 @@ def refine_markdown(source: str, toc_title: str = "Содержание") -> str
     sections = main_sections(lines, toc_title)
     if not sections:
         result = f"{body}\n" if body else ""
-        assert_sources_preserved(before_sources, source_counts(result))
+        assert_sources_preserved(
+            before_sources,
+            source_counts(result),
+            allowed_removed={"citation_markers"},
+        )
         return result
 
     toc = "\n".join(
@@ -297,7 +311,11 @@ def refine_markdown(source: str, toc_title: str = "Содержание") -> str
         + [f"- [{title}](#{anchor})" for title, anchor in sections]
     )
     result = f"{toc}\n\n{body}\n" if body else f"{toc}\n"
-    assert_sources_preserved(before_sources, source_counts(result))
+    assert_sources_preserved(
+        before_sources,
+        source_counts(result),
+        allowed_removed={"citation_markers"},
+    )
     return result
 
 
@@ -530,6 +548,7 @@ def main(argv: list[str]) -> int:
             "input": str(args.path),
             "output": str(args.out),
             "source_counts": source_counts(source),
+            "removed_citation_markers": source_counts(source)["citation_markers"],
             "suggested_filename": note_filename(source, args.path.stem),
         }, ensure_ascii=False))
     elif args.command == "handoff-refined-note":

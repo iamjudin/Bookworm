@@ -29,14 +29,15 @@ It may:
 - remove one redundant top-level H1 when Obsidian will already display the
   filename as the inline title.
 
-It must preserve prose, Markdown links, URL-only source lists, ChatGPT citation
-markers such as `citeturn0search1`, footnotes, images, embedded media,
-callouts, code blocks, and meaningful metadata.
+It must preserve prose, Markdown links, URL-only source lists, footnotes,
+images, embedded media, callouts, code blocks, and meaningful metadata.
 
-ChatGPT citation markers are not URLs. Do not remove, rewrite, or call them
-preserved unless the input includes a trustworthy citation-to-URL map. A raw
-Markdown export often does not contain that map; in this case retain the marker
-and say that clickable URLs cannot be reconstructed from the file alone.
+ChatGPT citation markers such as `citeturn0search1` are export artifacts,
+not reader-facing URLs. Remove them from the refined Markdown so the final note
+is clean. Keep the original source file untouched until confirmed handoff, and
+report how many markers were removed. Do not claim that the original citation
+URLs were preserved: a raw Markdown export often has no citation-to-URL map.
+Offer Enrich after handoff to build a new verified source layer with title links.
 
 ## Source Integrity Gate
 
@@ -49,8 +50,9 @@ python3 scripts/bookworm_helper.py refine-markdown \
   --toc-title "Содержание"
 ```
 
-The command fails if any source-bearing count would decrease. Do not bypass
-that failure, and do not ask for final-transfer confirmation until it passes.
+The command fails if Markdown source links, bare URLs, or footnote references
+would decrease. Citation markers are the one intentional cleanup category and
+their removed count must be reported before handoff.
 
 When a Markdown source link already exists, keep the human title as the link
 text. Do not replace it with a naked URL.
@@ -104,9 +106,9 @@ Refine improves presentation without discarding content:
    English. Read `suggested_filename` from the command output. It is derived
    from the note's human title H1; never use a technical source name such as
    `deep-research-report.md` when a title exists.
-5. Inspect the result before handoff. Verify that all source-bearing counts are
-   unchanged, ordinary title links and source sections remain, the body has no
-   duplicate top H1, and the TOC links only to real main sections.
+5. Inspect the result before handoff. Verify that ordinary title links, bare
+   URLs, and source sections remain; raw citation markers are gone; the body has
+   no duplicate top H1; and the TOC links only to real main sections.
 6. If a selected vault contains `Library/`, make that the default destination.
    Otherwise use the best matching existing folder, or the vault root when no
    better match exists. State the selected path and why it was chosen, then ask
@@ -137,9 +139,8 @@ end with this exact question in the relevant language:
 
 > Обогатить заметку свежими проверенными источниками с Букворм: Enrich?
 
-The question is mandatory even when the original citation markers were
-preserved. It is an offer only; wait for the user's answer before starting
-Enrich.
+The question is mandatory after raw citation markers have been removed. It is
+an offer only; wait for the user's answer before starting Enrich.
 
 ## No Vault Found
 

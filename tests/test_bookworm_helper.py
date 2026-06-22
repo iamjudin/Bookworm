@@ -53,15 +53,15 @@ class RefineMarkdownTests(unittest.TestCase):
             self.assertFalse(source_path.exists())
             self.assertFalse(refined_path.parent.exists())
 
-    def test_preserves_citation_only_source_markers(self) -> None:
+    def test_removes_raw_citation_markers_from_reader_output(self) -> None:
         citation = "citeturn0search1"
         source = f"# Title\n\nClaim supported only by {citation}.\n\n## Findings\n"
 
         result = refine_markdown(source, toc_title="Содержание")
 
-        self.assertIn(citation, result)
+        self.assertNotIn(citation, result)
 
-    def test_preserves_citations_and_urls_and_adds_toc(self) -> None:
+    def test_removes_citations_preserves_urls_and_adds_toc(self) -> None:
         source = """# Board Game Mechanics
 
 Intro citeturn0search1 with a [source](https://example.com/research).
@@ -77,7 +77,7 @@ Useful text.
 
         result = refine_markdown(source, toc_title="Содержание")
 
-        self.assertIn("cite", result)
+        self.assertNotIn("cite", result)
         self.assertNotIn("# Board Game Mechanics", result)
         self.assertIn("[source](https://example.com/research)", result)
         self.assertIn("## Содержание", result)
@@ -127,7 +127,7 @@ Footnote reference[^source].
 
             self.assertEqual(input_path.read_text(encoding="utf-8"), source)
             self.assertTrue(output_path.exists())
-            self.assertIn("cite", output_path.read_text(encoding="utf-8"))
+            self.assertNotIn("cite", output_path.read_text(encoding="utf-8"))
             self.assertIn(str(output_path), completed.stdout)
             self.assertIn('"suggested_filename": "Title.md"', completed.stdout)
 
