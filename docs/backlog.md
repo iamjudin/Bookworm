@@ -24,9 +24,10 @@
   explanation, never personal opinion. Each added block must use
   `#### Дополнение — [название источника](https://...)` so it is visibly not
   part of the original book or source note.
-- Keep only compact Obsidian tables. Prefer a two-column `Параметр | Описание`
-  table for repeated profiles and reference cards; convert wide/prose-heavy
-  tables into labeled sections and process tables into numbered steps.
+- Keep only compact Obsidian tables. Two or more related `Параметр: значение`
+  fields must become a two-column `Параметр | Описание` table; convert
+  wide/prose-heavy tables into labeled sections and process tables into
+  numbered steps.
 - Use a numbered list for a long, referable catalogue of peer items (for
   example, mechanics, methods, cases, or options); keep short unordered
   attributes and alternatives as bullets.

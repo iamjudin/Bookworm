@@ -92,7 +92,7 @@ When including fenced code templates in the final note, avoid Markdown heading m
 
 ## Sources
 
-Use a two-column parameter-description table for repeated profiles, reference cards, and comparable records when it is more scannable than prose. Keep narrative reasoning and long explanations outside tables.
+Use a two-column parameter-description table for repeated profiles, reference cards, and comparable records when it is more scannable than prose; two or more related label-value fields must become that table. Keep narrative reasoning and long explanations outside tables.
 
 Use an ordered list for a long enumeration of peer items that a reader may need to refer to by position, such as a catalogue of mechanisms, methods, cases, or options. Use ordinary bullets for short, unordered sets of attributes or alternatives.
 

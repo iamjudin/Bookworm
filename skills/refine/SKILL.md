@@ -102,7 +102,7 @@ text. Do not replace it with a naked URL.
 Refine improves presentation without discarding content:
 
 - Keep a Markdown table only when it is a compact comparison: at most four
-  columns, short cells, and readable at normal note width. A two-column parameter-description table is preferred for repeated profiles, cards, or reference entries (for example: definition, strengths, risks, variants, and examples).
+  columns, short cells, and readable at normal note width. A two-column parameter-description table is preferred for repeated profiles, cards, or reference entries (for example: definition, strengths, risks, variants, and examples); two or more related label-value fields must become that table.
 - Turn wider or prose-heavy tables into titled item sections with labeled
   fields such as `**Сильные стороны:**` and `**Риски:**`.
 - Turn procedural tables into numbered steps.

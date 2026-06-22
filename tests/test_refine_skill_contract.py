@@ -52,6 +52,7 @@ class RefineSkillContractTests(unittest.TestCase):
             self.assertIn("two-column parameter-description table", skill)
             self.assertIn("## Sources", skill)
             self.assertIn("Do not leave reader-facing numeric citations", skill)
+            self.assertIn("two or more related label-value fields", skill)
 
     def test_bookworm_numbers_long_enumerations(self) -> None:
         for name in ("digest", "refine", "enrich"):

@@ -48,7 +48,7 @@ the later enrichment.
 ## Obsidian Layout Rules
 
 - Keep only compact comparison tables: at most four columns, short cells, and
-  no horizontal scrolling at normal note width. Use a two-column parameter-description table for repeated profiles or reference cards; keep narrative reasoning in prose.
+  no horizontal scrolling at normal note width. Use a two-column parameter-description table for repeated profiles or reference cards; two or more related label-value fields must become that table. Keep narrative reasoning in prose.
 - Convert wide/prose-heavy tables to titled item sections with labeled fields;
   convert process tables to numbered steps.
 - Use Mermaid only in portrait, top-to-bottom form. If the relationship cannot
