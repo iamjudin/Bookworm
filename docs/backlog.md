@@ -48,5 +48,10 @@
 - Update the Refine action's visible name and description: it accepts Markdown,
   Word (`.docx`), PDF, and PowerPoint (`.pptx`), so it must not be presented as
   a Markdown-only action in Codex UI.
+- Refine must detect numeric citation references such as `[66]` left by DOCX
+  conversion. They are not reader-facing links: resolve them through the source
+  list into nearby descriptive, clickable title-links when reliable; otherwise
+  remove the raw reference and report it as unresolved. Never leave a bare
+  numeric marker that forces the reader to hunt for its source.
 - Verify after reinstall that Codex shows the plugin action as `Bookworm: Digest` or an equivalent non-duplicated label.
 - Verify after reinstall that Bookworm no longer presents empty EPUB auto-start as a guaranteed behavior.
