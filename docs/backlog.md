@@ -33,6 +33,15 @@
 - After a successful Refine handoff, offer Enrich to add clearly labelled
   examples and context. Enrich must remain confirmation-gated and must not
   start automatically.
+- Enrich may ask concise, content-focused questions to choose its scope, but
+  must not expose internal choices about plans, specs, commits, agents, or
+  execution modes. Once the user confirms the scope, it proceeds directly.
+- Generate a Table of Contents with native Obsidian heading links, for example
+  `[[#Резюме для руководителя|Резюме для руководителя]]`, instead of guessed
+  Markdown URL fragments.
+- Extend Refine input support beyond Markdown: accept Word (`.docx`), PDF, and
+  PowerPoint (`.pptx`) documents and convert them into an Obsidian-ready
+  Markdown note through the same temporary-copy and confirmation-gated handoff.
 
 ## Cleanup
 
