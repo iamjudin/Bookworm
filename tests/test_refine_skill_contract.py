@@ -12,7 +12,19 @@ class RefineSkillContractTests(unittest.TestCase):
         skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
 
         self.assertIn("## Required Final Response", skill)
-        self.assertIn("Обогатить заметку свежими проверенными источниками", skill)
+        self.assertIn("Обогатить заметку примерами и контекстом", skill)
+
+    def test_refine_repairs_sources_without_expanding_content(self) -> None:
+        skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
+
+        self.assertIn("repair broken or raw source citations", skill)
+        self.assertIn("Do not add examples, opinions, or new analysis", skill)
+
+    def test_enrich_labels_every_added_block_with_its_source(self) -> None:
+        skill = (ROOT / "skills" / "enrich" / "SKILL.md").read_text(encoding="utf-8")
+
+        self.assertIn("#### Дополнение — [название источника](https://...)", skill)
+        self.assertIn("Do not add personal opinions", skill)
 
 
 if __name__ == "__main__":

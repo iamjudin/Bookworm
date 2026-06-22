@@ -136,6 +136,19 @@ def source_counts(source: str) -> dict[str, int]:
     }
 
 
+def citation_inventory(source: str) -> list[dict[str, str | int]]:
+    """Return raw ChatGPT citations with the paragraph they annotate."""
+    entries: list[dict[str, str | int]] = []
+    for index, line in enumerate(source.splitlines(), start=1):
+        markers = CHATGPT_CITATION_PATTERN.findall(line)
+        if not markers:
+            continue
+        context = line.strip()
+        for marker in markers:
+            entries.append({"line": index, "marker": marker, "context": context})
+    return entries
+
+
 def assert_sources_preserved(
     before: dict[str, int],
     after: dict[str, int],
@@ -523,6 +536,9 @@ def main(argv: list[str]) -> int:
     refine_cmd.add_argument("--out", required=True, type=Path)
     refine_cmd.add_argument("--toc-title", default="Содержание")
 
+    citations_cmd = sub.add_parser("inspect-citations")
+    citations_cmd.add_argument("path", type=Path)
+
     handoff_cmd = sub.add_parser("handoff-refined-note")
     handoff_cmd.add_argument("--source", required=True, type=Path)
     handoff_cmd.add_argument("--refined", required=True, type=Path)
@@ -551,6 +567,9 @@ def main(argv: list[str]) -> int:
             "removed_citation_markers": source_counts(source)["citation_markers"],
             "suggested_filename": note_filename(source, args.path.stem),
         }, ensure_ascii=False))
+    elif args.command == "inspect-citations":
+        source = args.path.read_text(encoding="utf-8")
+        print(json.dumps({"citations": citation_inventory(source)}, ensure_ascii=False, indent=2))
     elif args.command == "handoff-refined-note":
         destination = handoff_refined_note(
             args.source,

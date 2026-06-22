@@ -10,10 +10,34 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from bookworm_helper import handoff_refined_note, refine_markdown, source_counts
+from bookworm_helper import citation_inventory, handoff_refined_note, refine_markdown, source_counts
 
 
 class RefineMarkdownTests(unittest.TestCase):
+    def test_citation_inventory_keeps_marker_context_before_cleanup(self) -> None:
+        first = "citeturn0search1"
+        second = "citeturn1search2"
+        source = (
+            f"First claim about a mechanic {first}.\n\n"
+            f"Second claim is separate {second}.\n"
+        )
+
+        self.assertEqual(
+            citation_inventory(source),
+            [
+                {
+                    "line": 1,
+                    "marker": first,
+                    "context": f"First claim about a mechanic {first}.",
+                },
+                {
+                    "line": 3,
+                    "marker": second,
+                    "context": f"Second claim is separate {second}.",
+                },
+            ],
+        )
+
     def test_handoff_requires_confirmation_and_uses_title_filename(self) -> None:
         source = "# Принципы хороших интерфейсов\n\nИсходный текст.\n"
 

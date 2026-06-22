@@ -15,20 +15,24 @@
 - Vault destinations must be discovered from actual Obsidian vaults (`.obsidian`) and selected by request, folder names, note structure, and nearby content. Do not hard-code a personal vault path.
 - If no Obsidian vault is detected, keep the deliverable in the current output location and do not propose moving it to a vault.
 - Refine must preserve every source-bearing construct. It must fail closed when
-  citation markers, Markdown source links, bare URLs, or footnote references
-  would decrease.
-- Use title links for reader-facing sources. Replacing an unusable source layer
-  with fresh research is an explicit Enrich action, never a hidden Refine step.
+  Markdown source links, bare URLs, or footnote references would decrease. Raw
+  citation markers must be reviewed claim-by-claim and repaired with verified
+  title links where possible before they are removed.
+- Refine improves only the existing source: no new examples, personal opinions,
+  or new analysis. Enrich is the explicit content-expansion action.
+- Enrich adds sourced examples, context, alternatives, consequences, or deeper
+  explanation, never personal opinion. Each added block must use
+  `#### Дополнение — [название источника](https://...)` so it is visibly not
+  part of the original book or source note.
 - Keep only compact Obsidian tables; convert wide/prose-heavy tables into
   labeled sections and process tables into numbered steps.
 - Mermaid diagrams must be portrait and top-to-bottom. Render an unreadably
   wide diagram as an image when the environment can do so reliably.
 - In Russian user-facing text and plugin metadata, write the brand as
   `Букворм / Bookworm`; use `Bookworm / Букворм` only in an English context.
-- After a successful Refine handoff, offer the next two optional steps in
-  order: move the note to the selected vault `Library/`, then run Enrich to add
-  a fresh verified source layer. Enrich must remain confirmation-gated and must
-  not start automatically.
+- After a successful Refine handoff, offer Enrich to add clearly labelled
+  examples and context. Enrich must remain confirmation-gated and must not
+  start automatically.
 
 ## Cleanup
 

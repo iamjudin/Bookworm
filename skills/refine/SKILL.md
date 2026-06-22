@@ -6,10 +6,10 @@ description: Use when the user wants to clean an existing Markdown research expo
 # Refine
 
 `Bookworm: Refine` turns an existing Markdown research note into an
-Obsidian-ready working note without losing its evidence trail. It is for
+Obsidian-ready working note without expanding its substantive content. It is for
 research exports, not for digesting a book from source material; use
 `Bookworm: Digest` for EPUBs and long book PDFs and `Bookworm: Enrich` when the
-user wants fresh research and replacement sources.
+user wants additional examples, context, or depth.
 
 Prefer explicit invocation, for example `$Bookworm: Refine` with a Markdown
 file or “Букворм, подчисти этот Deep Research”.
@@ -19,6 +19,8 @@ file or “Букворм, подчисти этот Deep Research”.
 Preserve the research by default. Refine may make cosmetic and structural
 changes, but it must not summarize, fact-check, remove ordinary links, remove
 source lists, or replace the author's claims unless the user explicitly asks.
+It must repair broken or raw source citations into Markdown links with
+descriptive source titles. Do not add examples, opinions, or new analysis.
 
 It may:
 
@@ -33,11 +35,14 @@ It must preserve prose, Markdown links, URL-only source lists, footnotes,
 images, embedded media, callouts, code blocks, and meaningful metadata.
 
 ChatGPT citation markers such as `citeturn0search1` are export artifacts,
-not reader-facing URLs. Remove them from the refined Markdown so the final note
-is clean. Keep the original source file untouched until confirmed handoff, and
-report how many markers were removed. Do not claim that the original citation
-URLs were preserved: a raw Markdown export often has no citation-to-URL map.
-Offer Enrich after handoff to build a new verified source layer with title links.
+not reader-facing URLs. Before removing one, inspect the nearby claim and repair
+broken or raw source citations with a relevant verified source. Link the source
+by its descriptive title at the claim, for example
+`[BoardGameGeek](https://boardgamegeek.com/)`. Open each replacement source
+before linking it. Prefer the source named in the text; otherwise use an
+authoritative primary or domain source. If no reliable replacement can be
+verified, remove the broken marker, retain the claim unchanged, and report the
+unresolved source gap in chat. Never invent a URL.
 
 ## Source Integrity Gate
 
@@ -51,8 +56,8 @@ python3 scripts/bookworm_helper.py refine-markdown \
 ```
 
 The command fails if Markdown source links, bare URLs, or footnote references
-would decrease. Citation markers are the one intentional cleanup category and
-their removed count must be reported before handoff.
+would decrease. Clean up citation markers only after reviewing their nearby
+claims for source repair.
 
 When a Markdown source link already exists, keep the human title as the link
 text. Do not replace it with a naked URL.
@@ -95,6 +100,14 @@ Refine improves presentation without discarding content:
    assets, must stay inside it. Do not modify, move, or delete the source file
    at this stage:
 
+   First inventory raw citation context before cleanup:
+
+   ```bash
+   python3 scripts/bookworm_helper.py inspect-citations /path/to/research.md
+   ```
+
+   Then generate the clean copy:
+
    ```bash
    python3 scripts/bookworm_helper.py refine-markdown \
      /path/to/research.md \
@@ -105,10 +118,13 @@ Refine improves presentation without discarding content:
    Use `Contents` instead of `Содержание` when the note/request language is
    English. Read `suggested_filename` from the command output. It is derived
    from the note's human title H1; never use a technical source name such as
-   `deep-research-report.md` when a title exists.
+   `deep-research-report.md` when a title exists. For every inventory entry,
+   repair the matching claim in the refined copy with a verified title link when
+   a reliable source is available.
 5. Inspect the result before handoff. Verify that ordinary title links, bare
    URLs, and source sections remain; raw citation markers are gone; the body has
-   no duplicate top H1; and the TOC links only to real main sections.
+   no duplicate top H1; and the TOC links only to real main sections. Confirm
+   that Refine did not add examples, opinions, or new analysis.
 6. If a selected vault contains `Library/`, make that the default destination.
    Otherwise use the best matching existing folder, or the vault root when no
    better match exists. State the selected path and why it was chosen, then ask
@@ -137,10 +153,10 @@ Refine improves presentation without discarding content:
 After a verified handoff, the final answer must state the destination path and
 end with this exact question in the relevant language:
 
-> Обогатить заметку свежими проверенными источниками с Букворм: Enrich?
+> Обогатить заметку примерами и контекстом с Букворм: Enrich?
 
-The question is mandatory after raw citation markers have been removed. It is
-an offer only; wait for the user's answer before starting Enrich.
+The question is mandatory after handoff. It is an offer only; wait for the
+user's answer before starting Enrich.
 
 ## No Vault Found
 
