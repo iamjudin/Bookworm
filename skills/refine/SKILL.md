@@ -88,13 +88,9 @@ Refine improves presentation without discarding content:
 - Turn procedural tables into numbered steps.
 - Keep Mermaid only when it is naturally portrait and top-to-bottom, without
   horizontal scrolling. Prefer `flowchart TB` or `TD` and concise labels.
-- When a diagram cannot be made readable vertically, render it as a raster
-  asset under the note's assets folder, embed the image, and add a title plus a
-  short explanation. Keep the Mermaid source beside it only when future editing
-  is useful.
-- If the current environment cannot render the raster asset reliably, preserve
-  the original Mermaid and report that limitation rather than pretending the
-  conversion happened.
+- Never render Mermaid as a raster image. Mermaid must remain editable in the
+  final Obsidian note. When a diagram is too wide, simplify it, split it into
+  smaller portrait diagrams, or pair it with a concise textual explanation.
 
 ## Workflow
 
@@ -114,8 +110,8 @@ Refine improves presentation without discarding content:
    personal vault name or path.
 4. Create one dedicated run directory such as
    `/path/to/scratch/refine-<run-id>/`. Every temporary file for this run,
-   including the refined note, manifests, contact sheets, and rendered diagram
-   assets, must stay inside it. Do not modify, move, or delete the source file
+   including the refined note, manifests, contact sheets, and extracted assets,
+   must stay inside it. Do not modify, move, or delete the source file
    at this stage:
 
    First convert every input to a temporary Markdown copy. Keep important

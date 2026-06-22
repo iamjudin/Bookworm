@@ -26,8 +26,9 @@
   part of the original book or source note.
 - Keep only compact Obsidian tables; convert wide/prose-heavy tables into
   labeled sections and process tables into numbered steps.
-- Mermaid diagrams must be portrait and top-to-bottom. Render an unreadably
-  wide diagram as an image when the environment can do so reliably.
+- Mermaid diagrams must be portrait and top-to-bottom. Keep them as editable
+  Mermaid: simplify or split an unreadably wide diagram instead of rendering it
+  as an image.
 - In Russian user-facing text and plugin metadata, write the brand as
   `Букворм / Bookworm`; use `Bookworm / Букворм` only in an English context.
 - After a successful Refine handoff, offer Enrich to add clearly labelled

@@ -41,6 +41,11 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertIn("must not ask about agents or execution modes", skill)
         self.assertIn("temporary copy", skill)
 
+    def test_refine_and_enrich_keep_mermaid_editable(self) -> None:
+        for name in ("refine", "enrich"):
+            skill = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("Never render Mermaid as a raster image", skill)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -52,8 +52,8 @@ the later enrichment.
 - Convert wide/prose-heavy tables to titled item sections with labeled fields;
   convert process tables to numbered steps.
 - Use Mermaid only in portrait, top-to-bottom form. If the relationship cannot
-  be made readable vertically, render and embed a raster asset instead, with a
-  title and explanatory text.
+  be made readable vertically, simplify or split the Mermaid into smaller
+  editable diagrams and add a title and explanatory text. Never render Mermaid as a raster image.
 - Preserve visual assets that materially explain the research; prune unused
   generated assets after selection.
 
