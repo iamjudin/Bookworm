@@ -66,6 +66,10 @@ class RefineSkillContractTests(unittest.TestCase):
         refine = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("Do not introduce new conclusions, taxonomies, or recommendations", refine)
 
+    def test_refine_does_not_request_second_handoff_confirmation(self) -> None:
+        skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("Do not ask for a second confirmation", skill)
+
 
 if __name__ == "__main__":
     unittest.main()

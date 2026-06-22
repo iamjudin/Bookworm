@@ -510,7 +510,11 @@ def handoff_refined_note(
         destination.unlink(missing_ok=True)
         raise OSError("Final note verification failed")
 
-    if assets_dir is not None and assets_dir.exists():
+    has_assets = assets_dir is not None and assets_dir.exists() and any(
+        path.is_file() for path in assets_dir.rglob("*")
+    )
+    if has_assets:
+        assert assets_dir is not None
         asset_root = destination_dir / "assets" if destination_dir.name == "Library" else destination_dir / "assets"
         final_assets = asset_root / slugify(document_title(title_source, source_path.stem))
         if final_assets.exists():

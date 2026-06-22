@@ -119,6 +119,33 @@ class RefineMarkdownTests(unittest.TestCase):
             )
             self.assertFalse(run_dir.exists())
 
+    def test_handoff_ignores_empty_assets_directory(self) -> None:
+        source = "# Empty assets\n\nText.\n"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source_path = root / "Inbox" / "source.md"
+            run_dir = root / "scratch"
+            refined_path = run_dir / "refined.md"
+            assets_dir = run_dir / "assets"
+            destination_dir = root / "Vault" / "Library"
+            source_path.parent.mkdir()
+            assets_dir.mkdir(parents=True)
+            source_path.write_text(source, encoding="utf-8")
+            refined_path.write_text("## Contents\n", encoding="utf-8")
+
+            destination = handoff_refined_note(
+                source_path,
+                refined_path,
+                destination_dir,
+                confirmation="user-confirmed",
+                run_dir=run_dir,
+                assets_dir=assets_dir,
+            )
+
+            self.assertTrue(destination.exists())
+            self.assertFalse((destination_dir / "assets" / "empty-assets").exists())
+            self.assertFalse(run_dir.exists())
+
     def test_converts_markdown_to_temp_copy_without_changing_original(self) -> None:
         source = "# Title\n\nBody.\n"
         with tempfile.TemporaryDirectory() as directory:

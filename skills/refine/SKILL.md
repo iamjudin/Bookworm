@@ -213,7 +213,10 @@ When a reader-facing named example itself is useful to open — such as a game, 
    The helper refuses to run without the confirmation token, refuses to
    overwrite an existing note, verifies the final bytes and assets, and only
    then removes the original and all temporary run files. For a `Library/`
-   destination, assets live in `Library/assets/<note-slug>/`.
+   destination, assets live in `Library/assets/<note-slug>/`. Treat this
+   explicit confirmation as authorization for that verified transfer and
+   cleanup. Do not ask for a second confirmation unless the destination or
+   transfer scope changes.
 8. Use the required final response below. Do not start Enrich automatically.
 
 ## Required Final Response
