@@ -71,6 +71,13 @@ class RefineSkillContractTests(unittest.TestCase):
         skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("Do not ask for a second confirmation", skill)
 
+    def test_enrich_requires_labelled_nonduplicating_structure(self) -> None:
+        skill = (ROOT / "skills" / "enrich" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("Never add a new unlabeled profile heading", skill)
+        self.assertIn("Every added paragraph must remain inside a labelled addition block", skill)
+        self.assertIn("Do not create a second summary table or profile catalogue", skill)
+        self.assertIn("grouped by the relevant main section", skill)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -35,6 +35,9 @@
   summary, catalogue, or card section without a distinct reading purpose.
 - Before handoff, review the note as rendered for the reader: first-screen
   orientation, tables, diagrams, links, citations, and duplicated content.
+- Enrich must not create unlabelled new profile sections or a second summary
+  catalogue. Every addition remains inside a labelled source block; section
+  sources stay grouped instead of becoming a flat URL dump.
 - Reader-facing named examples (games, books, products, methods, official
   documents) should link from their names. Gather proof for whole sections at
   the end under `## Источники` / `## Sources`, grouped by section, with

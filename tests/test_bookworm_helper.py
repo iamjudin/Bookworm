@@ -357,6 +357,23 @@ Useful text.
         self.assertEqual(result.count("## Содержание"), 1)
         self.assertEqual(result.count("- [[#Находки|Находки]]"), 1)
 
+    def test_turns_two_related_label_value_fields_into_a_table(self) -> None:
+        source = """## Профиль
+
+**Определение:** Игрок размещает рабочих на общих ячейках.
+
+**Сильные стороны:** Блокирование и читаемое планирование.
+
+**Игры:** [Agricola](https://example.com/agricola)
+"""
+
+        result = refine_markdown(source, toc_title="Содержание")
+
+        self.assertIn("| Параметр | Описание |", result)
+        self.assertIn("| Определение | Игрок размещает рабочих на общих ячейках. |", result)
+        self.assertIn("| Игры | [Agricola](https://example.com/agricola) |", result)
+        self.assertNotIn("**Сильные стороны:**", result)
+
     def test_counts_each_source_bearing_construct(self) -> None:
         source = """Claim citeturn0search1 [named source](https://example.com/a).
 

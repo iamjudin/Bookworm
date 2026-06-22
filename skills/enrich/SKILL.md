@@ -45,6 +45,18 @@ Do not make unlabelled additions and do not merge external material into the
 original prose. This preserves the boundary between the book or source note and
 the later enrichment.
 
+## Enrich Structure Gate
+
+Never add a new unlabeled profile heading. A new mechanism, method, case, or
+other profile belongs inside a `#### Дополнение — [название источника](https://...)`
+block; use a lower-level heading inside that block only when needed for
+navigation. Every added paragraph must remain inside a labelled addition block.
+
+Do not create a second summary table or profile catalogue. Extend the relevant
+original section instead, and do not restate the original record unless the
+new material gives it a distinctly different reading task. For any two or more
+related label-value fields that Enrich creates, write a real two-column table.
+
 ## Obsidian Layout Rules
 
 - Keep only compact comparison tables: at most four columns, short cells, and
@@ -75,7 +87,9 @@ When sources support a whole section, collect them at the end under `## Исто
 Before asking for handoff, read the temporary note as it will appear in
 Obsidian. Check that the first two screens establish navigation and purpose,
 tables are scannable, diagrams are legible, links open, and no duplicate
-summary layer repeats the same material.
+summary layer repeats the same material. Check that every added paragraph is
+inside a labelled addition block and that sources are grouped by the relevant
+main section rather than dumped into one flat list.
 
 ## Handoff
 
