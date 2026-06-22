@@ -30,6 +30,10 @@
 - Use a numbered list for a long, referable catalogue of peer items (for
   example, mechanics, methods, cases, or options); keep short unordered
   attributes and alternatives as bullets.
+- Keep a single orientation layer: do not duplicate the same records in a
+  summary, catalogue, or card section without a distinct reading purpose.
+- Before handoff, review the note as rendered for the reader: first-screen
+  orientation, tables, diagrams, links, citations, and duplicated content.
 - Reader-facing named examples (games, books, products, methods, official
   documents) should link from their names. Gather proof for whole sections at
   the end under `## Источники` / `## Sources`, grouped by section, with

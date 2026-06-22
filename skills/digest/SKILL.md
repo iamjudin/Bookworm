@@ -96,6 +96,10 @@ Use a two-column parameter-description table for repeated profiles, reference ca
 
 Use an ordered list for a long enumeration of peer items that a reader may need to refer to by position, such as a catalogue of mechanisms, methods, cases, or options. Use ordinary bullets for short, unordered sets of attributes or alternatives.
 
+Avoid duplicate summary layers: give the note one concise orientation layer,
+then the full material. Do not restate the same records in a second summary,
+catalogue, or card section unless it adds a genuinely different reading task.
+
 Do not leave reader-facing numeric citations such as `[47]`. When a named example, book, product, method, or official document is useful to open, link its name directly with a descriptive title-link.
 
 When external sources support a whole section, collect them at the end of the note under `## Источники` / `## Sources`, grouped by the relevant main section. Each entry must be a descriptive title-link, never a naked URL or numeric-only reference.
@@ -210,6 +214,13 @@ Before finalizing, verify silently:
 - reader-facing cleanliness: no internal diagnostics or plugin scaffolding remain.
 
 Only show this checklist if the user explicitly asks for diagnostics.
+
+## Reader Review Gate
+
+Before final handoff, read the note as it will appear in Obsidian. Check that
+the first two screens establish navigation and purpose, tables are scannable,
+diagrams are legible, links open, and no duplicate summary layer repeats the
+same material.
 
 ## Copyright And Privacy
 

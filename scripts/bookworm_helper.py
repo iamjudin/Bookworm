@@ -352,6 +352,30 @@ def _markdown_table(rows: list[list[str]]) -> list[str]:
     ]
 
 
+def _docx_paragraph_markdown(paragraph) -> str:
+    """Extract paragraph text while retaining external Word hyperlinks."""
+    from docx.oxml.ns import qn
+
+    parts: list[str] = []
+    for child in paragraph._p:
+        tag = child.tag.rsplit("}", 1)[-1]
+        text = "".join(
+            node.text or ""
+            for node in child.iter()
+            if node.tag.rsplit("}", 1)[-1] == "t"
+        )
+        if not text:
+            continue
+        if tag == "hyperlink":
+            relationship_id = child.get(qn("r:id"))
+            relationship = paragraph.part.rels.get(relationship_id)
+            url = relationship.target_ref if relationship is not None and relationship.is_external else ""
+            parts.append(f"[{text}]({url})" if url else text)
+        else:
+            parts.append(text)
+    return "".join(parts).strip()
+
+
 def convert_refine_input(source_path: Path, output_path: Path, assets_dir: Path | None = None) -> dict:
     """Convert a supported source into a temporary Markdown copy without mutation."""
     suffix = source_path.suffix.lower()
@@ -371,7 +395,7 @@ def convert_refine_input(source_path: Path, output_path: Path, assets_dir: Path 
         document = document_module.Document(source_path)
         lines: list[str] = []
         for paragraph in document.paragraphs:
-            text = paragraph.text.strip()
+            text = _docx_paragraph_markdown(paragraph)
             if not text:
                 continue
             style = (paragraph.style.name or "").lower()

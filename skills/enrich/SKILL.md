@@ -60,12 +60,22 @@ the later enrichment.
   need to refer to by position, such as a catalogue of mechanisms, methods,
   cases, or options. Use ordinary bullets for short, unordered attributes or
   alternatives.
+- Avoid duplicate summary layers: add material at the relevant original section,
+  not as a second catalogue that restates the same records without a distinct
+  reading task.
 
 ## Sources
 
 Do not leave reader-facing numeric citations such as `[47]` or source labels that force the reader to hunt through a reference list. Use descriptive title-links for the source of each added block and for named examples that are useful to open directly, such as `[CATAN](https://...)`.
 
 When sources support a whole section, collect them at the end under `## Источники` / `## Sources`, grouped by the relevant main section. Every entry is a descriptive title-link; do not use naked URLs or numeric-only references.
+
+## Reader Review Gate
+
+Before asking for handoff, read the temporary note as it will appear in
+Obsidian. Check that the first two screens establish navigation and purpose,
+tables are scannable, diagrams are legible, links open, and no duplicate
+summary layer repeats the same material.
 
 ## Handoff
 

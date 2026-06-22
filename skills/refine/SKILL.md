@@ -20,7 +20,7 @@ Preserve the research by default. Refine may make cosmetic and structural
 changes, but it must not summarize, fact-check, remove ordinary links, remove
 source lists, or replace the author's claims unless the user explicitly asks.
 It must repair broken or raw source citations into Markdown links with
-descriptive source titles. Do not add examples, opinions, or new analysis.
+descriptive source titles. Do not add examples, opinions, or new analysis. Do not introduce new conclusions, taxonomies, or recommendations: those belong to Enrich unless they were already present in the source.
 
 It may:
 
@@ -115,6 +115,9 @@ Refine improves presentation without discarding content:
   need to refer to by position, such as a catalogue of mechanisms, methods,
   cases, or options. Use ordinary bullets for short, unordered attributes or
   alternatives.
+- Avoid duplicate summary layers: retain one orientation layer and do not repeat
+  the same records in a new summary, catalogue, or card section unless the
+  source already contains both for distinct reading tasks.
 
 ## Sources
 
@@ -240,6 +243,13 @@ The final note should look like a normal Obsidian note, not a cleanup report.
   by links to main `##` sections.
 - Do not add Bookworm metadata, diagnostics, quality checklists, or process
   commentary to the note body.
+
+## Reader Review Gate
+
+Before asking for handoff, read the temporary note as it will appear in
+Obsidian. Check that the first two screens establish navigation and purpose,
+tables are scannable, diagrams are legible, links open, source entries are
+reader-facing, and no duplicate summary layer repeats the same material.
 
 ## Safety Gate
 

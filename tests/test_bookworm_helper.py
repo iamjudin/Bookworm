@@ -179,6 +179,42 @@ class RefineMarkdownTests(unittest.TestCase):
             self.assertEqual(len(result["assets"]), 1)
             self.assertTrue(Path(result["assets"][0]).exists())
 
+    @unittest.skipUnless(importlib.util.find_spec("docx"), "requires bundled python-docx")
+    def test_preserves_docx_hyperlinks_as_markdown_title_links(self) -> None:
+        from docx import Document
+        from docx.enum.style import WD_STYLE_TYPE
+        from docx.opc.constants import RELATIONSHIP_TYPE
+        from docx.oxml import OxmlElement
+        from docx.oxml.ns import qn
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "input.docx"
+            output = root / "run" / "note.md"
+            document = Document()
+            paragraph = document.add_paragraph("Read ")
+            relationship_id = paragraph.part.relate_to(
+                "https://example.com/primary-source",
+                RELATIONSHIP_TYPE.HYPERLINK,
+                is_external=True,
+            )
+            hyperlink = OxmlElement("w:hyperlink")
+            hyperlink.set(qn("r:id"), relationship_id)
+            run = OxmlElement("w:r")
+            text = OxmlElement("w:t")
+            text.text = "Primary source"
+            run.append(text)
+            hyperlink.append(run)
+            paragraph._p.append(hyperlink)
+            document.save(source)
+
+            convert_refine_input(source, output)
+
+            self.assertIn(
+                "[Primary source](https://example.com/primary-source)",
+                output.read_text(encoding="utf-8"),
+            )
+
     @unittest.skipUnless(importlib.util.find_spec("pptx"), "requires bundled python-pptx")
     def test_converts_pptx_text_notes_and_illustrations(self) -> None:
         from pptx import Presentation

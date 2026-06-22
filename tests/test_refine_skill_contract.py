@@ -58,6 +58,14 @@ class RefineSkillContractTests(unittest.TestCase):
             skill = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
             self.assertIn("Use an ordered list for a long enumeration", skill)
 
+    def test_bookworm_requires_reader_review_without_duplicate_layers(self) -> None:
+        for name in ("digest", "refine", "enrich"):
+            skill = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("Avoid duplicate summary layers", skill)
+            self.assertIn("Reader Review Gate", skill)
+        refine = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("Do not introduce new conclusions, taxonomies, or recommendations", refine)
+
 
 if __name__ == "__main__":
     unittest.main()
