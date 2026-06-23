@@ -36,18 +36,26 @@ class RefineMarkdownTests(unittest.TestCase):
         self.assertEqual(
             citation_inventory(source),
             [
-                {
-                    "line": 1,
-                    "marker": first,
-                    "context": f"First claim about a mechanic {first}.",
-                },
-                {
-                    "line": 3,
-                    "marker": second,
-                    "context": f"Second claim is separate {second}.",
-                },
+                {"line": 1, "marker": first, "context": f"First claim about a mechanic {first}."},
+                {"line": 3, "marker": second, "context": f"Second claim is separate {second}."},
             ],
         )
+
+    def test_preserves_ordinary_grouped_sources_without_numeric_citations(self) -> None:
+        source = """## Тезисы
+
+Текст исследования.
+
+## Источники
+
+### Официальные
+
+- [Документация](https://example.com/docs)
+- [Правила](https://example.com/rules)
+"""
+        result, report = resolve_numeric_citations(source)
+        self.assertEqual(result, source)
+        self.assertEqual(report["numeric_citations_scanned"], 0)
 
     def test_handoff_requires_confirmation_and_uses_title_filename(self) -> None:
         source = "# Принципы хороших интерфейсов\n\nИсходный текст.\n"

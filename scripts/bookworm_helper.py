@@ -236,6 +236,9 @@ def resolve_numeric_citations(
         return source, report
 
     start, end = bounds
+    has_numeric_entries = any(_source_entry(line) is not None for line in lines[start + 1:end])
+    if not has_numeric_entries:
+        return source, report
     references: dict[str, dict[str, str]] = {}
     ordered: list[dict[str, str]] = []
     seen_urls: set[str] = set()

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import unittest
 from pathlib import Path
 
@@ -138,6 +139,11 @@ class RefineSkillContractTests(unittest.TestCase):
             skill = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
             self.assertIn("ask the user where to place it", skill)
             self.assertIn("Do not choose", skill)
+
+    def test_plugin_uses_bookworm_icon_asset(self) -> None:
+        manifest = json.loads((ROOT / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["interface"]["composerIcon"], "./assets/icon.png")
+        self.assertTrue((ROOT / "assets" / "icon.png").is_file())
 
 
 if __name__ == "__main__":
