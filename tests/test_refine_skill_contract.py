@@ -146,6 +146,10 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertEqual(manifest["interface"]["logo"], "./assets/icon.png")
         self.assertTrue((ROOT / "assets" / "icon.png").is_file())
 
+    def test_enrich_handoff_keeps_final_note_visible_in_finder(self) -> None:
+        skill = (ROOT / "skills" / "enrich" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("marked hidden", skill)
+
 
 if __name__ == "__main__":
     unittest.main()

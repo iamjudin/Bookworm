@@ -113,6 +113,9 @@ Follow the same vault discovery and confirmation rules as Refine. Work on a
 temporary copy, report the selected destination and enrichment scope, then
 ask before replacing or moving the original. Do not delete the source file
 until the final note and its source links have been verified.
+After an atomic replacement, verify that the final note is readable and not
+marked hidden in Finder; a successful byte check is insufficient if the user
+cannot see the note in the vault folder.
 
 ## Interaction and Repository Boundary
 
