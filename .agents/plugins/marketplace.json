@@ -1,0 +1,20 @@
+{
+  "name": "bookworm",
+  "interface": {
+    "displayName": "Букворм / Bookworm"
+  },
+  "plugins": [
+    {
+      "name": "bookworm",
+      "source": {
+        "source": "local",
+        "path": "./plugins/bookworm"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

@@ -146,6 +146,15 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertEqual(manifest["interface"]["logo"], "./assets/icon.png")
         self.assertTrue((ROOT / "assets" / "icon.png").is_file())
 
+    def test_public_marketplace_points_to_the_packaged_plugin(self) -> None:
+        marketplace_path = ROOT.parents[1] / ".agents" / "plugins" / "marketplace.json"
+        marketplace = json.loads(marketplace_path.read_text(encoding="utf-8"))
+        self.assertEqual(marketplace["name"], "bookworm")
+        plugin = marketplace["plugins"][0]
+        self.assertEqual(plugin["name"], "bookworm")
+        self.assertEqual(plugin["source"]["path"], "./plugins/bookworm")
+        self.assertEqual(plugin["policy"]["installation"], "AVAILABLE")
+
     def test_user_facing_action_names_do_not_mix_russian_and_english(self) -> None:
         expected = {
             "digest": "Букворм: Дайджест",
