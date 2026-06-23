@@ -617,6 +617,17 @@ def normalize_existing_tables(lines: list[str]) -> list[str]:
     return normalized
 
 
+def localize_table_headers(lines: list[str]) -> list[str]:
+    """Use Russian parameter headers when the research itself is Russian."""
+    russian = any(re.search(r"[А-Яа-яЁё]", line) for line in lines)
+    if not russian:
+        return lines
+    return [
+        "| Параметр | Описание |" if line.strip() == "| Parameter | Description |" else line
+        for line in lines
+    ]
+
+
 def compact_mermaid_blocks(lines: list[str]) -> list[str]:
     """Keep Mermaid editable, compact, and vertically readable as one graph."""
     compacted: list[str] = []
@@ -695,6 +706,7 @@ def refine_markdown(source: str, toc_title: str = "Содержание") -> str
     lines = remove_generated_toc(lines, toc_title)
     lines = convert_label_value_runs(lines)
     lines = normalize_existing_tables(lines)
+    lines = localize_table_headers(lines)
     lines = compact_mermaid_blocks(lines)
 
     while lines and not lines[0].strip():
@@ -966,12 +978,20 @@ def main(argv: list[str]) -> int:
         resolved, citation_report = resolve_citation_markers(source, verified_sources)
         resolved, numeric_report = resolve_numeric_citations(resolved, verified_sources)
         refined = refine_markdown(resolved, args.toc_title)
+        source_bounds = _source_section_bounds(refined.splitlines())
+        source_section = (
+            "\n".join(refined.splitlines()[source_bounds[0]:source_bounds[1]])
+            if source_bounds is not None
+            else ""
+        )
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(refined, encoding="utf-8")
         print(json.dumps({
             "input": str(args.path),
             "output": str(args.out),
             "source_counts": source_counts(source),
+            "existing_title_links_preserved": source_counts(source)["markdown_links"],
+            "section_sources_retained": len(MARKDOWN_SOURCE_LINK_PATTERN.findall(source_section)),
             "removed_citation_markers": source_counts(source)["citation_markers"],
             "suggested_filename": note_filename(source, args.path.stem),
             **citation_report,

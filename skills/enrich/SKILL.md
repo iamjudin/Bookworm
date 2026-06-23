@@ -119,6 +119,8 @@ until the final note and its source links have been verified.
 Ask at most one short question about the desired enrichment focus when the note and request do not make it inferable. For example: “Что важнее углубить:
 практическое применение, примеры, альтернативы или ограничения?” Do not ask when the focus is already clear; once the user confirms the scope, research and
 enrich directly. Enrich must not ask about agents or execution modes.
+Generic consent such as “давай”, “ок” or “enrich” confirms permission, not the
+content focus: ask the one focus question before choosing mechanisms or cases.
 
 Before handoff, keep a compact source ledger in the temporary run directory:
 each added block records the opened URL, readable title, and the claim it

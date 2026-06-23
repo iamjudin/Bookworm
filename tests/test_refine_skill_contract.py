@@ -115,6 +115,16 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertIn("generic catalogue link", skill)
         self.assertIn("visible source-status note", skill)
 
+    def test_refine_distinguishes_marker_mapping_from_existing_sources(self) -> None:
+        skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("marker-level mapping", skill)
+        self.assertIn("section sources retained", skill)
+
+    def test_reader_review_flags_visual_density_without_deleting_diagrams(self) -> None:
+        skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("visual-density", skill)
+        self.assertIn("delete diagrams automatically", skill)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -402,6 +402,17 @@ Useful text.
         self.assertIn("**Кратко:**", result)
         self.assertIn("**Проектирование:**", result)
 
+    def test_localizes_existing_parameter_table_headers(self) -> None:
+        source = """## Профиль
+
+| Parameter | Description |
+| --- | --- |
+| Размер руки | Число карт |
+"""
+        result = refine_markdown(source, toc_title="Содержание")
+        self.assertIn("| Параметр | Описание |", result)
+        self.assertNotIn("| Parameter | Description |", result)
+
     def test_escapes_pipes_inside_existing_markdown_table_links(self) -> None:
         source = """## Сравнение
 

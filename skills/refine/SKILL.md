@@ -86,6 +86,9 @@ When unresolved citations remain, add a visible source-status note under
 `## Источники` / `## Sources`: report the three counts and say that the
 unresolved claims were retained without a reconstructed link. This is
 provenance for the reader, not an error banner or a block on Enrich.
+Distinguish marker-level mapping from source coverage: also report existing
+title-links preserved and section sources retained. A marker-level mapping gap
+does not make a note source-empty when its grouped title-links remain usable.
 
 Numbered citations from DOCX exports, such as `[66]`, are a separate raw
 citation format. Inspect the final `## Источники` / `## Sources` section and
@@ -125,6 +128,8 @@ Keep evidence readable: link named items where they are useful to open; put sect
 - Interpret “label-value fields” by density, not only by count: two or more
   short values belong in a table; multi-sentence or prose-heavy values stay as
   labelled paragraphs so the note remains scannable without losing wording.
+- Normalize `Parameter | Description` to `Параметр | Описание` in Russian
+  research, and preserve English headers in English research.
 - Turn wider or prose-heavy tables into titled item sections with labeled
   fields such as `**Сильные стороны:**` and `**Риски:**`.
 - Turn procedural tables into numbered steps.
@@ -286,6 +291,10 @@ Before asking for handoff, read the temporary note as it will appear in
 Obsidian. Check that the first two screens establish navigation and purpose,
 tables are scannable, diagrams are legible, links open, source entries are
 reader-facing, and no duplicate summary layer repeats the same material.
+Perform a visual-density review: count Mermaid blocks and large tables. If the
+note is visually dense, flag the choice in the preview for the user. Do not
+delete diagrams automatically; Refine preserves them unless the user asks for a
+separate visual pass.
 
 ## Safety Gate
 
