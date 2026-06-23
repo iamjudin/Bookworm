@@ -96,6 +96,12 @@
 - Extend Refine input support beyond Markdown: accept Word (`.docx`), PDF, and
   PowerPoint (`.pptx`) documents and convert them into an Obsidian-ready
   Markdown note through the same temporary-copy and confirmation-gated handoff.
+- Digest also accepts a standalone readable article, essay, report, or research
+  URL. It opens the actual page body in a temporary run directory, treats it as
+  a new Digest source rather than a Refine input, and follows the same
+  confirmation-gated vault handoff, asset selection, source-title link, and
+  cleanup rules as a book. A paywalled, sign-in-only, category, or unreadable
+  URL must fail clearly without creating an empty note.
 
 ## Cleanup
 

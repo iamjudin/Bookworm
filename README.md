@@ -1,12 +1,13 @@
 # Букворм / Bookworm
 
-Bookworm is a local Codex plugin for turning long books and existing research
-exports into reader-facing Obsidian notes.
+Bookworm is a local Codex plugin for turning books, readable web articles, and
+existing research exports into reader-facing Obsidian notes.
 
 MVP focus:
 
 - practical non-fiction books;
 - EPUB files and long PDFs that look like books;
+- standalone readable article, essay, report, or research URLs;
 - one Markdown note per book;
 - Obsidian image embeds with local assets;
 - enough context for future Q&A and implementation help;
@@ -14,8 +15,8 @@ MVP focus:
 
 Actions:
 
-- `Bookworm: Digest` reads a practical non-fiction EPUB or long PDF and creates
-  a working book note with important visuals.
+- `Bookworm: Digest` reads a practical non-fiction EPUB, long PDF, or readable
+  article URL and creates a working note with important visuals.
 - `Bookworm: Refine` cosmetically cleans an existing Markdown research export,
   such as a ChatGPT Deep Research note, without substantively rewriting it or
   losing source-bearing constructs.

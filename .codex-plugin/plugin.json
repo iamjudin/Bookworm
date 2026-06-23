@@ -1,7 +1,7 @@
 {
   "name": "bookworm",
   "version": "0.1.0+codex.20260623202703",
-  "description": "Bookworm digests books, safely refines research, and enriches notes with verified sources.",
+  "description": "Bookworm digests books and articles, safely refines research, and enriches notes with verified sources.",
   "author": {
     "name": "iamjudin"
   },
@@ -10,13 +10,14 @@
     "displayName": "\u0411\u0443\u043a\u0432\u043e\u0440\u043c / Bookworm",
     "composerIcon": "./assets/icon.png",
     "logo": "./assets/icon.png",
-    "shortDescription": "Digest books and improve research for Obsidian.",
-    "longDescription": "Bookworm helps Codex turn practical books and existing Markdown research into clean, reader-facing Obsidian notes. Digest reads long EPUB/PDF books; Refine preserves sources while cleaning exports; Enrich adds a fresh verified source layer.",
+    "shortDescription": "Digest books, articles, and improve research for Obsidian.",
+    "longDescription": "Bookworm helps Codex turn practical books, readable articles, and existing Markdown research into clean, reader-facing Obsidian notes. Digest reads long EPUB/PDF books and article URLs; Refine preserves sources while cleaning exports; Enrich adds a fresh verified source layer.",
     "developerName": "iamjudin",
     "category": "Productivity",
     "capabilities": [
       "EPUB inspection",
       "PDF book heuristic",
+      "Article URL digestion",
       "Obsidian Markdown output",
       "Image asset extraction",
       "Practical non-fiction digestion",

@@ -1,11 +1,11 @@
 ---
 name: digest
-description: Digest long EPUB/PDF books into Obsidian-ready working notes, with important images preserved in the note body.
+description: Digest books and standalone readable articles into Obsidian-ready working notes, with important visuals preserved when they matter.
 ---
 
 # Digest
 
-Use this skill when the user asks Codex to read, digest, summarize, extract the essence of, or prepare an Obsidian note for a book. Also use it when an input looks like a book: an `EPUB` file or a `PDF` with roughly 100+ pages.
+Use this skill when the user asks Codex to read, digest, summarize, extract the essence of, or prepare an Obsidian note for a book or a standalone readable article. Also use it when an input looks like a book: an `EPUB` file or a `PDF` with roughly 100+ pages.
 
 This skill is the main action bundled by the Bookworm / Букворм plugin. Think of the plugin as the bookworm character and this skill as what it does: it digests a book into a useful working note.
 
@@ -21,13 +21,33 @@ Start Bookworm confidently when:
 
 - the user gives an EPUB;
 - the user gives a PDF that appears to be a book, especially 100+ pages;
+- the user gives a URL to a standalone readable article, essay, report, or research page and asks for a digest;
 - the user asks to make a book digest, book note, practical summary, or Obsidian-ready summary.
 
 For PDFs under 100 pages, inspect first. They may be articles, reports, contracts, decks, manuals, or whitepapers.
 
+### Article URLs
+
+A URL to a standalone readable article, essay, report, or research page is a
+Digest input, not a Refine input: Digest reads the page as its source and makes
+a new working note; Refine only restructures a file or note the user already
+has. Open the URL and work from its actual readable body, title, and source
+language. Do not use search-result snippets or infer facts from the address.
+
+If the page is paywalled, requires sign-in, is only a search/category page, is
+rendered without accessible body text, or otherwise cannot be read reliably,
+say so plainly and do not create an empty note. Ask for an accessible URL or a
+local export instead.
+
+Treat an article URL with the same safety as a book: collect material in a
+temporary run directory, leave the web source untouched, make the Markdown
+and selected assets there first, and replace or create a vault note only after
+explicit handoff confirmation. Use the article's readable title for the final
+filename. Under `## Источники` / `## Sources`, include the main article as a descriptive title-link; add other sources only when they were actually opened and needed for context, never as invented citations.
+
 ## Core Output Rules
 
-- Produce one Markdown file per book.
+- Produce one Markdown file per book or article.
 - Optimize for Obsidian.
 - Detect likely vaults by looking for folders containing `.obsidian`.
 - If one or more likely Obsidian vaults exist, select the best target from the detected vaults by matching the user's explicit request, existing folder names, note/library structure, and nearby content. Do not hard-code or assume a personal vault path.
@@ -40,7 +60,7 @@ For PDFs under 100 pages, inspect first. They may be articles, reports, contract
 - The note filename must match the human-readable book title, not a slug and not a Bookworm implementation name. Do not append `bookworm` to the final note filename.
 - If the note filename is the book title and Obsidian will show the inline title, do not add a duplicate top-level `# Book Title` heading inside the note.
 - For substantial notes, add a compact manual table of contents near the top. When relying on Obsidian's inline title, make `## Содержание` the first section in the file, followed by links to the main `##` sections, then continue with `## Коротко`.
-- Store visual assets in a shared library assets folder, such as `Library/assets/<book-slug>/<chapter-slug>/` for notes in `Library/`.
+- Store visual assets in a shared library assets folder, such as `Library/assets/<source-slug>/<section-slug>/` for notes in `Library/`.
 - For notes stored in `Library/`, embed important images with paths relative to the library folder: `![[assets/book-slug/chapter-06/figure-01.png|700]]`.
 - After selecting final visuals, keep only the assets that are actually embedded in the final note, plus a manifest if useful. Do not copy the whole extraction dump into the vault.
 - Use simple ASCII-safe asset filenames.
@@ -62,7 +82,7 @@ If no vault was detected, do not ask for vault copy confirmation. Just provide t
 If the user confirms, copy:
 
 - the Markdown file to the vault `Library/` folder when present, otherwise to the vault root or the user-specified vault folder;
-- the asset directory to the shared assets folder for that book, e.g. `Library/assets/<book-slug>/` when the note is in `Library/`.
+- the asset directory to the shared assets folder for that source, e.g. `Library/assets/<source-slug>/` when the note is in `Library/`.
 
 After copying, verify that every Obsidian embed in the copied note resolves relative to the vault root.
 
@@ -147,11 +167,11 @@ Avoid slash labels like `Capture / Сохраняем` in final reader-facing te
 
 The digest should be complete enough that Codex can later answer questions about the book and help the user apply its methodology without rereading the source.
 
-Judge fullness by chapter coverage, not by a compression percentage. For every
-substantive chapter or section, retain its central mechanism, a concrete example
-or case, a failure mode or limitation, and a practical implication. Adapt this
-to the kind of book: a history may need causal context, a technical book may
-need procedures and trade-offs, and a practical book may need reusable steps.
+Judge fullness by source coverage, not by a compression percentage. For every
+substantive chapter, section, or article argument, retain its central mechanism,
+a concrete example or case, a failure mode or limitation, and a practical implication. Adapt this to the kind of source: a history may need causal
+context, a technical source may need procedures and trade-offs, and a practical
+source may need reusable steps.
 
 Preserve:
 
@@ -204,18 +224,19 @@ If a visual is essential, technical, or a practical example that teaches impleme
 
 ## Workflow
 
-1. Inspect the source file with `scripts/bookworm_helper.py inspect`.
-2. Detect a likely Obsidian vault with `scripts/bookworm_helper.py detect-vaults` when an output location is not given.
-3. Determine source language and visible heading language.
-4. Extract or plan important visual assets.
-5. Build a chapter/section map.
-6. Digest chapter by chapter, preserving enough context for future Q&A.
-7. Include important figures in place, with explanations.
-8. Run the internal quality gate.
-9. Write one Obsidian-ready Markdown file plus local assets.
-10. Prune generated assets so only embedded visuals and useful manifests remain with the final note.
-11. If a vault was detected but the output was written elsewhere, ask to copy the finished deliverable into the vault and verify the copied embeds after confirmation.
-12. After confirmed vault copy and verification, remove temporary working files from the scratch workspace so repeated book runs do not leave clutter.
+1. For a local book, inspect the source file with `scripts/bookworm_helper.py inspect`; for a URL, open the page and verify that its readable body is available.
+2. Create a temporary run directory and collect the working Markdown and selected assets there; never write an empty or provisional note to the vault.
+3. Detect a likely Obsidian vault with `scripts/bookworm_helper.py detect-vaults` when an output location is not given.
+4. Determine source language and visible heading language.
+5. Extract or plan important visual assets.
+6. Build a chapter, section, or article-argument map.
+7. Digest the source section by section, preserving enough context for future Q&A.
+8. Include important figures in place, with explanations.
+9. Run the internal quality gate.
+10. Write one Obsidian-ready Markdown file plus local assets in the run directory.
+11. Prune generated assets so only embedded visuals and useful manifests remain with the final note.
+12. Ask for explicit handoff confirmation before creating or replacing the vault note; then verify copied embeds after confirmation.
+13. After confirmed vault copy and verification, remove temporary working files from the scratch workspace so repeated runs do not leave clutter.
 
 ## Internal Quality Gate
 
