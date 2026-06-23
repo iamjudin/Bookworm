@@ -374,6 +374,20 @@ Useful text.
         self.assertIn("| Игры | [Agricola](https://example.com/agricola) |", result)
         self.assertNotIn("**Сильные стороны:**", result)
 
+    def test_turns_bold_label_with_external_colon_into_a_table(self) -> None:
+        source = """## Профиль
+
+**Автор**: Francesco Cirillo.
+**Базовая единица**: Фокус-сессия и отношение ко времени.
+**Ограничения**: Не является полной системой проектов.
+"""
+
+        result = refine_markdown(source, toc_title="Содержание")
+
+        self.assertIn("| Параметр | Описание |", result)
+        self.assertIn("| Автор | Francesco Cirillo. |", result)
+        self.assertIn("| Ограничения | Не является полной системой проектов. |", result)
+
     def test_counts_each_source_bearing_construct(self) -> None:
         source = """Claim citeturn0search1 [named source](https://example.com/a).
 
