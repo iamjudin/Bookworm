@@ -5,6 +5,10 @@ description: Use when the user wants to expand an existing note with clearly att
 
 # Enrich
 
+## Action Names
+
+For Russian user-facing text, call this action `Букворм: Энрич`. For English user-facing text, call it `Bookworm: Enrich`. Never mix a Russian Bookworm label with an English action name, or an English Bookworm label with a Russian action name.
+
 `Bookworm: Enrich` adds a clearly separated, evidence-backed content layer to
 an existing Markdown note. Unlike `Bookworm: Refine`, it increases substantive
 content; it does not repair or replace the original source layer.

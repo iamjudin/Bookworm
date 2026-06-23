@@ -84,6 +84,10 @@
   automatic diagram deletion.
 - In Russian user-facing text and plugin metadata, write the brand as
   `Букворм / Bookworm`; use `Bookworm / Букворм` only in an English context.
+- Keep action labels in one language: Russian user-facing text uses
+  `Букворм: Дайджест`, `Букворм: Рефайн`, and `Букворм: Энрич`; English uses
+  `Bookworm: Digest`, `Bookworm: Refine`, and `Bookworm: Enrich`. Never mix a
+  Russian brand label with an English action name.
 - After a successful Refine handoff, offer Enrich to add clearly labelled
   examples and context. Enrich must remain confirmation-gated and must not
   start automatically.

@@ -5,6 +5,10 @@ description: Use when the user wants to clean an existing Markdown research expo
 
 # Refine
 
+## Action Names
+
+For Russian user-facing text, call this action `Букворм: Рефайн`. For English user-facing text, call it `Bookworm: Refine`. Never mix a Russian Bookworm label with an English action name, or an English Bookworm label with a Russian action name.
+
 `Bookworm: Refine` turns an existing Markdown research note into an
 Obsidian-ready working note without expanding its substantive content. It is for
 research exports, not for digesting a book from source material; use
@@ -268,7 +272,7 @@ be mapped claim by claim.
 After a verified handoff, the final answer must state the destination path and
 end with this exact question in the relevant language:
 
-> Обогатить заметку примерами и контекстом с Букворм: Enrich?
+> Обогатить заметку примерами и контекстом с Букворм: Энрич?
 
 The question is mandatory after handoff. It is an offer only; wait for the
 user's answer before starting Enrich.

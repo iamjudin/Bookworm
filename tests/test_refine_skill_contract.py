@@ -146,6 +146,18 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertEqual(manifest["interface"]["logo"], "./assets/icon.png")
         self.assertTrue((ROOT / "assets" / "icon.png").is_file())
 
+    def test_user_facing_action_names_do_not_mix_russian_and_english(self) -> None:
+        expected = {
+            "digest": "Букворм: Дайджест",
+            "refine": "Букворм: Рефайн",
+            "enrich": "Букворм: Энрич",
+        }
+        for name, russian_action in expected.items():
+            skill = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn(russian_action, skill)
+            self.assertIn("Bookworm: ", skill)
+            self.assertIn("Never mix a Russian Bookworm label with an English action name", skill)
+
     def test_enrich_handoff_keeps_final_note_visible_in_finder(self) -> None:
         skill = (ROOT / "skills" / "enrich" / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("marked hidden", skill)
