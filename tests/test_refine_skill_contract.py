@@ -125,6 +125,20 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertIn("visual-density", skill)
         self.assertIn("delete diagrams automatically", skill)
 
+    def test_digest_requires_chapter_coverage_not_word_ratio(self) -> None:
+        skill = (ROOT / "skills" / "digest" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("not by a compression percentage", skill)
+        self.assertIn("mechanism", skill)
+        self.assertIn("example", skill)
+        self.assertIn("failure mode or limitation", skill)
+        self.assertIn("practical implication", skill)
+
+    def test_bookworm_asks_for_ambiguous_vault_destination(self) -> None:
+        for name in ("digest", "refine"):
+            skill = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("ask the user where to place it", skill)
+            self.assertIn("Do not choose", skill)
+
 
 if __name__ == "__main__":
     unittest.main()

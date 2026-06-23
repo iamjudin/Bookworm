@@ -180,7 +180,9 @@ When a reader-facing named example itself is useful to open — such as a game, 
 
 3. If vaults exist, choose the best one from the user's explicit request,
    folder names, note/library structure, and nearby content. Never hard-code a
-   personal vault name or path.
+   personal vault name or path. Do not choose `Library/` merely because it
+   exists; if there is no obvious candidate from title, nearby content, folder
+   purpose, or request, ask the user where to place it before handoff.
 4. Create one dedicated run directory such as
    `/path/to/scratch/refine-<run-id>/`. Every temporary file for this run,
    including the refined note, manifests, contact sheets, and extracted assets,

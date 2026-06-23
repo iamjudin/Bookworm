@@ -31,6 +31,8 @@ For PDFs under 100 pages, inspect first. They may be articles, reports, contract
 - Optimize for Obsidian.
 - Detect likely vaults by looking for folders containing `.obsidian`.
 - If one or more likely Obsidian vaults exist, select the best target from the detected vaults by matching the user's explicit request, existing folder names, note/library structure, and nearby content. Do not hard-code or assume a personal vault path.
+- Do not choose `Library/` merely because it exists. When title, nearby content,
+  folder purpose, and the request do not identify an obvious candidate, ask the user where to place it before handoff.
 - When the selected vault is writable, write the Markdown note and assets there by default unless the user asked for another location.
 - When filesystem permissions or sandbox rules prevent direct vault writes, create the deliverable in the writable `outputs` area first, then ask the user to confirm copying it into the selected detected vault. Do not silently leave the vault-ready result only in `outputs` when a suitable vault was detected.
 - If no Obsidian vault is detected, keep the deliverable in the current writable output location and do not propose moving it to a vault. Mention that no vault was detected.
@@ -144,6 +146,12 @@ Avoid slash labels like `Capture / Сохраняем` in final reader-facing te
 ## Fullness Standard
 
 The digest should be complete enough that Codex can later answer questions about the book and help the user apply its methodology without rereading the source.
+
+Judge fullness by chapter coverage, not by a compression percentage. For every
+substantive chapter or section, retain its central mechanism, a concrete example
+or case, a failure mode or limitation, and a practical implication. Adapt this
+to the kind of book: a history may need causal context, a technical book may
+need procedures and trade-offs, and a practical book may need reusable steps.
 
 Preserve:
 
