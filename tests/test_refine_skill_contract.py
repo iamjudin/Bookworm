@@ -143,6 +143,7 @@ class RefineSkillContractTests(unittest.TestCase):
     def test_plugin_uses_bookworm_icon_asset(self) -> None:
         manifest = json.loads((ROOT / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
         self.assertEqual(manifest["interface"]["composerIcon"], "./assets/icon.png")
+        self.assertEqual(manifest["interface"]["logo"], "./assets/icon.png")
         self.assertTrue((ROOT / "assets" / "icon.png").is_file())
 
 
