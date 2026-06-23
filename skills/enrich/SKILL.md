@@ -126,6 +126,10 @@ Before handoff, keep a compact source ledger in the temporary run directory:
 each added block records the opened URL, readable title, and the claim it
 supports. State this verification briefly in the handoff preview; do not expose
 the internal ledger in the final note.
+Count actual `#### Дополнение` blocks in the temporary note for the preview;
+never report a model-estimated count. If the verified transfer times out before
+the command runs, preserve both files and retry the same confirmed handoff once;
+only then report the failure and paths.
 
 Enrich must not create plans, specs, commits, worktrees, or repository files.
 It must not modify Bookworm itself. Make every proposed note change on a

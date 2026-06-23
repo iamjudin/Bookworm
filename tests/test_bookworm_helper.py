@@ -413,6 +413,10 @@ Useful text.
         self.assertIn("| Параметр | Описание |", result)
         self.assertNotIn("| Parameter | Description |", result)
 
+    def test_localizes_generic_english_heading_in_russian_research(self) -> None:
+        result = refine_markdown("## Executive summary\n\nРусский текст.\n")
+        self.assertIn("## Исполнительное резюме", result)
+
     def test_escapes_pipes_inside_existing_markdown_table_links(self) -> None:
         source = """## Сравнение
 

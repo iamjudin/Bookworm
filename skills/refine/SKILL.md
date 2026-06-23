@@ -218,13 +218,17 @@ When a reader-facing named example itself is useful to open — such as a game, 
      --toc-title "Содержание"
    ```
 
-   Use `Contents` instead of `Содержание` when the note/request language is
-   English. Read `suggested_filename` from the command output. It is derived
+Use `Contents` instead of `Содержание` when the note/request language is
+English. Read `suggested_filename` from the command output. It is derived
    from the note's human title H1; never use a technical source name such as
    `deep-research-report.md` when a title exists. For every inventory entry,
    repair the matching claim in the refined copy with a verified title link when
-   a reliable source is available. The helper's report must be retained for
-   the final response.
+a reliable source is available. The helper's report must be retained for
+the final response.
+Use the helper's `existing_title_links_preserved` and
+`section_sources_retained` values in the visible source-status note; do not
+describe the note as source-empty merely because raw export markers could not
+be mapped claim by claim.
 5. Inspect the result before handoff. Verify that ordinary title links, bare
    URLs, and source sections remain; raw citation markers are gone; the body has
    no duplicate top H1; and the TOC links only to real main sections. Confirm

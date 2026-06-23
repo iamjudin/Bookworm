@@ -628,6 +628,21 @@ def localize_table_headers(lines: list[str]) -> list[str]:
     ]
 
 
+def localize_common_headings(lines: list[str]) -> list[str]:
+    """Normalize generic export headings to the predominant Russian language."""
+    if not any(re.search(r"[А-Яа-яЁё]", line) for line in lines):
+        return lines
+    replacements = {"Executive summary": "Исполнительное резюме", "Sources": "Источники"}
+    result: list[str] = []
+    for line in lines:
+        heading = MARKDOWN_HEADING_PATTERN.match(line)
+        if heading and heading.group(2).strip() in replacements:
+            result.append(f"{heading.group(1)} {replacements[heading.group(2).strip()]}")
+        else:
+            result.append(line)
+    return result
+
+
 def compact_mermaid_blocks(lines: list[str]) -> list[str]:
     """Keep Mermaid editable, compact, and vertically readable as one graph."""
     compacted: list[str] = []
@@ -707,6 +722,7 @@ def refine_markdown(source: str, toc_title: str = "Содержание") -> str
     lines = convert_label_value_runs(lines)
     lines = normalize_existing_tables(lines)
     lines = localize_table_headers(lines)
+    lines = localize_common_headings(lines)
     lines = compact_mermaid_blocks(lines)
 
     while lines and not lines[0].strip():
