@@ -116,9 +116,14 @@ until the final note and its source links have been verified.
 
 ## Interaction and Repository Boundary
 
-Ask at most one short, content-focused question, and only when the requested
-focus cannot be inferred. Once the user confirms the scope, research and
-enrich directly; Enrich must not ask about agents or execution modes.
+Ask at most one short question about the desired enrichment focus when the note and request do not make it inferable. For example: “Что важнее углубить:
+практическое применение, примеры, альтернативы или ограничения?” Do not ask when the focus is already clear; once the user confirms the scope, research and
+enrich directly. Enrich must not ask about agents or execution modes.
+
+Before handoff, keep a compact source ledger in the temporary run directory:
+each added block records the opened URL, readable title, and the claim it
+supports. State this verification briefly in the handoff preview; do not expose
+the internal ledger in the final note.
 
 Enrich must not create plans, specs, commits, worktrees, or repository files.
 It must not modify Bookworm itself. Make every proposed note change on a

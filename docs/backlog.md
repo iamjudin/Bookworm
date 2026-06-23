@@ -59,6 +59,17 @@
 - Unresolved original citations mark the source layer as incomplete but do not
   block a confirmation-gated Refine handoff or Enrich. Enrich must not treat
   them as verified: every added block carries its own opened, verified source.
+- Keep a run-directory source ledger for every inserted Refine or Enrich link:
+  opened URL, descriptive title, claim/section supported, and source scope.
+  Do not use a generic catalogue link as proof for a specific claim.
+- When unresolved citations remain, retain the claims and add a concise visible
+  source-status note under `## Источники` / `## Sources`; it is provenance, not
+  an Enrich blocker.
+- Use tables for two or more compact label-value fields. Keep multi-sentence or
+  prose-heavy fields as labelled paragraphs; a table must not become a narrow
+  wall of text.
+- Enrich asks one short content question only when the desired focus cannot be
+  inferred from the note and request; it proceeds directly when clear.
 - In Russian user-facing text and plugin metadata, write the brand as
   `Букворм / Bookworm`; use `Bookworm / Букворм` only in an English context.
 - After a successful Refine handoff, offer Enrich to add clearly labelled

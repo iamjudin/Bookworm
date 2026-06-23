@@ -100,6 +100,21 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertIn("Do not create a second summary table or profile catalogue", skill)
         self.assertIn("grouped by the relevant main section", skill)
 
+    def test_enrich_asks_only_when_the_content_focus_is_ambiguous(self) -> None:
+        skill = (ROOT / "skills" / "enrich" / "SKILL.md").read_text(encoding="utf-8")
+
+        self.assertIn("one short question about the desired enrichment focus", skill)
+        self.assertIn("when the note and request do not make it inferable", skill)
+        self.assertIn("Do not ask when the focus is already clear", skill)
+
+    def test_refine_requires_specific_source_provenance_and_visible_gaps(self) -> None:
+        skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
+
+        self.assertIn("source ledger", skill)
+        self.assertIn("claim it supports", skill)
+        self.assertIn("generic catalogue link", skill)
+        self.assertIn("visible source-status note", skill)
+
 
 if __name__ == "__main__":
     unittest.main()

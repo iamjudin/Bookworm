@@ -70,11 +70,22 @@ python3 scripts/bookworm_helper.py refine-markdown \
   --verified-sources /path/to/run/verified-sources.json
 ```
 
+Maintain a source ledger in the run directory for every inserted link: its
+opened URL, descriptive title, the claim it supports, and whether it is a
+claim-level or section-level source. Never use a generic catalogue link as
+proof for a specific claim merely because the topic sounds related. If a source
+supports the broader section, keep the table cell readable and place it in the
+section source list instead.
+
 The helper reports `markers_scanned`, `verified_title_links_inserted`, and
 `unresolved`. Include those exact three counts in the final user-facing
 message. An unresolved marker is removed without changing its claim. If one or
 more remain unresolved, state that the source layer is incomplete: the note is
 structurally refined, not a newly verified research record. This status does not block Enrich, which may add its own separately verified material; it does not validate the original claims.
+When unresolved citations remain, add a visible source-status note under
+`## Источники` / `## Sources`: report the three counts and say that the
+unresolved claims were retained without a reconstructed link. This is
+provenance for the reader, not an error banner or a block on Enrich.
 
 Numbered citations from DOCX exports, such as `[66]`, are a separate raw
 citation format. Inspect the final `## Источники` / `## Sources` section and
@@ -111,6 +122,9 @@ Keep evidence readable: link named items where they are useful to open; put sect
 
 - Keep a Markdown table only when it is a compact comparison: at most four
   columns, short cells, and readable at normal note width. A two-column parameter-description table is preferred for repeated profiles, cards, or reference entries (for example: definition, strengths, risks, variants, and examples); two or more related label-value fields must become that table.
+- Interpret “label-value fields” by density, not only by count: two or more
+  short values belong in a table; multi-sentence or prose-heavy values stay as
+  labelled paragraphs so the note remains scannable without losing wording.
 - Turn wider or prose-heavy tables into titled item sections with labeled
   fields such as `**Сильные стороны:**` and `**Риски:**`.
 - Turn procedural tables into numbered steps.
@@ -133,6 +147,10 @@ Keep evidence readable: link named items where they are useful to open; put sect
 - Avoid duplicate summary layers: retain one orientation layer and do not repeat
   the same records in a new summary, catalogue, or card section unless the
   source already contains both for distinct reading tasks.
+- An orientation layer names the map and the reader's next choice; it must not
+  repeat every definition, strength, risk, variant, and example later held in
+  detailed profiles. Preserve repeated facts by keeping them once in their
+  canonical profile.
 
 ## Sources
 

@@ -388,6 +388,20 @@ Useful text.
         self.assertIn("| Автор | Francesco Cirillo. |", result)
         self.assertIn("| Ограничения | Не является полной системой проектов. |", result)
 
+    def test_keeps_prose_heavy_label_value_runs_out_of_tables(self) -> None:
+        source = """## Профиль
+
+**Кратко:** Это длинное описание механики, которое объясняет её устройство, варианты применения и последствия для проектирования. Оно намеренно содержит больше одного предложения, чтобы оставаться читабельным как обычный текст, а не как узкая ячейка таблицы.
+
+**Проектирование:** Второй развёрнутый абзац описывает ограничения, типовые ошибки и способы баланса. Он также достаточно длинный, чтобы таблица ухудшила сканирование заметки.
+"""
+
+        result = refine_markdown(source, toc_title="Содержание")
+
+        self.assertNotIn("| Параметр | Описание |", result)
+        self.assertIn("**Кратко:**", result)
+        self.assertIn("**Проектирование:**", result)
+
     def test_escapes_pipes_inside_existing_markdown_table_links(self) -> None:
         source = """## Сравнение
 

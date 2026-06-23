@@ -583,6 +583,14 @@ def convert_label_value_runs(lines: list[str]) -> list[str]:
             index += 1
             continue
 
+        # Tables make compact fields scannable, but turn long research prose
+        # into an unreadable narrow column. Preserve such runs as labelled
+        # prose; no claim or wording is discarded.
+        if any(len(value) > 240 or value.count(". ") >= 2 for _label, value in rows):
+            converted.extend(lines[index:cursor])
+            index = cursor
+            continue
+
         russian = any(re.search(r"[А-Яа-яЁё]", label) for label, _value in rows)
         headers = ["Параметр", "Описание"] if russian else ["Parameter", "Description"]
         converted.extend(_markdown_table([headers, *[list(row) for row in rows]]))
