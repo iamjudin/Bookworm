@@ -54,6 +54,20 @@ class RefineSkillContractTests(unittest.TestCase):
             self.assertIn("section-level sources", skill)
             self.assertIn("Mermaid configuration", skill)
 
+    def test_unresolved_original_sources_do_not_block_enrich(self) -> None:
+        refine = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
+        enrich = (ROOT / "skills" / "enrich" / "SKILL.md").read_text(encoding="utf-8")
+
+        self.assertIn("source layer is incomplete", refine)
+        self.assertIn("does not block Enrich", refine)
+        self.assertIn("even when the original source layer is incomplete", enrich)
+        self.assertIn("does not validate the original claims", enrich)
+
+    def test_bookworm_keeps_each_mermaid_diagram_whole(self) -> None:
+        for name in ("digest", "refine", "enrich"):
+            skill = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("Do not split a Mermaid diagram", skill)
+
     def test_bookworm_uses_scannable_tables_and_reader_facing_sources(self) -> None:
         for name in ("digest", "refine", "enrich"):
             skill = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")

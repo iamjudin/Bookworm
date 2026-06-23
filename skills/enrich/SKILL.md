@@ -31,6 +31,12 @@ Preserve useful original structure and reasoning unless the user asks for a
 rewrite. Do not add personal opinions. Added content must be examples, context,
 alternatives, consequences, or a deeper explanation.
 
+Enrich may enrich a note even when the original source layer is incomplete.
+Treat unresolved citations in the original as a visible limitation, not as
+evidence to repeat or repair silently. Every Enrich block must carry its own
+opened and verified source; Enrich does not validate the original claims. Use a
+separate source-repair pass only when the user asks to verify those claims.
+
 When enriching a book digest or another authored note, every addition must make
 its external origin unmistakable. Place it beside the relevant original section
 using this exact block form:
@@ -70,9 +76,12 @@ Keep source presentation readable: link named items where opening them is useful
 - Convert wide/prose-heavy tables to titled item sections with labeled fields;
   convert process tables to numbered steps.
 - Use Mermaid only in portrait, top-to-bottom form. If the relationship cannot
-  be made readable vertically, simplify or split the Mermaid into smaller
-  editable diagrams and add a title and explanatory text. Never render Mermaid as a raster image.
-- When there is no intentional source-specific configuration, use compact Mermaid configuration: `%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 20, "rankSpacing": 25}} }%%`. It prevents the editable diagram from filling the note width; simplify or split it if it remains too large.
+  be made readable vertically, shorten labels and add a title and explanatory
+  text. Never render Mermaid as a raster image.
+- When there is no intentional source-specific configuration, use compact Mermaid configuration: `%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 20, "rankSpacing": 25}} }%%`. It prevents the editable diagram from filling the note width; shorten labels if it remains too large.
+- Convert `flowchart LR` to `flowchart TD` when this preserves the graph's
+  meaning. Do not split a Mermaid diagram: retain one editable graph and add
+  concise explanatory text when its full context matters.
 - Preserve visual assets that materially explain the research; prune unused
   generated assets after selection.
 - Use an ordered list for a long enumeration of peer items that a reader may

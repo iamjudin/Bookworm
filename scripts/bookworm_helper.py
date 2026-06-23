@@ -610,7 +610,7 @@ def normalize_existing_tables(lines: list[str]) -> list[str]:
 
 
 def compact_mermaid_blocks(lines: list[str]) -> list[str]:
-    """Add a conservative compact layout directive to plain Mermaid blocks."""
+    """Keep Mermaid editable, compact, and vertically readable as one graph."""
     compacted: list[str] = []
     index = 0
     while index < len(lines):
@@ -626,7 +626,9 @@ def compact_mermaid_blocks(lines: list[str]) -> list[str]:
         compacted.append(lines[index])
         if not any("%%{init:" in line for line in block[1:]):
             compacted.append(MERMAID_COMPACT_INIT)
-        compacted.extend(lines[index + 1 : min(end + 1, len(lines))])
+        for line in lines[index + 1 : min(end + 1, len(lines))]:
+            line = re.sub(r"^(\s*flowchart\s+)LR\b", r"\1TD", line, flags=re.IGNORECASE)
+            compacted.append(line)
         index = end + 1
     return compacted
 

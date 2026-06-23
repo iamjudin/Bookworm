@@ -43,9 +43,11 @@
   the end under `## Источники` / `## Sources`, grouped by section, with
   descriptive title-links. Do not leave bare numeric citations or naked URLs.
 - Mermaid diagrams must be portrait and top-to-bottom. Keep them as editable
-  Mermaid: simplify or split an unreadably wide diagram instead of rendering it
-  as an image. Use compact Mermaid configuration (`useMaxWidth: false`, compact
-  node/rank spacing) when no source-specific configuration is needed.
+  Mermaid: convert `LR` to `TD/TB` when graph meaning is unchanged; never split
+  one diagram automatically or render it as an image. Use compact Mermaid
+  configuration (`useMaxWidth: false`, compact node/rank spacing) when no
+  source-specific configuration is needed, shorten labels, and pair a wide
+  graph with a concise explanation.
 - Apply one general research information architecture across Digest, Refine, and
   Enrich: preserve all information; use one orientation layer, detailed material
   in its canonical sections, and a comparison/synthesis only for a distinct
@@ -54,6 +56,9 @@
 - Normalize existing Markdown tables safely: escape pipes inside link labels
   (`\\|`) so a title such as `What is GTD? | Getting Things Done` cannot create a
   false column.
+- Unresolved original citations mark the source layer as incomplete but do not
+  block a confirmation-gated Refine handoff or Enrich. Enrich must not treat
+  them as verified: every added block carries its own opened, verified source.
 - In Russian user-facing text and plugin metadata, write the brand as
   `Букворм / Bookworm`; use `Bookworm / Букворм` only in an English context.
 - After a successful Refine handoff, offer Enrich to add clearly labelled

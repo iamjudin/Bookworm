@@ -72,7 +72,9 @@ python3 scripts/bookworm_helper.py refine-markdown \
 
 The helper reports `markers_scanned`, `verified_title_links_inserted`, and
 `unresolved`. Include those exact three counts in the final user-facing
-message. An unresolved marker is removed without changing its claim.
+message. An unresolved marker is removed without changing its claim. If one or
+more remain unresolved, state that the source layer is incomplete: the note is
+structurally refined, not a newly verified research record. This status does not block Enrich, which may add its own separately verified material; it does not validate the original claims.
 
 Numbered citations from DOCX exports, such as `[66]`, are a separate raw
 citation format. Inspect the final `## Источники` / `## Sources` section and
@@ -117,10 +119,13 @@ Keep evidence readable: link named items where they are useful to open; put sect
 - Use a compact Mermaid configuration when the diagram has no intentional
   source-specific configuration: `%%{init: {"flowchart": {"useMaxWidth": false,
   "nodeSpacing": 20, "rankSpacing": 25}} }%%`. It keeps an editable diagram
-  from expanding to the full note width; simplify or split it if it remains too large.
+  from expanding to the full note width. Convert a horizontal `flowchart LR`
+  into `flowchart TD` when this preserves its edges and meaning; shorten labels
+  if it remains too large.
+- Do not split a Mermaid diagram: preserve one editable graph and pair it with
+  concise explanatory text when its full context matters.
 - Never render Mermaid as a raster image. Mermaid must remain editable in the
-  final Obsidian note. When a diagram is too wide, simplify it, split it into
-  smaller portrait diagrams, or pair it with a concise textual explanation.
+  final Obsidian note.
 - Use an ordered list for a long enumeration of peer items that a reader may
   need to refer to by position, such as a catalogue of mechanisms, methods,
   cases, or options. Use ordinary bullets for short, unordered attributes or

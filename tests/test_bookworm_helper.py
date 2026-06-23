@@ -422,6 +422,22 @@ flowchart TB
         self.assertIn('%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 20, "rankSpacing": 25}} }%%', result)
         self.assertNotIn("![[assets/", result)
 
+    def test_verticalizes_horizontal_mermaid_without_splitting_the_graph(self) -> None:
+        source = """## Поток
+
+```mermaid
+flowchart LR
+    A[Входящее] --> B[Разобрать] --> C[Следующее действие]
+```
+"""
+
+        result = refine_markdown(source, toc_title="Содержание")
+
+        self.assertIn("flowchart TD", result)
+        self.assertNotIn("flowchart LR", result)
+        self.assertIn("A[Входящее] --> B[Разобрать] --> C[Следующее действие]", result)
+        self.assertEqual(result.count("```mermaid"), 1)
+
     def test_counts_each_source_bearing_construct(self) -> None:
         source = """Claim citeturn0search1 [named source](https://example.com/a).
 

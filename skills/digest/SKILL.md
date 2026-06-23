@@ -110,7 +110,7 @@ Do not leave reader-facing numeric citations such as `[47]`. When a named exampl
 
 When external sources support a whole section, collect them at the end of the note under `## Источники` / `## Sources`, grouped by the relevant main section. Each entry must be a descriptive title-link, never a naked URL or numeric-only reference.
 
-For editable Mermaid, prefer portrait `flowchart TB` or `TD`. When there is no intentional source-specific configuration, add compact Mermaid configuration: `%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 20, "rankSpacing": 25}} }%%`. It prevents the rendered diagram from filling the note width; simplify or split the diagram if it remains large. Never replace Mermaid with a raster image.
+For editable Mermaid, prefer portrait `flowchart TB` or `TD`. When there is no intentional source-specific configuration, add compact Mermaid configuration: `%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 20, "rankSpacing": 25}} }%%`. It prevents the rendered diagram from filling the note width; shorten labels if it remains large. Convert `flowchart LR` to `flowchart TD` when this preserves the graph's meaning. Do not split a Mermaid diagram: retain one editable graph and add concise explanatory text when its full context matters. Never replace Mermaid with a raster image.
 
 ## Practical Non-Fiction Template
 
