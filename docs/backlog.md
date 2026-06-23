@@ -72,6 +72,10 @@
   inferred from the note and request; it proceeds directly when clear.
 - Use informal second-person address (`ты`) in Russian user-facing Bookworm
   messages unless the user explicitly chooses a formal tone.
+- Do not choose `Library/` merely because it exists or because the input came
+  from the same vault. Auto-select a destination only when the request, note
+  title, nearby content, or folder purpose gives an obvious candidate; otherwise
+  ask the user where to place the result before handoff.
 - Refine status must distinguish marker-level mapping gaps from usable source
   coverage: report preserved title-links and grouped section sources separately,
   and generate the visible source-status from helper metrics rather than a
