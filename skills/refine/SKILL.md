@@ -101,6 +101,12 @@ text. Do not replace it with a naked URL.
 
 Refine improves presentation without discarding content:
 
+### Research Information Architecture
+
+Apply these rules to any research topic, not only books, methods, or a particular note. Preserve every fact, example, claim, and source unless the user explicitly asks to remove it. Reduce repetition by assigning each layer a distinct reading job: keep one orientation layer near the top, place detailed material once in the relevant sections, and retain a comparison or synthesis only when it answers a different reader question. Move duplicated wording to its canonical section rather than silently dropping information.
+
+Keep evidence readable: link named items where they are useful to open; put section-level sources at the end under `## Источники` / `## Sources`, grouped by the relevant main section. Do not crowd every comparison-table cell with proof links when the same source supports the whole section. In existing Markdown tables, escape a pipe inside a link label as `\\|` so it cannot create a false column.
+
 - Keep a Markdown table only when it is a compact comparison: at most four
   columns, short cells, and readable at normal note width. A two-column parameter-description table is preferred for repeated profiles, cards, or reference entries (for example: definition, strengths, risks, variants, and examples); two or more related label-value fields must become that table.
 - Turn wider or prose-heavy tables into titled item sections with labeled
@@ -108,6 +114,10 @@ Refine improves presentation without discarding content:
 - Turn procedural tables into numbered steps.
 - Keep Mermaid only when it is naturally portrait and top-to-bottom, without
   horizontal scrolling. Prefer `flowchart TB` or `TD` and concise labels.
+- Use a compact Mermaid configuration when the diagram has no intentional
+  source-specific configuration: `%%{init: {"flowchart": {"useMaxWidth": false,
+  "nodeSpacing": 20, "rankSpacing": 25}} }%%`. It keeps an editable diagram
+  from expanding to the full note width; simplify or split it if it remains too large.
 - Never render Mermaid as a raster image. Mermaid must remain editable in the
   final Obsidian note. When a diagram is too wide, simplify it, split it into
   smaller portrait diagrams, or pair it with a concise textual explanation.

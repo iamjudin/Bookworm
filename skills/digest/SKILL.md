@@ -92,6 +92,12 @@ When including fenced code templates in the final note, avoid Markdown heading m
 
 ## Sources
 
+### Research Information Architecture
+
+Apply these rules to any research topic, not only books, methods, or a particular note. Preserve facts, examples, claims, and evidence while reducing repetition: give the reader one orientation layer first, then detailed material once in the relevant sections. Keep a comparison or synthesis only when it has a distinct reading job; otherwise merge duplicate wording into its canonical section rather than dropping information.
+
+Link named items where opening them helps. Put section-level sources at the end under `## Источники` / `## Sources`, grouped by the relevant main section, so comparison tables stay readable. In Markdown tables, escape a pipe inside a link label as `\\|` rather than allowing it to create a false column.
+
 Use a two-column parameter-description table for repeated profiles, reference cards, and comparable records when it is more scannable than prose; two or more related label-value fields must become that table. Keep narrative reasoning and long explanations outside tables.
 
 Use an ordered list for a long enumeration of peer items that a reader may need to refer to by position, such as a catalogue of mechanisms, methods, cases, or options. Use ordinary bullets for short, unordered sets of attributes or alternatives.
@@ -103,6 +109,8 @@ catalogue, or card section unless it adds a genuinely different reading task.
 Do not leave reader-facing numeric citations such as `[47]`. When a named example, book, product, method, or official document is useful to open, link its name directly with a descriptive title-link.
 
 When external sources support a whole section, collect them at the end of the note under `## Источники` / `## Sources`, grouped by the relevant main section. Each entry must be a descriptive title-link, never a naked URL or numeric-only reference.
+
+For editable Mermaid, prefer portrait `flowchart TB` or `TD`. When there is no intentional source-specific configuration, add compact Mermaid configuration: `%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 20, "rankSpacing": 25}} }%%`. It prevents the rendered diagram from filling the note width; simplify or split the diagram if it remains large. Never replace Mermaid with a raster image.
 
 ## Practical Non-Fiction Template
 

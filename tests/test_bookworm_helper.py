@@ -388,6 +388,40 @@ Useful text.
         self.assertIn("| Автор | Francesco Cirillo. |", result)
         self.assertIn("| Ограничения | Не является полной системой проектов. |", result)
 
+    def test_escapes_pipes_inside_existing_markdown_table_links(self) -> None:
+        source = """## Сравнение
+
+| Метод | Источник |
+| --- | --- |
+| GTD | [What is GTD? | Getting Things Done](https://gettingthingsdone.com/) |
+"""
+
+        result = refine_markdown(source, toc_title="Содержание")
+
+        self.assertIn(
+            "[What is GTD? \\| Getting Things Done](https://gettingthingsdone.com/)",
+            result,
+        )
+        self.assertNotIn(
+            "[What is GTD? | Getting Things Done](https://gettingthingsdone.com/)",
+            result,
+        )
+
+    def test_compacts_mermaid_without_rasterizing_it(self) -> None:
+        source = """## Процесс
+
+```mermaid
+flowchart TB
+    A[Начало] --> B[Следующий шаг]
+```
+"""
+
+        result = refine_markdown(source, toc_title="Содержание")
+
+        self.assertIn("```mermaid", result)
+        self.assertIn('%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 20, "rankSpacing": 25}} }%%', result)
+        self.assertNotIn("![[assets/", result)
+
     def test_counts_each_source_bearing_construct(self) -> None:
         source = """Claim citeturn0search1 [named source](https://example.com/a).
 

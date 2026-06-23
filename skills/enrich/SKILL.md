@@ -59,6 +59,12 @@ related label-value fields that Enrich creates, write a real two-column table.
 
 ## Obsidian Layout Rules
 
+### Research Information Architecture
+
+Apply these rules to any research topic, not only books, methods, or a particular note. Preserve the original facts, examples, claims, and evidence while reducing repetition: maintain one orientation layer, put detailed material once in the relevant sections, and add a comparison or synthesis only when it gives the reader a distinct task. Do not discard information to remove duplication; merge repeated wording into its canonical section.
+
+Keep source presentation readable: link named items where opening them is useful, and collect section-level sources at the end under `## Источники` / `## Sources`, grouped by the relevant main section. Do not overload comparison-table cells with broad proof links. Escape a pipe inside a Markdown link label as `\\|` so it cannot create a false table column.
+
 - Keep only compact comparison tables: at most four columns, short cells, and
   no horizontal scrolling at normal note width. Use a two-column parameter-description table for repeated profiles or reference cards; two or more related label-value fields must become that table. Keep narrative reasoning in prose.
 - Convert wide/prose-heavy tables to titled item sections with labeled fields;
@@ -66,6 +72,7 @@ related label-value fields that Enrich creates, write a real two-column table.
 - Use Mermaid only in portrait, top-to-bottom form. If the relationship cannot
   be made readable vertically, simplify or split the Mermaid into smaller
   editable diagrams and add a title and explanatory text. Never render Mermaid as a raster image.
+- When there is no intentional source-specific configuration, use compact Mermaid configuration: `%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 20, "rankSpacing": 25}} }%%`. It prevents the editable diagram from filling the note width; simplify or split it if it remains too large.
 - Preserve visual assets that materially explain the research; prune unused
   generated assets after selection.
 - Use an ordered list for a long enumeration of peer items that a reader may

@@ -46,6 +46,14 @@ class RefineSkillContractTests(unittest.TestCase):
             skill = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
             self.assertIn("Never render Mermaid as a raster image", skill)
 
+    def test_bookworm_uses_general_research_information_architecture(self) -> None:
+        for name in ("digest", "refine", "enrich"):
+            skill = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("one orientation layer", skill)
+            self.assertIn("detailed material", skill)
+            self.assertIn("section-level sources", skill)
+            self.assertIn("Mermaid configuration", skill)
+
     def test_bookworm_uses_scannable_tables_and_reader_facing_sources(self) -> None:
         for name in ("digest", "refine", "enrich"):
             skill = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
