@@ -70,6 +70,14 @@
   wall of text.
 - Enrich asks one short content question only when the desired focus cannot be
   inferred from the note and request; it proceeds directly when clear.
+- Use informal second-person address (`ты`) in Russian user-facing Bookworm
+  messages unless the user explicitly chooses a formal tone.
+- Refine status must distinguish marker-level mapping gaps from usable source
+  coverage: report preserved title-links and grouped section sources separately,
+  and generate the visible source-status from helper metrics rather than a
+  model-written interpretation. Normalize generic visible headings and TOC to
+  the note/request language. Treat visual-density review as a flag only, never
+  automatic diagram deletion.
 - In Russian user-facing text and plugin metadata, write the brand as
   `Букворм / Bookworm`; use `Bookworm / Букворм` only in an English context.
 - After a successful Refine handoff, offer Enrich to add clearly labelled
