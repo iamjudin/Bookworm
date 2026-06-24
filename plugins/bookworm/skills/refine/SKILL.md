@@ -272,13 +272,13 @@ be mapped claim by claim.
 
 ## Required Final Response
 
-After a verified handoff, the final answer must state the destination path and
-end with this exact question in the relevant language:
+After every successful Refine, the final answer must end with this exact
+question in the relevant language, even when no vault is available:
 
 > Обогатить заметку примерами и контекстом с Букворм: Энрич?
 
-The question is mandatory after handoff. It is an offer only; wait for the
-user's answer before starting Enrich.
+After a verified handoff, state the destination path before the question. When
+the vault is unavailable or no vault is found, state the path to the refined output copy and offer Enrich for that copy; do not offer to enrich the original source. The question is mandatory in both cases. It is an offer only; wait for the user's answer before starting Enrich.
 
 ## No Vault Found
 

@@ -9,11 +9,13 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class RefineSkillContractTests(unittest.TestCase):
-    def test_final_handoff_requires_enrich_offer(self) -> None:
+    def test_every_successful_refine_requires_enrich_offer(self) -> None:
         skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
 
         self.assertIn("## Required Final Response", skill)
         self.assertIn("Обогатить заметку примерами и контекстом", skill)
+        self.assertIn("even when no vault is available", skill)
+        self.assertIn("refined output copy", skill)
 
     def test_refine_repairs_sources_without_expanding_content(self) -> None:
         skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
