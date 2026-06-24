@@ -3,7 +3,7 @@
 Bookworm helps turn books, articles, and research into clear, useful notes for
 Obsidian.
 
-## What it does
+## Skills
 
 ### Digest
 
@@ -31,6 +31,16 @@ codex plugin marketplace add iamjudin/Bookworm
 
 Then open Plugins in Codex, find **Букворм / Bookworm**, click Add, and start a
 new chat.
+
+## Update
+
+In Terminal, run:
+
+```bash
+codex plugin marketplace upgrade bookworm
+```
+
+Then restart Codex and begin a new chat.
 
 ## License
 
