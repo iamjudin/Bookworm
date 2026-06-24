@@ -64,5 +64,7 @@ When developing in Codex, also run the plugin validation supplied by
 
 ## License
 
-The license has not been selected yet. Choose one before public release so
-users know whether they may copy, modify, and redistribute Bookworm.
+Bookworm is source-available under the
+[PolyForm Noncommercial 1.0.0](LICENSE) license. You may use, modify, and
+redistribute it for noncommercial purposes. Commercial use needs separate
+permission from the author; open a GitHub issue to get in touch.
