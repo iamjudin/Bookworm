@@ -4,17 +4,59 @@ Bookworm turns books, readable web articles, and existing research exports into
 clean, reader-facing Obsidian notes. This repository is structured as a Codex
 plugin marketplace with one plugin: `bookworm`.
 
-## What it does
+## Choose the right skill
 
-- **Bookworm: Digest** creates a useful working note from an EPUB, a long PDF,
-  or a readable article URL. It keeps meaningful visuals and does not reduce a
-  source to a bare summary.
-- **Bookworm: Refine** restructures an existing Markdown, Word, PDF, or
-  PowerPoint research export without adding new claims. It preserves usable
-  links, cleans raw citation markers, and prepares an Obsidian-ready note.
-- **Bookworm: Enrich** adds a clearly separated layer of verified examples,
-  context, alternatives, and implications. It never silently rewrites the
-  original material.
+| You have | Use | What you get |
+| --- | --- | --- |
+| A book, a long report, or a readable article URL | **Bookworm: Digest** | A new, complete working note for Obsidian |
+| An existing research export that is hard to read | **Bookworm: Refine** | The same material, structured and source-aware |
+| A note that needs reliable outside context | **Bookworm: Enrich** | Clearly separated, verified additions |
+
+### Bookworm: Digest
+
+Use **Digest** when you are starting from source material: an EPUB, a long PDF
+that is actually a book, or a standalone readable article, essay, report, or
+research page. It creates a new Obsidian working note that preserves the
+source's argument, mechanisms, examples, limitations, and practical
+implications rather than producing a bare short summary. Important visuals are
+kept only when they help the reader understand or apply the material.
+
+Choose Digest for “read this and make it useful later.” Do not use it to tidy a
+research note you already have; that is Refine.
+
+### Bookworm: Refine
+
+Use **Refine** for an existing Markdown, Word, PDF, or PowerPoint research
+export that needs to become readable and Obsidian-ready without changing what
+it says. It normalizes headings, native Obsidian table-of-contents links,
+compact tables, lists, and editable Mermaid diagrams; it preserves useful
+title-links and removes raw citation markers only when their source status is
+accounted for.
+
+Refine does not add examples, opinions, analysis, or recommendations. It works
+on a temporary copy, leaves the source untouched until explicit handoff
+confirmation, and reports any unresolved citations instead of inventing links.
+
+Choose Refine for “make this research clean and navigable.” Do not use it when
+you want new research or external examples; that is Enrich.
+
+### Bookworm: Enrich
+
+Use **Enrich** when an existing note would benefit from new examples, context,
+alternatives, consequences, or a deeper verified explanation. It opens and
+checks sources, then adds only a visibly separate layer using blocks such as:
+
+```markdown
+#### Дополнение — [Source title](https://example.com)
+```
+
+It never silently rewrites the original material or presents its additions as
+part of the source. If the focus is unclear, it asks one short content question;
+otherwise it proceeds directly after your confirmation. Every change is made to
+a temporary note copy before the final handoff.
+
+Choose Enrich for “what is missing here, and what reliable context would make
+it more useful?” Do not use it as a cleanup pass; that is Refine.
 
 Russian user-facing labels are consistent: `Букворм: Дайджест`, `Букворм:
 Рефайн`, and `Букворм: Энрич`. English labels use `Bookworm: Digest`,
