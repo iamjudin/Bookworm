@@ -921,24 +921,40 @@ def extract_epub_assets(path: Path, out: Path, book_slug: str | None = None) -> 
     return manifest
 
 
+VAULT_EXCLUDED_DIRECTORY_NAMES = {".Trash", "Trash", "Caches", ".cache", "tmp", "TemporaryItems"}
+
+
 def detect_vaults(roots: Iterable[Path]) -> list[dict]:
     vaults: list[dict] = []
+    seen_paths: set[Path] = set()
     for root in roots:
         if not root.exists():
             continue
         for current, dirs, _files in os.walk(root):
             current_path = Path(current)
+            dirs[:] = [directory for directory in dirs if directory not in VAULT_EXCLUDED_DIRECTORY_NAMES]
             if ".obsidian" in dirs:
-                vaults.append({"path": str(current_path), "name": current_path.name})
+                resolved_path = current_path.resolve()
+                if resolved_path not in seen_paths:
+                    vaults.append({"path": str(current_path), "name": current_path.name})
+                    seen_paths.add(resolved_path)
                 dirs[:] = [d for d in dirs if d != ".obsidian"]
             if len(current_path.relative_to(root).parts) >= 4:
                 dirs[:] = []
     return vaults
 
 
-def default_vault_roots() -> list[Path]:
-    home = Path.home()
-    return [home / "Desktop", home / "Documents", home]
+def default_vault_roots(home: Path | None = None) -> list[Path]:
+    home = home or Path.home()
+    roots = [home / "Desktop", home / "Documents"]
+    mobile_documents = home / "Library" / "Mobile Documents"
+    if mobile_documents.is_dir():
+        roots.extend(sorted(
+            (container / "Documents" for container in mobile_documents.iterdir() if (container / "Documents").is_dir()),
+            key=lambda path: str(path),
+        ))
+    roots.append(home)
+    return roots
 
 
 def main(argv: list[str]) -> int:

@@ -186,7 +186,10 @@ When a reader-facing named example itself is useful to open — such as a game, 
    folder names, note/library structure, and nearby content. Never hard-code a
    personal vault name or path. Do not choose `Library/` merely because it
    exists; if there is no obvious candidate from title, nearby content, folder
-   purpose, or request, ask the user where to place it before handoff.
+   purpose, or request, ask the user where to place it before handoff. Never
+   treat `.Trash`, caches, or temporary folders as vault candidates; when a
+   known iCloud vault is absent from detection, inspect its stated path before
+   choosing another vault.
 4. Create one dedicated run directory such as
    `/path/to/scratch/refine-<run-id>/`. Every temporary file for this run,
    including the refined note, manifests, contact sheets, and extracted assets,

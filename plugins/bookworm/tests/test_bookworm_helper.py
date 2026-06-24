@@ -21,10 +21,23 @@ from bookworm_helper import (
     resolve_numeric_citations,
     source_counts,
     convert_refine_input,
+    default_vault_roots,
+    detect_vaults,
 )
 
 
 class RefineMarkdownTests(unittest.TestCase):
+    def test_detects_icloud_obsidian_vault_once(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            brain = home / "Library" / "Mobile Documents" / "iCloud~md~obsidian" / "Documents" / "Brain"
+            (brain / ".obsidian").mkdir(parents=True)
+            (home / ".Trash" / "Old Vault" / ".obsidian").mkdir(parents=True)
+
+            vaults = detect_vaults(default_vault_roots(home))
+
+            self.assertEqual(vaults, [{"path": str(brain), "name": "Brain"}])
+
     def test_citation_inventory_keeps_marker_context_before_cleanup(self) -> None:
         first = "citeturn0search1"
         second = "citeturn1search2"

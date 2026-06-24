@@ -54,6 +54,11 @@ filename. Under `## Источники` / `## Sources`, include the main article
 - Produce one Markdown file per book or article.
 - Optimize for Obsidian.
 - Detect likely vaults by looking for folders containing `.obsidian`.
+- The helper searches standard desktop/document roots and direct iCloud document
+  containers (including Obsidian's iCloud container). Never treat `.Trash`,
+  caches, or temporary folders as vault candidates. If a user says that a
+  known vault exists but it is absent from the result, inspect its stated path
+  before choosing another vault.
 - If one or more likely Obsidian vaults exist, select the best target from the detected vaults by matching the user's explicit request, existing folder names, note/library structure, and nearby content. Do not hard-code or assume a personal vault path.
 - Do not choose `Library/` merely because it exists. When title, nearby content,
   folder purpose, and the request do not identify an obvious candidate, ask the user where to place it before handoff.
