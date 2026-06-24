@@ -9,13 +9,19 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class RefineSkillContractTests(unittest.TestCase):
-    def test_every_successful_refine_requires_enrich_offer(self) -> None:
+    def test_refine_offers_enrich_only_after_verified_handoff(self) -> None:
         skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
 
-        self.assertIn("## Required Final Response", skill)
+        self.assertIn("## Required Post-Handoff Response", skill)
         self.assertIn("Обогатить заметку примерами и контекстом", skill)
-        self.assertIn("even when no vault is available", skill)
-        self.assertIn("refined output copy", skill)
+        self.assertIn("After a verified handoff", skill)
+        self.assertIn("Do not offer Enrich in the pre-handoff response", skill)
+        self.assertIn("Do not combine the transfer confirmation and Enrich offer", skill)
+
+    def test_bookworm_uses_informal_russian_second_person(self) -> None:
+        for name in ("digest", "refine", "enrich"):
+            skill = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("Use informal Russian second-person (\"ты\")", skill)
 
     def test_refine_repairs_sources_without_expanding_content(self) -> None:
         skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
@@ -141,6 +147,12 @@ class RefineSkillContractTests(unittest.TestCase):
             skill = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
             self.assertIn("ask the user where to place it", skill)
             self.assertIn("Do not choose", skill)
+
+    def test_refine_rescans_when_a_selected_vault_disappears(self) -> None:
+        skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("rescan vaults", skill)
+        self.assertIn("selected vault disappeared", skill)
+        self.assertIn("ask the user where to place it", skill)
 
     def test_plugin_uses_bookworm_icon_asset(self) -> None:
         manifest = json.loads((ROOT / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))

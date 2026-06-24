@@ -8,6 +8,7 @@ description: Use when the user wants to clean an existing Markdown research expo
 ## Action Names
 
 For Russian user-facing text, call this action `Букворм: Рефайн`. For English user-facing text, call it `Bookworm: Refine`. Never mix a Russian Bookworm label with an English action name, or an English Bookworm label with a Russian action name.
+Use informal Russian second-person ("ты") in every Russian progress update, question, and final message; never address the user as "вы".
 
 `Bookworm: Refine` turns an existing Markdown research note into an
 Obsidian-ready working note without expanding its substantive content. It is for
@@ -246,7 +247,11 @@ be mapped claim by claim.
    Otherwise use the best matching existing folder, or the vault root when no
    better match exists. State the selected path and why it was chosen, then ask
    for confirmation before transferring anything. Do not create a file in the
-   selected vault at this stage.
+   selected vault at this stage. If the selected vault disappears before
+   transfer, rescan vaults once and choose again from the current results. Say
+   that the selected vault disappeared; do not describe it as a permission
+   failure or silently close the workflow. If no current vault is suitable,
+   leave the refined copy in outputs and ask the user where to place it.
 7. Only after the user explicitly confirms the transfer, run the handoff helper.
    Never use direct `cp`, `mv`, `rm`, or another filesystem shortcut for this
    handoff:
@@ -268,23 +273,35 @@ be mapped claim by claim.
    explicit confirmation as authorization for that verified transfer and
    cleanup. Do not ask for a second confirmation unless the destination or
    transfer scope changes.
-8. Use the required final response below. Do not start Enrich automatically.
+8. Use the transfer-confirmation response below before handoff. Do not start or
+   offer Enrich until the handoff has been verified.
 
-## Required Final Response
+## Transfer Confirmation Response
 
-After every successful Refine, the final answer must end with this exact
-question in the relevant language, even when no vault is available:
+After a temporary refined copy is ready and before a verified handoff, report
+the selected destination and ask only for transfer confirmation. In Russian,
+use an informal question such as:
+
+> Перенести очищенную копию в `Brain/Library`?
+
+Do not offer Enrich in the pre-handoff response. Do not combine the transfer confirmation and Enrich offer in one message.
+
+## Required Post-Handoff Response
+
+After a verified handoff, state the destination path and end with this exact
+question in the relevant language:
 
 > Обогатить заметку примерами и контекстом с Букворм: Энрич?
 
-After a verified handoff, state the destination path before the question. When
-the vault is unavailable or no vault is found, state the path to the refined output copy and offer Enrich for that copy; do not offer to enrich the original source. The question is mandatory in both cases. It is an offer only; wait for the user's answer before starting Enrich.
+The question is mandatory after handoff. It is an offer only; wait for the
+user's answer before starting Enrich. Do not enrich the original source.
 
 ## No Vault Found
 
 If no Obsidian vault is detected, leave the refined copy in the current writable
-output location and say that no vault was found. Do not propose a vault transfer
-or delete the original source file automatically.
+output location and say that no vault was found. Ask the user where to transfer
+the refined copy; do not offer Enrich before that transfer is verified and do
+not delete the original source file automatically.
 
 ## Reader-Facing Output
 

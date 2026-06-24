@@ -8,6 +8,7 @@ description: Digest books and standalone readable articles into Obsidian-ready w
 ## Action Names
 
 For Russian user-facing text, call this action `Букворм: Дайджест`. For English user-facing text, call it `Bookworm: Digest`. Never mix a Russian Bookworm label with an English action name, or an English Bookworm label with a Russian action name.
+Use informal Russian second-person ("ты") in every Russian progress update, question, and final message; never address the user as "вы".
 
 Use this skill when the user asks Codex to read, digest, summarize, extract the essence of, or prepare an Obsidian note for a book or a standalone readable article. Also use it when an input looks like a book: an `EPUB` file or a `PDF` with roughly 100+ pages.
 
