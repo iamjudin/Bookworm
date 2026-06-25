@@ -48,6 +48,10 @@
   configuration (`useMaxWidth: false`, compact node/rank spacing) when no
   source-specific configuration is needed, shorten labels, and pair a wide
   graph with a concise explanation.
+- Mermaid init blocks must match the diagram type. Do not prepend
+  flowchart-specific spacing config (`nodeSpacing`, `rankSpacing`) to
+  `erDiagram`, sequence, state, or other non-flowchart diagrams; omit the init
+  block or use only diagram-appropriate settings.
 - Apply one general research information architecture across Digest, Refine, and
   Enrich: preserve all information; use one orientation layer, detailed material
   in its canonical sections, and a comparison/synthesis only for a distinct
