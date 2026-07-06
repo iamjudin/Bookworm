@@ -2,6 +2,18 @@
 
 All notable changes to Bookworm are documented here.
 
+## 0.1.7 — 2026-07-06
+
+- Replaced the hard-coded landing/design phrase dictionary with a general
+  language-consistency gate. Refine now reports mixed-language reader-facing
+  glue through `language_warnings`; the agent must resolve those warnings by
+  meaning in the note/request language before handoff.
+- Added confirmed `--final-title` support to `handoff-refined-note`, so agents
+  can use a localized reader-facing filename without relying on a built-in
+  title dictionary.
+- Source sections remain exempt from the language gate so source titles and
+  source-group labels can stay in the original language.
+
 ## 0.1.6 — 2026-07-06
 
 - Refine now applies established Russian equivalents for common landing/design

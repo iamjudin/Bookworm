@@ -133,8 +133,9 @@ class RefineSkillContractTests(unittest.TestCase):
         skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("Translate visible structural headings", skill)
         self.assertIn("Use an established translation", skill)
-        self.assertIn("problem/pain", skill)
-        self.assertIn("проблема/боль", skill)
+        self.assertIn("Do not rely on a fixed dictionary", skill)
+        self.assertIn("language_warnings", skill)
+        self.assertIn("--final-title", skill)
 
     def test_reader_review_flags_visual_density_without_deleting_diagrams(self) -> None:
         skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")

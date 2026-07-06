@@ -140,11 +140,12 @@ Keep evidence readable: link named items where they are useful to open; put sect
   language. Use an established translation in the note/request language when
   one exists; preserve the original term only when the local translation is not
   established, would be less readable, or the term is a product/framework/source
-  name. Avoid mixed-language glue such as `problem/pain` or
-  `process/how it works` in Russian notes; prefer `проблема/боль` and
-  `процесс/как это работает`. Terms such as `wireframe`, `CTA`, `visual
-  design`, `AI-agent`, `SaaS`, or `B2B` may remain when they are the natural
-  reader-facing term.
+  name. Do not rely on a fixed dictionary of phrases. Run a semantic language
+  pass over reader-facing headings, table headers, table values, short labels,
+  and the final filename: mixed-language glue such as slash-separated English
+  phrase chains must be translated by meaning into the note/request language,
+  while natural terms such as `wireframe`, `CTA`, `visual design`, `AI-agent`,
+  `SaaS`, or `B2B` may remain when they are the reader-facing term.
 - Turn wider or prose-heavy tables into titled item sections with labeled
   fields such as `**Сильные стороны:**` and `**Риски:**`.
 - Turn procedural tables into numbered steps.
@@ -249,6 +250,10 @@ Use the helper's `existing_title_links_preserved` and
 `section_sources_retained` values in the visible source-status note; do not
 describe the note as source-empty merely because raw export markers could not
 be mapped claim by claim.
+Use the helper's `language_warnings` as a gate, not as an automatic
+translator. Resolve every warning in the temporary copy with model judgement
+before handoff, except when the flagged phrase is intentionally a name, source
+title, framework, or established term.
 5. Inspect the result before handoff. Verify that ordinary title links, bare
    URLs, and source sections remain; raw citation markers are gone; the body has
    no duplicate top H1; and the TOC links only to real main sections. Confirm
@@ -272,6 +277,7 @@ be mapped claim by claim.
      --refined /path/to/scratch/refined.md \
      --destination-dir /path/to/vault/Library \
      --confirmation user-confirmed \
+     --final-title "Reader-facing localized title" \
      --run-dir /path/to/scratch/refine-<run-id> \
      --assets-dir /path/to/scratch/refine-<run-id>/assets
    ```
@@ -285,6 +291,9 @@ be mapped claim by claim.
   transfer scope changes. If the refined destination is the same existing
   source note, the helper performs the verified in-place replacement; do not
   bypass it with manual `cp`, `mv`, `rm`, or editor writes.
+  When the source filename or H1 is in the wrong language, pass a localized
+  reader-facing `--final-title` to the helper instead of accepting the raw
+  export title.
 8. Use the transfer-confirmation response below before handoff. Do not start or
    offer Enrich until the handoff has been verified.
 

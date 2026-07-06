@@ -17,6 +17,7 @@ from bookworm_helper import (
     citation_inventory,
     note_filename,
     handoff_refined_note,
+    language_consistency_warnings,
     refine_markdown,
     resolve_citation_markers,
     resolve_numeric_citations,
@@ -517,7 +518,7 @@ Useful text.
         self.assertNotIn("Executive summary", result)
         self.assertNotIn("Recommended desktop composition", result)
 
-    def test_localizes_common_landing_terms_in_russian_table_values(self) -> None:
+    def test_flags_mixed_language_glue_in_russian_table_values_without_dictionary_translation(self) -> None:
         source = """## Секция
 
 | Тип лендинга | Рекомендуемый порядок |
@@ -526,24 +527,55 @@ Useful text.
 """
 
         result = refine_markdown(source, toc_title="Содержание")
+        warnings = language_consistency_warnings(result)
 
-        self.assertIn(
-            "Hero → проблема/боль → результаты/ценность → процесс/как это работает → доказательства/кейсы/логотипы → предложение/контакты/форма демо → FAQ/возражения → финальный CTA",
-            result,
-        )
-        self.assertNotIn("problem/pain", result)
-        self.assertNotIn("outcomes/value", result)
-        self.assertNotIn("process/how it works", result)
-        self.assertNotIn("proof/cases/logos", result)
-        self.assertNotIn("final CTA", result)
+        self.assertIn("problem/pain", result)
+        self.assertTrue(any("problem/pain" in warning["text"] for warning in warnings))
+        self.assertTrue(any(warning["reason"] == "latin_slash_glue" for warning in warnings))
 
-    def test_localizes_russian_note_filename_from_common_english_h1(self) -> None:
+    def test_language_warnings_ignore_source_section_original_titles(self) -> None:
+        source = """## Источники
+
+### Page structure, story flow, clarity, CTA
+
+- [What is GTD? | Getting Things Done](https://gettingthingsdone.com/)
+"""
+
+        self.assertEqual(language_consistency_warnings(source), [])
+
+    def test_does_not_localize_filename_by_builtin_dictionary(self) -> None:
         source = "# Structural gray wireframes for landing pages\n\nРусский текст про лендинги.\n"
 
         self.assertEqual(
             note_filename(source, "deep-research-report"),
-            "Структурные gray wireframes для лендингов.md",
+            "Structural gray wireframes for landing pages.md",
         )
+
+    def test_handoff_uses_confirmed_final_title_for_reader_facing_filename(self) -> None:
+        source = "# Structural gray wireframes for landing pages\n\nРусский текст.\n"
+        refined = "## Содержание\n\nРусский текст.\n"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source_path = root / "Downloads" / "deep-research-report.md"
+            run_dir = root / "scratch"
+            refined_path = run_dir / "refined.md"
+            destination_dir = root / "Brain" / "Library"
+            source_path.parent.mkdir()
+            run_dir.mkdir()
+            source_path.write_text(source, encoding="utf-8")
+            refined_path.write_text(refined, encoding="utf-8")
+
+            destination = handoff_refined_note(
+                source_path,
+                refined_path,
+                destination_dir,
+                confirmation="user-confirmed",
+                run_dir=run_dir,
+                final_title="Структурные gray wireframes для лендингов",
+            )
+
+            self.assertEqual(destination.name, "Структурные gray wireframes для лендингов.md")
+            self.assertTrue(destination.exists())
 
     def test_escapes_pipes_inside_existing_markdown_table_links(self) -> None:
         source = """## Сравнение

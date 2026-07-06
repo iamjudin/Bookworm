@@ -72,21 +72,20 @@ COMMON_RUSSIAN_TABLE_HEADER_TRANSLATIONS = {
     "Mobile": "Mobile",
     "Anti-pattern": "Антипаттерн",
 }
-COMMON_RUSSIAN_TEXT_TRANSLATIONS = {
-    "Structural gray wireframes for landing pages": "Структурные gray wireframes для лендингов",
-    "problem/pain": "проблема/боль",
-    "outcomes/value": "результаты/ценность",
-    "process/how it works": "процесс/как это работает",
-    "proof/cases/logos": "доказательства/кейсы/логотипы",
-    "offer/contact/demo form": "предложение/контакты/форма демо",
-    "FAQ/objections": "FAQ/возражения",
-    "final CTA": "финальный CTA",
-    "key benefits": "ключевые преимущества",
-    "feature/spec modules": "модули features/specs",
-    "reviews/proof/media": "отзывы/доказательства/медиа",
-    "comparison/variants": "сравнение/варианты",
-    "pricing/buy/bundle": "цены/покупка/комплект",
-    "shipping/returns/FAQ": "доставка/возвраты/FAQ",
+ALLOWED_SHORT_LATIN_TERMS = {
+    "AI",
+    "API",
+    "B2B",
+    "B2C",
+    "CTA",
+    "FAQ",
+    "H1",
+    "H2",
+    "H3",
+    "SaaS",
+    "SEO",
+    "UI",
+    "UX",
 }
 
 
@@ -374,23 +373,14 @@ def document_title(source: str, fallback: str) -> str:
     return fallback
 
 
-def is_predominantly_russian(source: str) -> bool:
-    return bool(re.search(r"[А-Яа-яЁё]", source))
-
-
-def localize_common_russian_text(text: str) -> str:
-    for source, target in COMMON_RUSSIAN_TEXT_TRANSLATIONS.items():
-        text = text.replace(source, target)
-    return text
-
-
-def note_filename(source: str, fallback: str) -> str:
-    title = document_title(source, fallback)
-    if is_predominantly_russian(source):
-        title = localize_common_russian_text(title)
+def note_filename_from_title(title: str, fallback: str) -> str:
     safe_title = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "-", title)
     safe_title = re.sub(r"\s+", " ", safe_title).strip(" .")
     return f"{safe_title or fallback}.md"
+
+
+def note_filename(source: str, fallback: str) -> str:
+    return note_filename_from_title(document_title(source, fallback), fallback)
 
 
 def _require_reader(module: str, label: str):
@@ -551,6 +541,7 @@ def handoff_refined_note(
     confirmation: str | None,
     run_dir: Path | None = None,
     assets_dir: Path | None = None,
+    final_title: str | None = None,
 ) -> Path:
     """Create the final note only after an explicit user confirmation token."""
     if confirmation != "user-confirmed":
@@ -571,7 +562,12 @@ def handoff_refined_note(
         if source_path.suffix.lower() == ".md"
         else refined_path.read_text(encoding="utf-8")
     )
-    destination = destination_dir / note_filename(title_source, source_path.stem)
+    destination_filename = (
+        note_filename_from_title(final_title, source_path.stem)
+        if final_title is not None
+        else note_filename(title_source, source_path.stem)
+    )
+    destination = destination_dir / destination_filename
     replacing_source_in_place = destination.exists() and destination.resolve() == source_path.resolve()
     if destination.exists() and not replacing_source_in_place:
         raise FileExistsError(f"Destination already exists: {destination}")
@@ -735,19 +731,19 @@ def localize_common_inline_labels(lines: list[str]) -> list[str]:
     return result
 
 
-def localize_common_text_fragments(lines: list[str]) -> list[str]:
-    """Translate known structural phrases when the Russian equivalent is established."""
+def language_consistency_warnings(source: str) -> list[dict[str, str | int]]:
+    """Flag visible mixed-language glue that needs model-side localization."""
+    lines = source.splitlines()
     if not any(re.search(r"[А-Яа-яЁё]", line) for line in lines):
-        return lines
-    result: list[str] = []
+        return []
+    warnings: list[dict[str, str | int]] = []
     in_fence = False
     in_sources = False
     source_level = 0
-    for line in lines:
+    for line_number, line in enumerate(lines, start=1):
         stripped = line.strip()
         if stripped.startswith("```") or stripped.startswith("~~~"):
             in_fence = not in_fence
-            result.append(line)
             continue
         heading = MARKDOWN_HEADING_PATTERN.match(line)
         if heading:
@@ -758,10 +754,40 @@ def localize_common_text_fragments(lines: list[str]) -> list[str]:
                 source_level = level
             elif in_sources and level <= source_level:
                 in_sources = False
-        if not in_fence and not in_sources:
-            line = localize_common_russian_text(line)
-        result.append(line)
-    return result
+        if in_fence or in_sources or not stripped:
+            continue
+        visible = MARKDOWN_SOURCE_LINK_PATTERN.sub("", line)
+        if re.search(r"\b[A-Za-z][A-Za-z -]+/[A-Za-z][A-Za-z/ -]*\b", visible):
+            warnings.append({
+                "line": line_number,
+                "reason": "latin_slash_glue",
+                "text": line.strip(),
+            })
+            continue
+        if heading:
+            title = heading.group(2).strip()
+            words = re.findall(r"\b[A-Za-z][A-Za-z0-9-]*\b", title)
+            meaningful = [word for word in words if word not in ALLOWED_SHORT_LATIN_TERMS]
+            if len(meaningful) >= 2 and not re.search(r"[А-Яа-яЁё]", title):
+                warnings.append({
+                    "line": line_number,
+                    "reason": "english_visible_heading",
+                    "text": line.strip(),
+                })
+                continue
+        if stripped.startswith("|"):
+            cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+            for cell in cells:
+                words = re.findall(r"\b[A-Za-z][A-Za-z0-9-]*\b", cell)
+                meaningful = [word for word in words if word not in ALLOWED_SHORT_LATIN_TERMS]
+                if len(meaningful) >= 2 and not re.search(r"[А-Яа-яЁё]", cell):
+                    warnings.append({
+                        "line": line_number,
+                        "reason": "english_table_cell",
+                        "text": line.strip(),
+                    })
+                    break
+    return warnings
 
 
 def localize_common_headings(lines: list[str]) -> list[str]:
@@ -859,7 +885,6 @@ def refine_markdown(source: str, toc_title: str = "Содержание") -> str
     lines = localize_table_headers(lines)
     lines = localize_common_inline_labels(lines)
     lines = localize_common_headings(lines)
-    lines = localize_common_text_fragments(lines)
     lines = compact_mermaid_blocks(lines)
 
     while lines and not lines[0].strip():
@@ -1127,6 +1152,7 @@ def main(argv: list[str]) -> int:
     handoff_cmd.add_argument("--confirmation", required=True)
     handoff_cmd.add_argument("--run-dir", type=Path)
     handoff_cmd.add_argument("--assets-dir", type=Path)
+    handoff_cmd.add_argument("--final-title")
 
     args = parser.parse_args(argv)
 
@@ -1163,6 +1189,7 @@ def main(argv: list[str]) -> int:
             "section_sources_retained": len(MARKDOWN_SOURCE_LINK_PATTERN.findall(source_section)),
             "removed_citation_markers": source_counts(source)["citation_markers"],
             "suggested_filename": note_filename(source, args.path.stem),
+            "language_warnings": language_consistency_warnings(refined),
             **citation_report,
             **numeric_report,
         }, ensure_ascii=False))
@@ -1182,6 +1209,7 @@ def main(argv: list[str]) -> int:
             confirmation=args.confirmation,
             run_dir=args.run_dir,
             assets_dir=args.assets_dir,
+            final_title=args.final_title,
         )
         print(json.dumps({"destination": str(destination)}, ensure_ascii=False))
     else:
