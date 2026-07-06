@@ -137,9 +137,14 @@ Keep evidence readable: link named items where they are useful to open; put sect
   research, and preserve English headers in English research.
 - Translate visible structural headings, TOC labels, and generic section names
   into the note/request language when the surrounding note is clearly in that
-  language. Preserve established terms inside localized headings when they are
-  the natural reader-facing term, for example `wireframe`, `CTA`, `visual
-  design`, `AI-agent`, or product/framework names.
+  language. Use an established translation in the note/request language when
+  one exists; preserve the original term only when the local translation is not
+  established, would be less readable, or the term is a product/framework/source
+  name. Avoid mixed-language glue such as `problem/pain` or
+  `process/how it works` in Russian notes; prefer `проблема/боль` and
+  `процесс/как это работает`. Terms such as `wireframe`, `CTA`, `visual
+  design`, `AI-agent`, `SaaS`, or `B2B` may remain when they are the natural
+  reader-facing term.
 - Turn wider or prose-heavy tables into titled item sections with labeled
   fields such as `**Сильные стороны:**` and `**Риски:**`.
 - Turn procedural tables into numbered steps.

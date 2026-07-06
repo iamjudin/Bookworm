@@ -2,6 +2,19 @@
 
 All notable changes to Bookworm are documented here.
 
+## 0.1.6 — 2026-07-06
+
+- Refine now applies established Russian equivalents for common landing/design
+  glue phrases inside table values and short structural text, for example
+  `problem/pain` → `проблема/боль` and `process/how it works` →
+  `процесс/как это работает`.
+- Refine keeps original terms only when they are the natural reader-facing term
+  or a product/framework/source name, preventing mixed-language “fabric/details”
+  output.
+- Suggested filenames now use the localized reader-facing title for known
+  Russian research notes, while preserving useful terms such as `gray
+  wireframes`.
+
 ## 0.1.5 — 2026-07-06
 
 - Refine now localizes short structural labels and common table headers in

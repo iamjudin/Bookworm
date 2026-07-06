@@ -72,6 +72,22 @@ COMMON_RUSSIAN_TABLE_HEADER_TRANSLATIONS = {
     "Mobile": "Mobile",
     "Anti-pattern": "Антипаттерн",
 }
+COMMON_RUSSIAN_TEXT_TRANSLATIONS = {
+    "Structural gray wireframes for landing pages": "Структурные gray wireframes для лендингов",
+    "problem/pain": "проблема/боль",
+    "outcomes/value": "результаты/ценность",
+    "process/how it works": "процесс/как это работает",
+    "proof/cases/logos": "доказательства/кейсы/логотипы",
+    "offer/contact/demo form": "предложение/контакты/форма демо",
+    "FAQ/objections": "FAQ/возражения",
+    "final CTA": "финальный CTA",
+    "key benefits": "ключевые преимущества",
+    "feature/spec modules": "модули features/specs",
+    "reviews/proof/media": "отзывы/доказательства/медиа",
+    "comparison/variants": "сравнение/варианты",
+    "pricing/buy/bundle": "цены/покупка/комплект",
+    "shipping/returns/FAQ": "доставка/возвраты/FAQ",
+}
 
 
 class TextAndImageParser(HTMLParser):
@@ -358,8 +374,20 @@ def document_title(source: str, fallback: str) -> str:
     return fallback
 
 
+def is_predominantly_russian(source: str) -> bool:
+    return bool(re.search(r"[А-Яа-яЁё]", source))
+
+
+def localize_common_russian_text(text: str) -> str:
+    for source, target in COMMON_RUSSIAN_TEXT_TRANSLATIONS.items():
+        text = text.replace(source, target)
+    return text
+
+
 def note_filename(source: str, fallback: str) -> str:
     title = document_title(source, fallback)
+    if is_predominantly_russian(source):
+        title = localize_common_russian_text(title)
     safe_title = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "-", title)
     safe_title = re.sub(r"\s+", " ", safe_title).strip(" .")
     return f"{safe_title or fallback}.md"
@@ -707,6 +735,35 @@ def localize_common_inline_labels(lines: list[str]) -> list[str]:
     return result
 
 
+def localize_common_text_fragments(lines: list[str]) -> list[str]:
+    """Translate known structural phrases when the Russian equivalent is established."""
+    if not any(re.search(r"[А-Яа-яЁё]", line) for line in lines):
+        return lines
+    result: list[str] = []
+    in_fence = False
+    in_sources = False
+    source_level = 0
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("```") or stripped.startswith("~~~"):
+            in_fence = not in_fence
+            result.append(line)
+            continue
+        heading = MARKDOWN_HEADING_PATTERN.match(line)
+        if heading:
+            level = len(heading.group(1))
+            title = heading.group(2).strip().casefold()
+            if title in {"источники", "sources"}:
+                in_sources = True
+                source_level = level
+            elif in_sources and level <= source_level:
+                in_sources = False
+        if not in_fence and not in_sources:
+            line = localize_common_russian_text(line)
+        result.append(line)
+    return result
+
+
 def localize_common_headings(lines: list[str]) -> list[str]:
     """Normalize common structural export headings to the predominant Russian language."""
     if not any(re.search(r"[А-Яа-яЁё]", line) for line in lines):
@@ -802,6 +859,7 @@ def refine_markdown(source: str, toc_title: str = "Содержание") -> str
     lines = localize_table_headers(lines)
     lines = localize_common_inline_labels(lines)
     lines = localize_common_headings(lines)
+    lines = localize_common_text_fragments(lines)
     lines = compact_mermaid_blocks(lines)
 
     while lines and not lines[0].strip():

@@ -15,6 +15,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from bookworm_helper import (
     citation_inventory,
+    note_filename,
     handoff_refined_note,
     refine_markdown,
     resolve_citation_markers,
@@ -515,6 +516,34 @@ Useful text.
         self.assertIn("| Паттерн макета | Рекомендуемая desktop-композиция | Примечания |", result)
         self.assertNotIn("Executive summary", result)
         self.assertNotIn("Recommended desktop composition", result)
+
+    def test_localizes_common_landing_terms_in_russian_table_values(self) -> None:
+        source = """## Секция
+
+| Тип лендинга | Рекомендуемый порядок |
+|---|---|
+| **B2B service** | Hero → problem/pain → outcomes/value → process/how it works → proof/cases/logos → offer/contact/demo form → FAQ/objections → final CTA |
+"""
+
+        result = refine_markdown(source, toc_title="Содержание")
+
+        self.assertIn(
+            "Hero → проблема/боль → результаты/ценность → процесс/как это работает → доказательства/кейсы/логотипы → предложение/контакты/форма демо → FAQ/возражения → финальный CTA",
+            result,
+        )
+        self.assertNotIn("problem/pain", result)
+        self.assertNotIn("outcomes/value", result)
+        self.assertNotIn("process/how it works", result)
+        self.assertNotIn("proof/cases/logos", result)
+        self.assertNotIn("final CTA", result)
+
+    def test_localizes_russian_note_filename_from_common_english_h1(self) -> None:
+        source = "# Structural gray wireframes for landing pages\n\nРусский текст про лендинги.\n"
+
+        self.assertEqual(
+            note_filename(source, "deep-research-report"),
+            "Структурные gray wireframes для лендингов.md",
+        )
 
     def test_escapes_pipes_inside_existing_markdown_table_links(self) -> None:
         source = """## Сравнение

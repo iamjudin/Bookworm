@@ -132,7 +132,9 @@ class RefineSkillContractTests(unittest.TestCase):
     def test_refine_localizes_visible_structure_to_note_language(self) -> None:
         skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("Translate visible structural headings", skill)
-        self.assertIn("Preserve established terms", skill)
+        self.assertIn("Use an established translation", skill)
+        self.assertIn("problem/pain", skill)
+        self.assertIn("проблема/боль", skill)
 
     def test_reader_review_flags_visual_density_without_deleting_diagrams(self) -> None:
         skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
