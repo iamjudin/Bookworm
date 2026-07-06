@@ -135,6 +135,11 @@ Keep evidence readable: link named items where they are useful to open; put sect
   labelled paragraphs so the note remains scannable without losing wording.
 - Normalize `Parameter | Description` to `Параметр | Описание` in Russian
   research, and preserve English headers in English research.
+- Translate visible structural headings, TOC labels, and generic section names
+  into the note/request language when the surrounding note is clearly in that
+  language. Preserve established terms inside localized headings when they are
+  the natural reader-facing term, for example `wireframe`, `CTA`, `visual
+  design`, `AI-agent`, or product/framework names.
 - Turn wider or prose-heavy tables into titled item sections with labeled
   fields such as `**Сильные стороны:**` and `**Риски:**`.
 - Turn procedural tables into numbered steps.

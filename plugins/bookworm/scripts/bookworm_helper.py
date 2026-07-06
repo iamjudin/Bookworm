@@ -34,6 +34,30 @@ BARE_URL_PATTERN = re.compile(r"(?<!\]\()(?<!\()https?://[^\s<>)\]]+")
 FOOTNOTE_REFERENCE_PATTERN = re.compile(r"(?<!\\)\[\^[^\]]+\]")
 LABEL_VALUE_PATTERN = re.compile(r"^\*\*(.+?)(?::)?\*\*\s*:?\s*(.+?)\s*$")
 MERMAID_COMPACT_INIT = '%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 20, "rankSpacing": 25}} }%%'
+COMMON_RUSSIAN_HEADING_TRANSLATIONS = {
+    "Executive summary": "Исполнительное резюме",
+    "Sources": "Источники",
+    "Page structure and story flow": "Структура страницы и сценарий",
+    "Layout grids, spacing and typography": "Сетки, интервалы и типографика",
+    "Composition and responsive behavior": "Композиция и адаптивное поведение",
+    "Recommended numeric scales and device differences": "Рекомендуемые числовые шкалы и различия устройств",
+    "Anti-patterns and costly errors": "Антипаттерны и дорогие ошибки",
+    "Ready for visual design checklist": "Чеклист готовности к visual design",
+    "AI-agent instruction block": "Инструкция для AI-агента",
+    "Recommended section orders by landing type": "Рекомендуемый порядок секций по типу лендинга",
+    "Hero full-screen versus hinting the next block": "Hero на весь экран или намёк на следующий блок",
+    "How to preserve the main conversion path": "Как сохранить главный conversion path",
+    "Layout grid defaults": "Базовые настройки сетки",
+    "When to use one, two, three and four columns": "Когда использовать одну, две, три и четыре колонки",
+    "Maximum text widths and full-width sections": "Максимальная ширина текста и full-width секции",
+    "Spacing system": "Система интервалов",
+    "Typography hierarchy in grayscale": "Типографическая иерархия в grayscale",
+    "Hero composition rules": "Правила композиции hero",
+    "Cards, metrics, forms and proof blocks": "Карточки, метрики, формы и proof-блоки",
+    "CTA placement": "Размещение CTA",
+    "Responsive behavior": "Адаптивное поведение",
+    "Recommended defaults by landing category": "Рекомендуемые defaults по категории лендинга",
+}
 
 
 class TextAndImageParser(HTMLParser):
@@ -632,15 +656,14 @@ def localize_table_headers(lines: list[str]) -> list[str]:
 
 
 def localize_common_headings(lines: list[str]) -> list[str]:
-    """Normalize generic export headings to the predominant Russian language."""
+    """Normalize common structural export headings to the predominant Russian language."""
     if not any(re.search(r"[А-Яа-яЁё]", line) for line in lines):
         return lines
-    replacements = {"Executive summary": "Исполнительное резюме", "Sources": "Источники"}
     result: list[str] = []
     for line in lines:
         heading = MARKDOWN_HEADING_PATTERN.match(line)
-        if heading and heading.group(2).strip() in replacements:
-            result.append(f"{heading.group(1)} {replacements[heading.group(2).strip()]}")
+        if heading and heading.group(2).strip() in COMMON_RUSSIAN_HEADING_TRANSLATIONS:
+            result.append(f"{heading.group(1)} {COMMON_RUSSIAN_HEADING_TRANSLATIONS[heading.group(2).strip()]}")
         else:
             result.append(line)
     return result

@@ -1,6 +1,6 @@
 {
   "name": "bookworm",
-  "version": "0.1.3+codex.20260624144005",
+  "version": "0.1.4+codex.20260706153638",
   "description": "Bookworm digests books and articles, safely refines research, and enriches notes with verified sources.",
   "author": {
     "name": "iamjudin"

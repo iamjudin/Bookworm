@@ -438,6 +438,41 @@ Useful text.
         result = refine_markdown("## Executive summary\n\nРусский текст.\n")
         self.assertIn("## Исполнительное резюме", result)
 
+    def test_localizes_common_english_research_structure_headings_in_russian_note(self) -> None:
+        source = """## Page structure and story flow
+
+Русский текст про лендинг и wireframe.
+
+## Layout grids, spacing and typography
+
+Ещё русский текст.
+"""
+
+        result = refine_markdown(source, toc_title="Содержание")
+
+        self.assertIn("[[#Структура страницы и сценарий|Структура страницы и сценарий]]", result)
+        self.assertIn("[[#Сетки, интервалы и типографика|Сетки, интервалы и типографика]]", result)
+        self.assertIn("## Структура страницы и сценарий", result)
+        self.assertIn("## Сетки, интервалы и типографика", result)
+        self.assertNotIn("Page structure and story flow", result)
+        self.assertNotIn("Layout grids, spacing and typography", result)
+
+    def test_preserves_established_terms_inside_localized_headings(self) -> None:
+        source = """## AI-agent instruction block
+
+Русский текст для Codex.
+
+## Ready for visual design checklist
+
+Русский текст про visual design.
+"""
+
+        result = refine_markdown(source, toc_title="Содержание")
+
+        self.assertIn("## Инструкция для AI-агента", result)
+        self.assertIn("## Чеклист готовности к visual design", result)
+        self.assertIn("[[#Инструкция для AI-агента|Инструкция для AI-агента]]", result)
+
     def test_escapes_pipes_inside_existing_markdown_table_links(self) -> None:
         source = """## Сравнение
 
