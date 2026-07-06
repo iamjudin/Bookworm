@@ -167,6 +167,32 @@ class RefineMarkdownTests(unittest.TestCase):
             self.assertFalse((destination_dir / "assets" / "empty-assets").exists())
             self.assertFalse(run_dir.exists())
 
+    def test_handoff_replaces_existing_source_note_in_place_after_confirmation(self) -> None:
+        source = "# Structural gray wireframes for landing pages\n\nOld text.\n"
+        refined = "## Содержание\n\nNew refined text.\n"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            destination_dir = root / "Brain" / "Library"
+            run_dir = root / "scratch"
+            source_path = destination_dir / "Structural gray wireframes for landing pages.md"
+            refined_path = run_dir / "refined.md"
+            destination_dir.mkdir(parents=True)
+            run_dir.mkdir()
+            source_path.write_text(source, encoding="utf-8")
+            refined_path.write_text(refined, encoding="utf-8")
+
+            destination = handoff_refined_note(
+                source_path,
+                refined_path,
+                destination_dir,
+                confirmation="user-confirmed",
+                run_dir=run_dir,
+            )
+
+            self.assertEqual(destination, source_path)
+            self.assertEqual(source_path.read_text(encoding="utf-8"), refined)
+            self.assertFalse(run_dir.exists())
+
     def test_converts_markdown_to_temp_copy_without_changing_original(self) -> None:
         source = "# Title\n\nBody.\n"
         with tempfile.TemporaryDirectory() as directory:
@@ -472,6 +498,23 @@ Useful text.
         self.assertIn("## Инструкция для AI-агента", result)
         self.assertIn("## Чеклист готовности к visual design", result)
         self.assertIn("[[#Инструкция для AI-агента|Инструкция для AI-агента]]", result)
+
+    def test_localizes_common_bold_labels_and_table_headers_in_russian_note(self) -> None:
+        source = """**Executive summary.** Русский текст.
+
+## Секция
+
+| Layout pattern | Recommended desktop composition | Notes |
+|---|---|---|
+| Hero | 7/5 | Proof near hero |
+"""
+
+        result = refine_markdown(source, toc_title="Содержание")
+
+        self.assertIn("**Резюме.** Русский текст.", result)
+        self.assertIn("| Паттерн макета | Рекомендуемая desktop-композиция | Примечания |", result)
+        self.assertNotIn("Executive summary", result)
+        self.assertNotIn("Recommended desktop composition", result)
 
     def test_escapes_pipes_inside_existing_markdown_table_links(self) -> None:
         source = """## Сравнение

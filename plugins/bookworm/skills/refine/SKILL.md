@@ -275,9 +275,11 @@ be mapped claim by claim.
    overwrite an existing note, verifies the final bytes and assets, and only
    then removes the original and all temporary run files. For a `Library/`
    destination, assets live in `Library/assets/<note-slug>/`. Treat this
-   explicit confirmation as authorization for that verified transfer and
-   cleanup. Do not ask for a second confirmation unless the destination or
-   transfer scope changes.
+  explicit confirmation as authorization for that verified transfer and
+  cleanup. Do not ask for a second confirmation unless the destination or
+  transfer scope changes. If the refined destination is the same existing
+  source note, the helper performs the verified in-place replacement; do not
+  bypass it with manual `cp`, `mv`, `rm`, or editor writes.
 8. Use the transfer-confirmation response below before handoff. Do not start or
    offer Enrich until the handoff has been verified.
 

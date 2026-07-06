@@ -58,6 +58,20 @@ COMMON_RUSSIAN_HEADING_TRANSLATIONS = {
     "Responsive behavior": "Адаптивное поведение",
     "Recommended defaults by landing category": "Рекомендуемые defaults по категории лендинга",
 }
+COMMON_RUSSIAN_INLINE_LABEL_TRANSLATIONS = {
+    "Executive summary": "Резюме",
+}
+COMMON_RUSSIAN_TABLE_HEADER_TRANSLATIONS = {
+    "Recommended order": "Рекомендуемый порядок",
+    "Layout pattern": "Паттерн макета",
+    "Recommended desktop composition": "Рекомендуемая desktop-композиция",
+    "Notes": "Примечания",
+    "When to use": "Когда использовать",
+    "When not to use": "Когда не использовать",
+    "Desktop / tablet": "Desktop / tablet",
+    "Mobile": "Mobile",
+    "Anti-pattern": "Антипаттерн",
+}
 
 
 class TextAndImageParser(HTMLParser):
@@ -530,11 +544,20 @@ def handoff_refined_note(
         else refined_path.read_text(encoding="utf-8")
     )
     destination = destination_dir / note_filename(title_source, source_path.stem)
-    if destination.exists():
+    replacing_source_in_place = destination.exists() and destination.resolve() == source_path.resolve()
+    if destination.exists() and not replacing_source_in_place:
         raise FileExistsError(f"Destination already exists: {destination}")
 
     payload = refined_path.read_bytes()
-    destination.write_bytes(payload)
+    if replacing_source_in_place:
+        temporary_destination = destination.with_name(f".{destination.name}.bookworm-tmp")
+        temporary_destination.write_bytes(payload)
+        if temporary_destination.read_bytes() != payload:
+            temporary_destination.unlink(missing_ok=True)
+            raise OSError("Final note verification failed")
+        os.replace(temporary_destination, destination)
+    else:
+        destination.write_bytes(payload)
     if destination.read_bytes() != payload:
         destination.unlink(missing_ok=True)
         raise OSError("Final note verification failed")
@@ -555,7 +578,8 @@ def handoff_refined_note(
             destination.unlink(missing_ok=True)
             raise OSError("Asset handoff verification failed")
 
-    source_path.unlink()
+    if not replacing_source_in_place:
+        source_path.unlink()
     if resolved_run_dir is not None:
         shutil.rmtree(resolved_run_dir)
     elif refined_path.resolve() != source_path.resolve():
@@ -649,10 +673,38 @@ def localize_table_headers(lines: list[str]) -> list[str]:
     russian = any(re.search(r"[А-Яа-яЁё]", line) for line in lines)
     if not russian:
         return lines
-    return [
-        "| Параметр | Описание |" if line.strip() == "| Parameter | Description |" else line
-        for line in lines
-    ]
+    result: list[str] = []
+    for index, line in enumerate(lines):
+        if line.strip() == "| Parameter | Description |":
+            result.append("| Параметр | Описание |")
+            continue
+        next_line = lines[index + 1].strip() if index + 1 < len(lines) else ""
+        is_table_header = bool(re.match(r"^\|\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?$", next_line))
+        if is_table_header and line.strip().startswith("|") and line.strip().endswith("|"):
+            cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+            translated = [
+                COMMON_RUSSIAN_TABLE_HEADER_TRANSLATIONS.get(cell, cell)
+                for cell in cells
+            ]
+            line = "| " + " | ".join(translated) + " |"
+        result.append(line)
+    return result
+
+
+def localize_common_inline_labels(lines: list[str]) -> list[str]:
+    """Normalize short structural bold labels to the predominant Russian language."""
+    if not any(re.search(r"[А-Яа-яЁё]", line) for line in lines):
+        return lines
+    result: list[str] = []
+    for line in lines:
+        for source, target in COMMON_RUSSIAN_INLINE_LABEL_TRANSLATIONS.items():
+            line = re.sub(
+                rf"^\*\*{re.escape(source)}([.:])\*\*",
+                rf"**{target}\1**",
+                line,
+            )
+        result.append(line)
+    return result
 
 
 def localize_common_headings(lines: list[str]) -> list[str]:
@@ -748,6 +800,7 @@ def refine_markdown(source: str, toc_title: str = "Содержание") -> str
     lines = convert_label_value_runs(lines)
     lines = normalize_existing_tables(lines)
     lines = localize_table_headers(lines)
+    lines = localize_common_inline_labels(lines)
     lines = localize_common_headings(lines)
     lines = compact_mermaid_blocks(lines)
 
