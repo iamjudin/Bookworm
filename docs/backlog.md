@@ -42,6 +42,10 @@
   documents) should link from their names. Gather proof for whole sections at
   the end under `## Источники` / `## Sources`, grouped by section, with
   descriptive title-links. Do not leave bare numeric citations or naked URLs.
+- If a note already has grouped section sources under `## Источники` /
+  `## Sources`, do not append routine proof title-links to most body
+  paragraphs. Keep the reading layer clean; use inline links only for
+  exceptions that need source attribution at the exact sentence.
 - Mermaid diagrams must be portrait and top-to-bottom. Keep them as editable
   Mermaid: convert `LR` to `TD/TB` when graph meaning is unchanged; never split
   one diagram automatically or render it as an image. Use compact Mermaid
