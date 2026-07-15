@@ -1,7 +1,17 @@
 {
   "name": "bookworm",
-  "version": "0.1.8+codex.20260715190000",
+  "version": "0.1.9+codex.20260715230500",
   "description": "Bookworm digests books and articles, safely refines research, and enriches notes with verified sources.",
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "keywords": [
+    "codex",
+    "obsidian",
+    "markdown",
+    "research",
+    "books",
+    "articles",
+    "productivity"
+  ],
   "author": {
     "name": "iamjudin"
   },

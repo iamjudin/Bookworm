@@ -2,6 +2,13 @@
 
 All notable changes to Bookworm are documented here.
 
+## 0.1.9 — 2026-07-15
+
+- Expanded the public README with why, use, development validation, and
+  contribution guidance.
+- Added public contribution, issue, pull request, and CI validation surfaces.
+- Added explicit public package `license` and `keywords` metadata.
+
 ## 0.1.8 — 2026-07-15
 
 - Changed public plugin and marketplace display names to English-only
