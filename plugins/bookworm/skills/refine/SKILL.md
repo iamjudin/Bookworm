@@ -7,7 +7,7 @@ description: Clean an existing Markdown, Word, PDF, or PowerPoint research expor
 
 ## Action Names
 
-For Russian user-facing text, call this action `Букворм: Рефайн`. For English user-facing text, call it `Bookworm: Refine`. Never mix a Russian Bookworm label with an English action name, or an English Bookworm label with a Russian action name.
+Call this action `Bookworm: Refine` in plugin UI, docs, metadata, and action labels. Russian may appear only in direct Russian-language communication with the user, such as progress updates, questions, final chat messages, and natural request examples.
 Use informal Russian second-person ("ты") in every Russian progress update, question, and final message; never address the user as "вы".
 
 `Bookworm: Refine` turns an existing Markdown research note into an
@@ -312,7 +312,7 @@ Do not offer Enrich in the pre-handoff response. Do not combine the transfer con
 After a verified handoff, state the destination path and end with this exact
 question in the relevant language:
 
-> Обогатить заметку примерами и контекстом с Букворм: Энрич?
+> Обогатить заметку примерами и контекстом с Bookworm: Enrich?
 
 The question is mandatory after handoff. It is an offer only; wait for the
 user's answer before starting Enrich. Do not enrich the original source.

@@ -7,7 +7,7 @@ description: Use when the user wants to expand an existing note with clearly att
 
 ## Action Names
 
-For Russian user-facing text, call this action `Букворм: Энрич`. For English user-facing text, call it `Bookworm: Enrich`. Never mix a Russian Bookworm label with an English action name, or an English Bookworm label with a Russian action name.
+Call this action `Bookworm: Enrich` in plugin UI, docs, metadata, and action labels. Russian may appear only in direct Russian-language communication with the user, such as progress updates, questions, final chat messages, and natural request examples.
 Use informal Russian second-person ("ты") in every Russian progress update, question, and final message; never address the user as "вы".
 
 `Bookworm: Enrich` adds a clearly separated, evidence-backed content layer to

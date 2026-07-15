@@ -1,7 +1,7 @@
 {
   "name": "bookworm",
   "interface": {
-    "displayName": "Букворм / Bookworm"
+    "displayName": "Bookworm"
   },
   "plugins": [
     {

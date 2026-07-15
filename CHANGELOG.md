@@ -2,6 +2,15 @@
 
 All notable changes to Bookworm are documented here.
 
+## 0.1.8 — 2026-07-15
+
+- Changed public plugin and marketplace display names to English-only
+  `Bookworm`.
+- Kept Russian wording only for direct Russian-language user communication,
+  not plugin UI names, README headings, manifests, or action labels.
+- Standardized action labels as `Bookworm: Digest`, `Bookworm: Refine`, and
+  `Bookworm: Enrich`.
+
 ## 0.1.7 — 2026-07-06
 
 - Replaced the hard-coded landing/design phrase dictionary with a general

@@ -94,12 +94,12 @@
   model-written interpretation. Normalize generic visible headings and TOC to
   the note/request language. Treat visual-density review as a flag only, never
   automatic diagram deletion.
-- In Russian user-facing text and plugin metadata, write the brand as
-  `Букворм / Bookworm`; use `Bookworm / Букворм` only in an English context.
-- Keep action labels in one language: Russian user-facing text uses
-  `Букворм: Дайджест`, `Букворм: Рефайн`, and `Букворм: Энрич`; English uses
-  `Bookworm: Digest`, `Bookworm: Refine`, and `Bookworm: Enrich`. Never mix a
-  Russian brand label with an English action name.
+- Keep plugin names, action labels, manifests, README headings, marketplace
+  metadata, and public docs in English: `Bookworm`, `Bookworm: Digest`,
+  `Bookworm: Refine`, and `Bookworm: Enrich`.
+- Russian is for direct communication with a Russian-speaking user: progress
+  updates, questions, final chat messages, and natural request examples may say
+  `Букворм`, but public/plugin UI names stay English-only.
 - After a successful Refine handoff, offer Enrich to add clearly labelled
   examples and context. Enrich must remain confirmation-gated and must not
   start automatically.

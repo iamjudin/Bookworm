@@ -7,12 +7,12 @@ description: Digest books and standalone readable articles into Obsidian-ready w
 
 ## Action Names
 
-For Russian user-facing text, call this action `Букворм: Дайджест`. For English user-facing text, call it `Bookworm: Digest`. Never mix a Russian Bookworm label with an English action name, or an English Bookworm label with a Russian action name.
+Call this action `Bookworm: Digest` in plugin UI, docs, metadata, and action labels. Russian may appear only in direct Russian-language communication with the user, such as progress updates, questions, final chat messages, and natural request examples.
 Use informal Russian second-person ("ты") in every Russian progress update, question, and final message; never address the user as "вы".
 
 Use this skill when the user asks Codex to read, digest, summarize, extract the essence of, or prepare an Obsidian note for a book or a standalone readable article. Also use it when an input looks like a book: an `EPUB` file or a `PDF` with roughly 100+ pages.
 
-This skill is the main action bundled by the Bookworm / Букворм plugin. Think of the plugin as the bookworm character and this skill as what it does: it digests a book into a useful working note.
+This skill is the main action bundled by the Bookworm plugin. Think of the plugin as the bookworm character and this skill as what it does: it digests a book into a useful working note.
 
 Prefer explicit invocation for the MVP, such as `$Bookworm`, `$Bookworm: Digest`, or "Букворм, обработай EPUB". Do not promise or depend on automatic handling of empty attachment-only EPUB messages; Codex may not route those messages to this skill reliably in every surface.
 

@@ -169,6 +169,16 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertEqual(manifest["interface"]["logo"], "./assets/icon.png")
         self.assertTrue((ROOT / "assets" / "icon.png").is_file())
 
+    def test_public_plugin_names_are_english_only(self) -> None:
+        manifest = json.loads((ROOT / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
+        marketplace_path = ROOT.parents[1] / ".agents" / "plugins" / "marketplace.json"
+        marketplace = json.loads(marketplace_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(manifest["interface"]["displayName"], "Bookworm")
+        self.assertEqual(marketplace["interface"]["displayName"], "Bookworm")
+        self.assertNotRegex(json.dumps(manifest["interface"], ensure_ascii=False), r"[А-Яа-яЁё]")
+        self.assertNotRegex(json.dumps(marketplace["interface"], ensure_ascii=False), r"[А-Яа-яЁё]")
+
     def test_public_marketplace_points_to_the_packaged_plugin(self) -> None:
         marketplace_path = ROOT.parents[1] / ".agents" / "plugins" / "marketplace.json"
         marketplace = json.loads(marketplace_path.read_text(encoding="utf-8"))
@@ -178,17 +188,17 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertEqual(plugin["source"]["path"], "./plugins/bookworm")
         self.assertEqual(plugin["policy"]["installation"], "AVAILABLE")
 
-    def test_user_facing_action_names_do_not_mix_russian_and_english(self) -> None:
+    def test_action_names_stay_english_in_plugin_surfaces(self) -> None:
         expected = {
-            "digest": "Букворм: Дайджест",
-            "refine": "Букворм: Рефайн",
-            "enrich": "Букворм: Энрич",
+            "digest": "Bookworm: Digest",
+            "refine": "Bookworm: Refine",
+            "enrich": "Bookworm: Enrich",
         }
-        for name, russian_action in expected.items():
+        for name, english_action in expected.items():
             skill = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
-            self.assertIn(russian_action, skill)
-            self.assertIn("Bookworm: ", skill)
-            self.assertIn("Never mix a Russian Bookworm label with an English action name", skill)
+            self.assertIn(english_action, skill)
+            self.assertIn("plugin UI, docs, metadata, and action labels", skill)
+            self.assertIn("Russian may appear only in direct Russian-language communication", skill)
 
     def test_enrich_handoff_keeps_final_note_visible_in_finder(self) -> None:
         skill = (ROOT / "skills" / "enrich" / "SKILL.md").read_text(encoding="utf-8")

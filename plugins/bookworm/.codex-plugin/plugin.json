@@ -1,13 +1,13 @@
 {
   "name": "bookworm",
-  "version": "0.1.7+codex.20260706202706",
+  "version": "0.1.8+codex.20260715190000",
   "description": "Bookworm digests books and articles, safely refines research, and enriches notes with verified sources.",
   "author": {
     "name": "iamjudin"
   },
   "skills": "./skills/",
   "interface": {
-    "displayName": "\u0411\u0443\u043a\u0432\u043e\u0440\u043c / Bookworm",
+    "displayName": "Bookworm",
     "composerIcon": "./assets/icon.png",
     "logo": "./assets/icon.png",
     "shortDescription": "Digest books, articles, and improve research for Obsidian.",
