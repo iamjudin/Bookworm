@@ -60,19 +60,6 @@ codex plugin marketplace upgrade bookworm
 
 Then restart Codex and begin a new chat.
 
-## Development
-
-Run the release checks from the repository root:
-
-```bash
-PYTHONPYCACHEPREFIX=/private/tmp/bookworm-pycache python3 -m unittest discover -s plugins/bookworm/tests -v
-python3 scripts/validate_public_package.py
-git diff --check
-```
-
-The official Codex plugin validator should also pass before a public release
-when it is available in your local Codex environment.
-
 ## Contributing
 
 Issues and pull requests are welcome when they improve Bookworm's public

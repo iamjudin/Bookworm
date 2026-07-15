@@ -68,7 +68,7 @@ def main() -> None:
         fail("marketplace must point to ./plugins/bookworm")
 
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    for heading in ("## Skills", "## Use", "## Install", "## Update", "## Development", "## Contributing", "## License"):
+    for heading in ("## Skills", "## Use", "## Install", "## Update", "## Contributing", "## License"):
         if heading not in readme:
             fail(f"README missing {heading}")
 
