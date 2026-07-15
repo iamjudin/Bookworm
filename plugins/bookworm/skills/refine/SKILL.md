@@ -1,6 +1,6 @@
 ---
 name: refine
-description: Use when the user wants to clean an existing Markdown research export, especially a ChatGPT Deep Research note, for Obsidian without substantively rewriting it.
+description: Clean an existing Markdown, Word, PDF, or PowerPoint research export for Obsidian without substantively rewriting it.
 ---
 
 # Refine

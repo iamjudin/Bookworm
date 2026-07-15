@@ -42,6 +42,7 @@ class RefineSkillContractTests(unittest.TestCase):
             self.assertIn(suffix, skill)
         self.assertIn("bundled Python runtime", skill)
         self.assertIn("Do not create an empty note", skill)
+        self.assertIn("Markdown, Word, PDF, or PowerPoint research export", skill)
 
     def test_enrich_never_performs_repository_or_execution_work(self) -> None:
         skill = (ROOT / "skills" / "enrich" / "SKILL.md").read_text(encoding="utf-8")

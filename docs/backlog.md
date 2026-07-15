@@ -10,7 +10,11 @@
 - Do not duplicate Obsidian's inline file title with a redundant top-level `# Book Title` heading in the Markdown body.
 - When abbreviations have English originals, keep the English expansion in parentheses after the Russian label, for example `Сохраняем (Capture)` or `Проекты (Projects)`.
 - After a confirmed vault handoff, clean transient working files so scratch folders do not accumulate.
-- For local test iterations, prefer a clean reinstall cycle over upgrading in place: remove the old Bookworm plugin cache and transient test artifacts, then install the fresh local marketplace version.
+- Public Bookworm is now the canonical runtime. Do not continue local
+  marketplace reinstall workflows for ordinary Bookworm testing; use the
+  public `bookworm` marketplace/runtime and treat `bookworm@local-plugins` as
+  an obsolete duplicate unless deliberately doing a new local development
+  spike.
 - Bookworm's user-facing process should use the relevant language of the book/request instead of switching to English by default.
 - Vault destinations must be discovered from actual Obsidian vaults (`.obsidian`) and selected by request, folder names, note structure, and nearby content. Do not hard-code a personal vault path.
 - If no Obsidian vault is detected, keep the deliverable in the current output location and do not propose moving it to a vault.
@@ -117,8 +121,10 @@
 
 ## Cleanup
 
-- Update the Refine action's visible name and description: it accepts Markdown,
-  Word (`.docx`), PDF, and PowerPoint (`.pptx`), so it must not be presented as
-  a Markdown-only action in Codex UI.
-- Verify after reinstall that Codex shows the plugin action as `Bookworm: Digest` or an equivalent non-duplicated label.
-- Verify after reinstall that Bookworm no longer presents empty EPUB auto-start as a guaranteed behavior.
+- Remove Bookworm from the global `local-plugins` marketplace so Codex no
+  longer shows the stale `bookworm@local-plugins` duplicate next to the public
+  `bookworm@bookworm` plugin.
+- Verify through the public runtime that Codex shows the plugin action as
+  `Bookworm: Digest` or an equivalent non-duplicated label.
+- Verify through the public runtime that Bookworm no longer presents empty EPUB
+  auto-start as a guaranteed behavior.
