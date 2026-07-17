@@ -128,3 +128,10 @@
   `Bookworm: Digest` or an equivalent non-duplicated label.
 - Verify through the public runtime that Bookworm no longer presents empty EPUB
   auto-start as a guaranteed behavior.
+
+## Watch
+
+- [ ] Adopt Fabricator stale-run monitor rule
+  - Evidence: July 17, 2026, Fabricator 0.2.10 release added a shared Watch standard after Bookworm runtime drift monitor stayed `In progress` since `2026-07-17 11:16:48 MSK`.
+  - Owner: Bookworm
+  - Suggested next action: Update Bookworm monitoring setup so scheduled runs report stale previous runs separately from active work and archive completed monitor threads when the platform supports it.
