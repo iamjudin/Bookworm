@@ -47,8 +47,8 @@ local export instead.
 Treat an article URL with the same safety as a book: collect material in a
 temporary run directory, leave the web source untouched, make the Markdown
 and selected assets there first, and replace or create a vault note only after
-explicit handoff confirmation. Use the article's readable title for the final
-filename. Under `## Источники` / `## Sources`, include the main article as a descriptive title-link; add other sources only when they were actually opened and needed for context, never as invented citations.
+explicit handoff confirmation. Use the article's readable title in the note or
+request language for the final filename. Under `## Источники` / `## Sources`, include the main article as a descriptive title-link; add other sources only when they were actually opened and needed for context, never as invented citations.
 
 ## Core Output Rules
 
@@ -67,7 +67,12 @@ filename. Under `## Источники` / `## Sources`, include the main article
 - When filesystem permissions or sandbox rules prevent direct vault writes, create the deliverable in the writable `outputs` area first, then ask the user to confirm copying it into the selected detected vault. Do not silently leave the vault-ready result only in `outputs` when a suitable vault was detected.
 - If no Obsidian vault is detected, keep the deliverable in the current writable output location and do not propose moving it to a vault. Mention that no vault was detected.
 - If the selected vault has a `Library/` folder, use it as the default destination for book notes. Otherwise use the best matching existing folder by title/content, or the vault root if there is no clear match.
-- The note filename must match the human-readable book title, not a slug and not a Bookworm implementation name. Do not append `bookworm` to the final note filename.
+- The note filename must match the human-readable book/article title in the
+  source or request language, not a slug and not a Bookworm implementation
+  name. Do not append `bookworm` to the final note filename. For a Russian
+  book, Russian article, or Russian user request, use a natural Russian
+  filename except for established product names, acronyms, author names, or
+  terms that are more readable in the original.
 - If the note filename is the book title and Obsidian will show the inline title, do not add a duplicate top-level `# Book Title` heading inside the note.
 - For substantial notes, add a compact manual table of contents near the top. When relying on Obsidian's inline title, make `## Содержание` the first section in the file, followed by links to the main `##` sections, then continue with `## Коротко`.
 - Store visual assets in a shared library assets folder, such as `Library/assets/<source-slug>/<section-slug>/` for notes in `Library/`.
@@ -103,6 +108,11 @@ After a successful vault copy and embed verification, clean transient working fi
 - duplicate generated note/assets left under `outputs/` after the verified vault copy exists.
 
 Do not delete the original source book, the copied vault note, or copied vault assets. If cleanup is blocked by permissions, say exactly which temporary paths remain and ask the user whether to remove them.
+Do not delete an original source from `Downloads`, `Desktop`, `Book`, or another
+non-run user location as part of ordinary handoff. Handoff confirmation covers
+copying/replacing the vault note and cleaning Bookworm's temporary run files,
+not deleting the user's original source file. Ask separately if source deletion
+is actually desired.
 
 ## Required Post-Handoff Response
 

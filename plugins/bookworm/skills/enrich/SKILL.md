@@ -56,6 +56,35 @@ Do not make unlabelled additions and do not merge external material into the
 original prose. This preserves the boundary between the book or source note and
 the later enrichment.
 
+## Visual Enrichment Rules
+
+When the user asks to enrich a note with illustrations, images, visuals,
+graphics, figures, examples of illustration, or asks to "вытащить" visual
+examples from sources, text about illustrations is not enough. Treat the
+request as a visual-asset enrichment task.
+
+For every relevant opened source, look for concrete visual materials that help
+the note: charts, diagrams, screenshots, visual vocabulary examples, icon or
+illustration sets, format examples, accessibility examples, or article layout
+patterns. Add actual visual material to the note when license, access, and
+technical format make that appropriate:
+
+- save permitted or user-private visual files into the note's vault asset
+  folder, such as `Library/assets/<note-slug>/enrich-visuals/`;
+- embed local files with Obsidian image syntax, for example
+  `![[assets/note-slug/enrich-visuals/source-figure-01.png|700]]`;
+- put each embedded visual inside or immediately after a labelled
+  `#### Дополнение — [название источника](https://...)` block;
+- add a concise caption that says what the visual shows, why it matters, and
+  any source/license limitation that affects reuse.
+
+If a visual cannot be copied into the vault because it is interactive,
+copyright-restricted, behind a script, unavailable as a stable file, or better
+preserved as editable Mermaid/table text, say that explicitly in the relevant
+addition block and link to the source. Do not present a text-only list of links
+as satisfying a request for illustrations. Examples about illustrations are not
+enough when the user asked to add illustrations.
+
 ## Enrich Structure Gate
 
 Never add a new unlabeled profile heading. A new mechanism, method, case, or
@@ -111,6 +140,10 @@ tables are scannable, diagrams are legible, links open, and no duplicate
 summary layer repeats the same material. Check that every added paragraph is
 inside a labelled addition block and that sources are grouped by the relevant
 main section rather than dumped into one flat list.
+For visual-asset enrichment, additionally verify the count of local Obsidian
+image embeds added and that every embedded asset resolves from the final note.
+If the count is zero, the preview must say plainly why no local illustrations
+could be added and must ask whether to proceed with links/reconstructions only.
 
 ## Handoff
 
@@ -121,6 +154,8 @@ until the final note and its source links have been verified.
 After an atomic replacement, verify that the final note is readable and not
 marked hidden in Finder; a successful byte check is insufficient if the user
 cannot see the note in the vault folder.
+When visual assets were created, transfer the enriched Markdown and its asset
+folder together, then verify all Obsidian embeds in the final vault note.
 
 ## Interaction and Repository Boundary
 
@@ -138,6 +173,9 @@ Count actual `#### Дополнение` blocks in the temporary note for the pr
 never report a model-estimated count. If the verified transfer times out before
 the command runs, preserve both files and retry the same confirmed handoff once;
 only then report the failure and paths.
+For visual-asset enrichment, also report the actual count of local visual
+assets and embedded Obsidian image links in the preview and in the final
+handoff verification.
 
 Enrich must not create plans, specs, commits, worktrees, or repository files.
 It must not modify Bookworm itself. Make every proposed note change on a

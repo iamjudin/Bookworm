@@ -542,6 +542,7 @@ def handoff_refined_note(
     run_dir: Path | None = None,
     assets_dir: Path | None = None,
     final_title: str | None = None,
+    delete_source: bool = False,
 ) -> Path:
     """Create the final note only after an explicit user confirmation token."""
     if confirmation != "user-confirmed":
@@ -602,7 +603,7 @@ def handoff_refined_note(
             destination.unlink(missing_ok=True)
             raise OSError("Asset handoff verification failed")
 
-    if not replacing_source_in_place:
+    if delete_source and not replacing_source_in_place:
         source_path.unlink()
     if resolved_run_dir is not None:
         shutil.rmtree(resolved_run_dir)
@@ -1153,6 +1154,11 @@ def main(argv: list[str]) -> int:
     handoff_cmd.add_argument("--run-dir", type=Path)
     handoff_cmd.add_argument("--assets-dir", type=Path)
     handoff_cmd.add_argument("--final-title")
+    handoff_cmd.add_argument(
+        "--delete-source",
+        action="store_true",
+        help="Delete the original source after verified handoff. Off by default.",
+    )
 
     args = parser.parse_args(argv)
 
@@ -1210,6 +1216,7 @@ def main(argv: list[str]) -> int:
             run_dir=args.run_dir,
             assets_dir=args.assets_dir,
             final_title=args.final_title,
+            delete_source=args.delete_source,
         )
         print(json.dumps({"destination": str(destination)}, ensure_ascii=False))
     else:

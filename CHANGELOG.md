@@ -2,6 +2,17 @@
 
 All notable changes to Bookworm are documented here.
 
+## 0.1.11 — 2026-07-29
+
+- Enrich now treats requests for illustrations, visuals, graphics, or figures
+  as visual-asset enrichment: text-only examples are not enough when the user
+  asked to add illustrations.
+- Refine and Digest now make original source deletion opt-in. Verified handoff
+  keeps user source files by default and cleans only Bookworm temporary run
+  files unless `--delete-source` is explicitly used.
+- Tightened localized filename rules so Russian notes use natural Russian
+  Obsidian filenames instead of English slugs or export titles.
+
 ## 0.1.10 — 2026-07-29
 
 - Digest now offers `Bookworm: Enrich` after a verified vault handoff, matching

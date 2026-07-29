@@ -29,6 +29,16 @@ class DigestUrlContractTests(unittest.TestCase):
         self.assertIn("Do not start Enrich automatically", DIGEST)
         self.assertIn("pre-handoff vault-transfer confirmation", DIGEST)
 
+    def test_digest_uses_localized_reader_facing_filename(self):
+        self.assertIn("source or request language", DIGEST)
+        self.assertIn("natural Russian", DIGEST)
+        self.assertIn("not a slug", DIGEST)
+
+    def test_digest_handoff_does_not_delete_original_source_by_default(self):
+        self.assertIn("Do not delete an original source", DIGEST)
+        self.assertIn("Handoff confirmation covers", DIGEST)
+        self.assertIn("temporary run files", DIGEST)
+
 
 if __name__ == "__main__":
     unittest.main()

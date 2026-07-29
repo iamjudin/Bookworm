@@ -102,6 +102,10 @@ class RefineSkillContractTests(unittest.TestCase):
     def test_refine_does_not_request_second_handoff_confirmation(self) -> None:
         skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("Do not ask for a second confirmation", skill)
+        self.assertIn("must not delete an original", skill)
+        self.assertIn("user source from `Downloads`", skill)
+        self.assertIn("--delete-source", skill)
+        self.assertIn("temporary cleanup only", skill)
 
     def test_enrich_requires_labelled_nonduplicating_structure(self) -> None:
         skill = (ROOT / "skills" / "enrich" / "SKILL.md").read_text(encoding="utf-8")
@@ -203,6 +207,21 @@ class RefineSkillContractTests(unittest.TestCase):
     def test_enrich_handoff_keeps_final_note_visible_in_finder(self) -> None:
         skill = (ROOT / "skills" / "enrich" / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("marked hidden", skill)
+
+    def test_enrich_visual_requests_require_actual_assets_or_explicit_exception(self) -> None:
+        skill = (ROOT / "skills" / "enrich" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("text about illustrations is not enough", skill)
+        self.assertIn("visual-asset enrichment task", skill)
+        self.assertIn("Library/assets/<note-slug>/enrich-visuals/", skill)
+        self.assertIn("Obsidian image syntax", skill)
+        self.assertIn("Examples about illustrations are not", skill)
+        self.assertIn("enough when the user asked to add illustrations", skill)
+        self.assertIn("If the count is zero", skill)
+
+    def test_refine_requires_localized_reader_facing_filename(self) -> None:
+        skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("natural Russian title", skill)
+        self.assertIn("final filename", skill)
 
 
 if __name__ == "__main__":

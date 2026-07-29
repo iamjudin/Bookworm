@@ -121,6 +121,21 @@
   confirmation-gated vault handoff, asset selection, source-title link, and
   cleanup rules as a book. A paywalled, sign-in-only, category, or unreadable
   URL must fail clearly without creating an empty note.
+- Handoff confirmation covers vault transfer/replacement and cleanup of
+  Bookworm temporary run files only. Bookworm must not delete the user's
+  original source file from `Downloads`, `Desktop`, `Book`, or another
+  non-run location unless source deletion is explicitly requested as a separate
+  action.
+- Russian notes should receive natural Russian filenames. Keep established
+  product names, acronyms, author names, and terms that are more readable in
+  the original, but do not accept an English slug/export title as the final
+  Obsidian filename for a Russian source or Russian request.
+- When the user asks Enrich to add illustrations, visuals, figures, graphics,
+  or to extract visual examples from sources, text about illustrations is not
+  enough. Enrich should add local Obsidian visual assets when license/access
+  allow it, embed them from `Library/assets/<note-slug>/...`, and clearly
+  explain any visual that is left as a link or editable reconstruction instead
+  of a local asset.
 
 ## Cleanup
 

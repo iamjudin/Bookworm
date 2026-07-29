@@ -283,17 +283,23 @@ title, framework, or established term.
    ```
 
    The helper refuses to run without the confirmation token, refuses to
-   overwrite an existing note, verifies the final bytes and assets, and only
-   then removes the original and all temporary run files. For a `Library/`
+   overwrite an existing note, verifies the final bytes and assets, and then
+   removes only temporary run files by default. It must not delete an original
+   user source from `Downloads`, `Desktop`, a book folder, or another non-run
+   location unless the user explicitly approved source deletion as a separate
+   action and the command is run with `--delete-source`. For a `Library/`
    destination, assets live in `Library/assets/<note-slug>/`. Treat this
-  explicit confirmation as authorization for that verified transfer and
-  cleanup. Do not ask for a second confirmation unless the destination or
-  transfer scope changes. If the refined destination is the same existing
-  source note, the helper performs the verified in-place replacement; do not
-  bypass it with manual `cp`, `mv`, `rm`, or editor writes.
+  explicit confirmation as authorization for the verified transfer and
+  temporary cleanup only. Do not ask for a second confirmation unless the
+  destination, replacement scope, or source-deletion scope changes. If the
+  refined destination is the same existing source note, the helper performs the
+  verified in-place replacement; do not bypass it with manual `cp`, `mv`, `rm`,
+  or editor writes.
   When the source filename or H1 is in the wrong language, pass a localized
   reader-facing `--final-title` to the helper instead of accepting the raw
-  export title.
+  export title. For a Russian note or Russian user request, the final filename
+  must be a natural Russian title except for established product names,
+  acronyms, or terms that are more readable in the original.
 8. Use the transfer-confirmation response below before handoff. Do not start or
    offer Enrich until the handoff has been verified.
 
@@ -306,6 +312,10 @@ use an informal question such as:
 > Перенести очищенную копию в `Brain/Library`?
 
 Do not offer Enrich in the pre-handoff response. Do not combine the transfer confirmation and Enrich offer in one message.
+Do not say or imply that transfer confirmation deletes the original source.
+If source deletion is desired, ask a separate explicit question after the
+verified transfer, or include it only when the user already asked to delete the
+source.
 
 ## Required Post-Handoff Response
 

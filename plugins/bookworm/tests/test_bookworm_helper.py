@@ -72,7 +72,7 @@ class RefineMarkdownTests(unittest.TestCase):
         self.assertEqual(result, source)
         self.assertEqual(report["numeric_citations_scanned"], 0)
 
-    def test_handoff_requires_confirmation_and_uses_title_filename(self) -> None:
+    def test_handoff_requires_confirmation_uses_title_filename_and_keeps_source(self) -> None:
         source = "# Принципы хороших интерфейсов\n\nИсходный текст.\n"
 
         with tempfile.TemporaryDirectory() as directory:
@@ -108,8 +108,32 @@ class RefineMarkdownTests(unittest.TestCase):
 
             self.assertEqual(destination.name, "Принципы хороших интерфейсов.md")
             self.assertTrue(destination.exists())
-            self.assertFalse(source_path.exists())
+            self.assertTrue(source_path.exists())
             self.assertFalse(refined_path.parent.exists())
+
+    def test_handoff_deletes_source_only_when_explicitly_requested(self) -> None:
+        source = "# Принципы хороших интерфейсов\n\nИсходный текст.\n"
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source_path = root / "Inbox" / "deep-research-report.md"
+            refined_path = root / "scratch" / "deep-research-report.md"
+            destination_dir = root / "Library"
+            source_path.parent.mkdir()
+            refined_path.parent.mkdir()
+            source_path.write_text(source, encoding="utf-8")
+            refined_path.write_text("## Содержание\n", encoding="utf-8")
+
+            handoff_refined_note(
+                source_path,
+                refined_path,
+                destination_dir,
+                confirmation="user-confirmed",
+                run_dir=refined_path.parent,
+                delete_source=True,
+            )
+
+            self.assertFalse(source_path.exists())
 
     def test_handoff_copies_assets_to_shared_library_assets_folder(self) -> None:
         source = "# Принципы интерфейсов\n\nИсходный текст.\n"
