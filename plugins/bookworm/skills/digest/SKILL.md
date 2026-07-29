@@ -104,6 +104,18 @@ After a successful vault copy and embed verification, clean transient working fi
 
 Do not delete the original source book, the copied vault note, or copied vault assets. If cleanup is blocked by permissions, say exactly which temporary paths remain and ask the user whether to remove them.
 
+## Required Post-Handoff Response
+
+After a verified digest handoff to the final vault location, state the final
+note path and assets path when assets were created, then end with this exact
+question in the relevant language:
+
+> Обогатить заметку примерами и контекстом с Bookworm: Enrich?
+
+The question is mandatory after handoff. It is an offer only; wait for the
+user's answer before starting Enrich. Do not start Enrich automatically and do
+not combine it with a pre-handoff vault-transfer confirmation.
+
 ## Reader-Facing Tone
 
 The final note must read like a useful book note, not like a plugin report.

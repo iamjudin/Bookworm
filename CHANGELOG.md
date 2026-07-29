@@ -2,6 +2,13 @@
 
 All notable changes to Bookworm are documented here.
 
+## 0.1.10 — 2026-07-29
+
+- Digest now offers `Bookworm: Enrich` after a verified vault handoff, matching
+  the existing Refine post-handoff behavior.
+- Added a contract test so Digest cannot silently skip the post-handoff Enrich
+  offer again.
+
 ## 0.1.9 — 2026-07-15
 
 - Expanded the public README with why, use, development validation, and

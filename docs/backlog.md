@@ -103,6 +103,9 @@
 - After a successful Refine handoff, offer Enrich to add clearly labelled
   examples and context. Enrich must remain confirmation-gated and must not
   start automatically.
+- After a successful Digest handoff, offer Enrich to add clearly labelled
+  examples and context. Enrich must remain confirmation-gated and must not
+  start automatically.
 - Enrich may ask concise, content-focused questions to choose its scope, but
   must not expose internal choices about plans, specs, commits, agents, or
   execution modes. Once the user confirms the scope, it proceeds directly.

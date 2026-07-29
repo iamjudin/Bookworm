@@ -21,6 +21,14 @@ class DigestUrlContractTests(unittest.TestCase):
         self.assertIn("main article as a descriptive title-link", DIGEST)
         self.assertIn("temporary run directory", DIGEST)
 
+    def test_digest_offers_enrich_only_after_verified_handoff(self):
+        self.assertIn("## Required Post-Handoff Response", DIGEST)
+        self.assertIn("After a verified digest handoff", DIGEST)
+        self.assertIn("Обогатить заметку примерами и контекстом", DIGEST)
+        self.assertIn("wait for the", DIGEST)
+        self.assertIn("Do not start Enrich automatically", DIGEST)
+        self.assertIn("pre-handoff vault-transfer confirmation", DIGEST)
+
 
 if __name__ == "__main__":
     unittest.main()
