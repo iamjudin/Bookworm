@@ -2,6 +2,12 @@
 
 All notable changes to Bookworm are documented here.
 
+## 0.1.14 — 2026-10-12
+
+- Refine now replaces generic export headings such as “Ответ и уверенность”
+  with a concise topic-specific vault filename.
+- Refine final messages must name and link the exact destination file.
+
 ## 0.1.13 — 2026-10-12
 
 - Installed-package contract tests now skip repository-only marketplace checks

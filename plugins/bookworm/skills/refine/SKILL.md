@@ -254,8 +254,13 @@ When a reader-facing named example itself is useful to open — such as a game, 
 
 Use `Contents` instead of `Содержание` when the note/request language is
 English. Read `suggested_filename` from the command output. It is derived
-   from the note's human title H1; never use a technical source name such as
-   `deep-research-report.md` when a title exists. For every inventory entry,
+from the note's H1, but treat generic export headings such as `Ответ и
+уверенность`, `Краткий ответ`, `Обоснование и анализ`, or an equivalent title
+that could describe an unrelated report as scaffolding rather than a useful
+reader-facing filename. In that case, derive a concise, topic-specific title
+from the central subject or decision using terms already present in the note,
+and pass it with `--final-title`. Never use a technical source name such as
+`deep-research-report.md` when a meaningful title can be derived. For every inventory entry,
    repair the matching claim in the refined copy with a verified title link when
 a reliable source is available. The helper's report must be retained for
 internal verification and the natural-language final summary.
@@ -359,6 +364,8 @@ The final note should look like a normal Obsidian note, not a cleanup report.
 
 - Keep the filename as the reader-facing title; do not append `-refined` or
   `-bookworm` to the final vault filename.
+- In the final response, name and link the exact final file. Do not hide it
+  behind a generic label such as `заметка в Brain/Library`.
 - Do not add a duplicate `# Title` at the top of the Markdown body.
 - Place `## Содержание` or `## Contents` first in substantial notes, followed
   by links to main `##` sections.

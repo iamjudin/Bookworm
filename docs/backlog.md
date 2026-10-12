@@ -2,6 +2,8 @@
 
 ## Decisions
 
+- Generic research-export H1 headings are not acceptable final filenames;
+  Refine derives a concise topic-specific title from terms already in the note.
 - Manual invocation is acceptable and preferred for MVP: the user can call Bookworm explicitly with `$Bookworm` or a short request such as "Букворм, обработай EPUB".
 - Do not spend MVP effort on unreliable empty-EPUB auto-start behavior. If Codex receives an EPUB with no text and does not automatically start Bookworm, that is acceptable for now.
 - Book notes should land in the vault `Library/` folder when present.

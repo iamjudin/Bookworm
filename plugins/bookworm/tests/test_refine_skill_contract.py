@@ -246,6 +246,14 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertIn("natural Russian title", skill)
         self.assertIn("final filename", skill)
 
+    def test_refine_replaces_generic_export_titles_with_topic_specific_titles(self) -> None:
+        skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
+
+        self.assertIn("generic export headings", skill)
+        self.assertIn("derive a concise, topic-specific title", skill)
+        self.assertIn("name and link the exact final file", skill)
+        self.assertIn("заметка в Brain/Library", skill)
+
 
 if __name__ == "__main__":
     unittest.main()
