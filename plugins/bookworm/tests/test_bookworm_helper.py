@@ -29,6 +29,29 @@ from bookworm_helper import (
 
 
 class RefineMarkdownTests(unittest.TestCase):
+    def test_eight_input_batch_keeps_outputs_independent(self) -> None:
+        sources = [
+            (
+                f"# Исследование {index}\n\n"
+                f"Уникальный вывод документа {index}.\n\n"
+                "## Наблюдения\n\n"
+                f"Материал только из источника {index}.\n"
+            )
+            for index in range(1, 9)
+        ]
+
+        outputs = [refine_markdown(source) for source in sources]
+        filenames = [note_filename(source, f"research-{index}") for index, source in enumerate(sources, 1)]
+
+        self.assertEqual(len(outputs), 8)
+        self.assertEqual(len(set(filenames)), 8)
+        for index, output in enumerate(outputs, 1):
+            self.assertIn(f"Уникальный вывод документа {index}.", output)
+            self.assertIn(f"Материал только из источника {index}.", output)
+            for other in range(1, 9):
+                if other != index:
+                    self.assertNotIn(f"Уникальный вывод документа {other}.", output)
+
     def test_repeated_refine_preserves_intro_after_generated_toc(self) -> None:
         source = (
             "# Title\n\n"

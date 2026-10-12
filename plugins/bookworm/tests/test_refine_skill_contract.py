@@ -254,6 +254,19 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertIn("name and link the exact final file", skill)
         self.assertIn("заметка в Brain/Library", skill)
 
+    def test_refine_supports_batches_without_merging_inputs(self) -> None:
+        skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
+
+        self.assertIn("### Batch Mode", skill)
+        self.assertIn("eight research exports produces eight independent", skill)
+        self.assertIn("exactly one proposed output note for each successful input", skill)
+        self.assertIn("concatenate documents", skill)
+        self.assertIn("separate run subdirectory", skill)
+        self.assertIn("one compact batch preview", skill)
+        self.assertIn("Ask once whether to transfer", skill)
+        self.assertIn("eight documents is a supported ordinary batch", skill)
+        self.assertIn("Never claim that the batch succeeded", skill)
+
 
 if __name__ == "__main__":
     unittest.main()

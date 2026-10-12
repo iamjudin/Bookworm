@@ -18,7 +18,8 @@ material later.
 ### Refine
 
 Makes an existing research note easier to read and navigate without adding new
-ideas or changing its meaning.
+ideas or changing its meaning. You can attach a batch of research documents in
+one request; Refine creates and verifies one separate note per input.
 
 ### Enrich
 
@@ -31,7 +32,8 @@ Start a new Codex chat and invoke one of the Bookworm actions:
 
 - `Bookworm: Digest` for books, long PDFs, or standalone readable article URLs.
 - `Bookworm: Refine` for existing Markdown, Word, PDF, or PowerPoint research
-  exports that need a cleaner Obsidian shape without new claims.
+  exports that need a cleaner Obsidian shape without new claims. Multiple
+  attached exports are processed as separate notes in one batch.
 - `Bookworm: Enrich` when an existing note needs sourced examples, context, or
   alternatives.
 

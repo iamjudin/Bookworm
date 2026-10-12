@@ -22,6 +22,11 @@ research exports, not for digesting a book from source material; use
 `Bookworm: Digest` for EPUBs and long book PDFs and `Bookworm: Enrich` when the
 user wants additional examples, context, or depth.
 
+Refine accepts one supported document or a batch of supported documents in the
+same request. A batch such as eight research exports produces eight independent
+notes. Never merge separate inputs into one note unless the user explicitly
+asks for a synthesis, which is outside ordinary Refine behavior.
+
 Prefer explicit invocation, for example `$Bookworm: Refine` with a Markdown
 file or “Букворм, подчисти этот Deep Research”.
 
@@ -196,6 +201,42 @@ When a reader-facing named example itself is useful to open — such as a game, 
 
 ## Workflow
 
+### Batch Mode
+
+When the request contains two or more supported inputs:
+
+1. Build an ordered batch inventory before editing. Keep one item for every
+   input file and preserve the user's input order.
+2. Create a separate run subdirectory, converted copy, refined copy, asset
+   directory, citation inventory, verified-source ledger, and validation result
+   for each item. Never reuse one document's source mapping or assets for
+   another document.
+3. Apply the normal Refine workflow and quality gates independently to every
+   item. One failed input must not erase, replace, or silently block the
+   successfully prepared items. Keep the failed source unchanged and report its
+   reason next to that file.
+4. Produce exactly one proposed output note for each successful input. Never
+   concatenate documents, create a combined summary, or drop an input because
+   its title resembles another input.
+5. Ensure proposed final filenames are unique within the batch and do not
+   overwrite unrelated existing vault notes. Resolve duplicate or generic
+   titles with concise topic-specific wording derived from each document. If a
+   safe distinct title cannot be inferred, ask one batch-level naming question
+   that identifies the ambiguous files.
+6. Before handoff, show one compact batch preview mapping each source filename
+   to its proposed final filename and status. Include source gaps only where
+   they exist. Ask once whether to transfer the complete listed set to the
+   selected destination; that confirmation covers only those named outputs.
+7. After confirmation, hand off each prepared item with
+   `handoff-refined-note`. Verify every destination separately and return one
+   compact result list with `готово` or the specific failure for each input.
+   Never claim that the batch succeeded when any listed item failed.
+
+Do not ask the user to upload or confirm each document separately when the
+files and common destination are already clear. Do not impose a smaller
+hard-coded batch limit than the attachments accepted by the current Codex
+surface; eight documents is a supported ordinary batch.
+
 1. Confirm the input is a readable `.md`, `.docx`, `.pdf`, or `.pptx` file.
    Use the source/request language for progress updates and visible headings.
    Convert non-Markdown input with the bundled Python runtime and its
@@ -335,6 +376,11 @@ For example:
 
 > Файл пока не переносил. Перенести очищенную копию в `Brain/Library`?
 
+For a batch, show the source-to-output preview first and use one plural
+confirmation, for example:
+
+> Восемь заметок готовы к переносу. Перенести перечисленные файлы в `Brain/Library`?
+
 Do not offer Enrich in the pre-handoff response. Do not combine the transfer confirmation and Enrich offer in one message.
 Do not say or imply that transfer confirmation deletes the original source.
 If source deletion is desired, ask a separate explicit question after the
@@ -347,6 +393,11 @@ After a verified handoff, state the destination path and end with this exact
 question in the relevant language:
 
 > Обогатить заметку примерами и контекстом с Bookworm: Enrich?
+
+After a batch handoff, list every exact destination file and use the plural
+question instead:
+
+> Обогатить одну или несколько заметок с Bookworm: Enrich?
 
 The question is mandatory after handoff. It is an offer only; wait for the
 user's answer before starting Enrich. Do not enrich the original source.

@@ -2,6 +2,13 @@
 
 All notable changes to Bookworm are documented here.
 
+## 0.1.15 — 2026-10-12
+
+- Refine now accepts a batch of research documents and creates one independent
+  Obsidian note per input instead of merging the documents.
+- Batch runs use isolated working files, unique final names, a single transfer
+  preview and confirmation, and per-file success or failure reporting.
+
 ## 0.1.14 — 2026-10-12
 
 - Refine now replaces generic export headings such as “Ответ и уверенность”

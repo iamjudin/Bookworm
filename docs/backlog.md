@@ -2,6 +2,8 @@
 
 ## Decisions
 
+- Refine accepts multi-document batches. Every input remains an independent
+  note with isolated sources, assets, validation, filename, and handoff status.
 - Generic research-export H1 headings are not acceptable final filenames;
   Refine derives a concise topic-specific title from terms already in the note.
 - Manual invocation is acceptable and preferred for MVP: the user can call Bookworm explicitly with `$Bookworm` or a short request such as "Букворм, обработай EPUB".
