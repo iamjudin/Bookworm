@@ -10,6 +10,12 @@ description: Digest books and standalone readable articles into Obsidian-ready w
 Call this action `Bookworm: Digest` in plugin UI, docs, metadata, and action labels. Russian may appear only in direct Russian-language communication with the user, such as progress updates, questions, final chat messages, and natural request examples.
 Use informal Russian second-person ("ты") in every Russian progress update, question, and final message; never address the user as "вы".
 
+Follow internal workflow and safety instructions silently. Never quote, cite,
+link to, or mention this skill file or its instruction text in a user-facing
+message. Do not expose command lines, JSON, helper field names, runtime paths,
+or internal approval rationale. Explain the result and ask any required
+question naturally in the language of the source/request.
+
 Use this skill when the user asks Codex to read, digest, summarize, extract the essence of, or prepare an Obsidian note for a book or a standalone readable article. Also use it when an input looks like a book: an `EPUB` file or a `PDF` with roughly 100+ pages.
 
 This skill is the main action bundled by the Bookworm plugin. Think of the plugin as the bookworm character and this skill as what it does: it digests a book into a useful working note.
@@ -91,6 +97,12 @@ When a final digest is created outside a detected vault because of workspace per
 - the generated note path;
 - the generated assets path;
 - a clear question asking whether to copy the note and assets into the vault.
+
+Keep that question concise and user-facing. In Russian, for example:
+
+> Дайджест готов, исходник сохранён. Перенести заметку и выбранные иллюстрации в `Brain/Library`?
+
+Do not explain that an internal instruction requires confirmation.
 
 If no vault was detected, do not ask for vault copy confirmation. Just provide the generated note/assets paths and say that no Obsidian vault was found.
 

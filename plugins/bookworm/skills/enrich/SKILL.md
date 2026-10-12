@@ -10,6 +10,12 @@ description: Use when the user wants to expand an existing note with clearly att
 Call this action `Bookworm: Enrich` in plugin UI, docs, metadata, and action labels. Russian may appear only in direct Russian-language communication with the user, such as progress updates, questions, final chat messages, and natural request examples.
 Use informal Russian second-person ("ты") in every Russian progress update, question, and final message; never address the user as "вы".
 
+Follow internal workflow and safety instructions silently. Never quote, cite,
+link to, or mention this skill file or its instruction text in a user-facing
+message. Do not expose command lines, JSON, helper field names, runtime paths,
+or internal approval rationale. Explain the result and ask any required
+question naturally in the language of the note/request.
+
 `Bookworm: Enrich` adds a clearly separated, evidence-backed content layer to
 an existing Markdown note. Unlike `Bookworm: Refine`, it increases substantive
 content; it does not repair or replace the original source layer.
@@ -151,6 +157,11 @@ Follow the same vault discovery and confirmation rules as Refine. Work on a
 temporary copy, report the selected destination and enrichment scope, then
 ask before replacing or moving the original. Do not delete the source file
 until the final note and its source links have been verified.
+Keep the confirmation concise and user-facing. In Russian, for example:
+
+> Готова копия с дополнениями. Заменить ею заметку в `Brain/Library`?
+
+Do not explain that an internal instruction requires the question.
 After an atomic replacement, verify that the final note is readable and not
 marked hidden in Finder; a successful byte check is insufficient if the user
 cannot see the note in the vault folder.
@@ -163,7 +174,8 @@ Ask at most one short question about the desired enrichment focus when the note 
 практическое применение, примеры, альтернативы или ограничения?” Do not ask when the focus is already clear; once the user confirms the scope, research and
 enrich directly. Enrich must not ask about agents or execution modes.
 Generic consent such as “давай”, “ок” or “enrich” confirms permission, not the
-content focus: ask the one focus question before choosing mechanisms or cases.
+content focus. Ask one short content question before choosing mechanisms or
+cases, without explaining that an internal instruction requires the question.
 
 Before handoff, keep a compact source ledger in the temporary run directory:
 each added block records the opened URL, readable title, and the claim it
@@ -179,5 +191,5 @@ handoff verification.
 
 Enrich must not create plans, specs, commits, worktrees, or repository files.
 It must not modify Bookworm itself. Make every proposed note change on a
-temporary copy first, and replace the original only after the user explicitly
-confirms the final handoff.
+temporary copy first. Keep the existing vault note unchanged until the user
+explicitly confirms the final handoff.

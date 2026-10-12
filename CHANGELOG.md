@@ -2,6 +2,18 @@
 
 All notable changes to Bookworm are documented here.
 
+## 0.1.12 — 2026-10-12
+
+- Digest, Refine, and Enrich now keep skill instructions, runtime paths,
+  command output, and helper field names out of user-facing messages.
+- Refine reports source status in natural reader-facing language instead of
+  exposing JSON-style metric names in chat or notes.
+- Repeated Refine passes now preserve introductory prose after a generated
+  table of contents instead of deleting everything before the first main
+  section.
+- Added regression coverage for Refine idempotency and virtual Digest handoff
+  communication.
+
 ## 0.1.11 — 2026-07-29
 
 - Enrich now treats requests for illustrations, visuals, graphics, or figures

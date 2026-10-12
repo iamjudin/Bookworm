@@ -29,6 +29,22 @@ from bookworm_helper import (
 
 
 class RefineMarkdownTests(unittest.TestCase):
+    def test_repeated_refine_preserves_intro_after_generated_toc(self) -> None:
+        source = (
+            "# Title\n\n"
+            "Important opening conclusion.\n\n"
+            "Second opening paragraph.\n\n"
+            "## Findings\n\n"
+            "Evidence.\n"
+        )
+
+        once = refine_markdown(source, toc_title="Contents")
+        twice = refine_markdown(once, toc_title="Contents")
+
+        self.assertEqual(twice, once)
+        self.assertIn("Important opening conclusion.", twice)
+        self.assertIn("Second opening paragraph.", twice)
+
     def test_detects_icloud_obsidian_vault_once(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             home = Path(directory)

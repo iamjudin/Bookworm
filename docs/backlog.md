@@ -100,6 +100,12 @@
 - Russian is for direct communication with a Russian-speaking user: progress
   updates, questions, final chat messages, and natural request examples may say
   `Букворм`, but public/plugin UI names stay English-only.
+- Digest, Refine, and Enrich must follow internal workflow rules silently.
+  User-facing messages and notes must not quote or link skill instructions,
+  expose runtime paths, or show raw helper field names and JSON diagnostics.
+- Refine must be safe to run repeatedly: rebuilding a generated table of
+  contents must preserve introductory prose between the title/TOC and the first
+  main section.
 - After a successful Refine handoff, offer Enrich to add clearly labelled
   examples and context. Enrich must remain confirmation-gated and must not
   start automatically.

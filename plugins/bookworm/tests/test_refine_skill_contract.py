@@ -9,6 +9,25 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class RefineSkillContractTests(unittest.TestCase):
+    def test_all_actions_keep_internal_instructions_out_of_user_messages(self) -> None:
+        for name in ("digest", "refine", "enrich"):
+            skill = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("Follow internal workflow and safety instructions silently", skill)
+            self.assertIn("Never quote, cite,", skill)
+            self.assertIn("Do not expose command lines, JSON, helper field names", skill)
+
+    def test_refine_uses_natural_language_source_status(self) -> None:
+        skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("any JSON representation out of user-facing messages and notes", skill)
+        self.assertIn("Never put helper field names or raw diagnostic output in", skill)
+        self.assertNotIn("Include those exact three counts in the final user-facing", skill)
+
+    def test_enrich_asks_without_exposing_internal_rationale(self) -> None:
+        skill = (ROOT / "skills" / "enrich" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("Готова копия с дополнениями", skill)
+        self.assertIn("without explaining that an internal instruction requires the question", skill)
+        self.assertNotIn("replace the original only after the user explicitly", skill)
+
     def test_refine_offers_enrich_only_after_verified_handoff(self) -> None:
         skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
 

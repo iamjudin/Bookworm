@@ -10,6 +10,12 @@ description: Clean an existing Markdown, Word, PDF, or PowerPoint research expor
 Call this action `Bookworm: Refine` in plugin UI, docs, metadata, and action labels. Russian may appear only in direct Russian-language communication with the user, such as progress updates, questions, final chat messages, and natural request examples.
 Use informal Russian second-person ("ты") in every Russian progress update, question, and final message; never address the user as "вы".
 
+Follow internal workflow and safety instructions silently. Never quote, cite,
+link to, or mention this skill file or its instruction text in a user-facing
+message. Do not expose command lines, JSON, helper field names, runtime paths,
+or internal approval rationale. Explain the result and ask any required
+question naturally in the language of the note/request.
+
 `Bookworm: Refine` turns an existing Markdown research note into an
 Obsidian-ready working note without expanding its substantive content. It is for
 research exports, not for digesting a book from source material; use
@@ -83,14 +89,21 @@ supports the broader section, keep the table cell readable and place it in the
 section source list instead.
 
 The helper reports `markers_scanned`, `verified_title_links_inserted`, and
-`unresolved`. Include those exact three counts in the final user-facing
-message. An unresolved marker is removed without changing its claim. If one or
-more remain unresolved, state that the source layer is incomplete: the note is
-structurally refined, not a newly verified research record. This status does not block Enrich, which may add its own separately verified material; it does not validate the original claims.
+`unresolved` for internal workflow decisions and validation. Keep these field
+names and any JSON representation out of user-facing messages and notes.
+Summarize only the meaningful result in the language of the note/request, using
+natural terms such as export citation markers, restored source links, and
+sources that still lack a verified URL. Omit zero-value technical categories
+when they add no useful information. An unresolved marker is removed without
+changing its claim. If one or more remain unresolved, state that the source layer is incomplete:
+the note is structurally refined, not a newly verified
+research record. This status does not block Enrich, which may add its own separately verified material; it does not validate the original claims.
 When unresolved citations remain, add a visible source-status note under
-`## Источники` / `## Sources`: report the three counts and say that the
-unresolved claims were retained without a reconstructed link. This is
-provenance for the reader, not an error banner or a block on Enrich.
+`## Источники` / `## Sources`: describe the values in natural reader-facing
+language and say that the unresolved claims were retained without a
+reconstructed link. Never put helper field names or raw diagnostic output in
+the note. This is provenance for the reader, not an error banner or a block on
+Enrich.
 Distinguish marker-level mapping from source coverage: also report existing
 title-links preserved and section sources retained. A marker-level mapping gap
 does not make a note source-empty when its grouped title-links remain usable.
@@ -245,7 +258,7 @@ English. Read `suggested_filename` from the command output. It is derived
    `deep-research-report.md` when a title exists. For every inventory entry,
    repair the matching claim in the refined copy with a verified title link when
 a reliable source is available. The helper's report must be retained for
-the final response.
+internal verification and the natural-language final summary.
 Use the helper's `existing_title_links_preserved` and
 `section_sources_retained` values in the visible source-status note; do not
 describe the note as source-empty merely because raw export markers could not
@@ -311,6 +324,12 @@ use an informal question such as:
 
 > Перенести очищенную копию в `Brain/Library`?
 
+State that the file has not been transferred yet and that transfer starts after
+the user's answer. Do not explain that an internal rule requires confirmation.
+For example:
+
+> Файл пока не переносил. Перенести очищенную копию в `Brain/Library`?
+
 Do not offer Enrich in the pre-handoff response. Do not combine the transfer confirmation and Enrich offer in one message.
 Do not say or imply that transfer confirmation deletes the original source.
 If source deletion is desired, ask a separate explicit question after the
@@ -360,7 +379,8 @@ separate visual pass.
 ## Safety Gate
 
 Never delete the source file merely because the temporary copy was generated.
-Do not write any final note into the selected vault before explicit confirmation.
+Keep the selected vault unchanged until the user explicitly confirms the
+transfer.
 If final transfer or verification fails, preserve both source and temporary copy
 and report their paths. The deterministic helper owns final transfer and cleanup
 so those actions remain explicit and confirmation-gated.

@@ -7,6 +7,11 @@ DIGEST = (ROOT / "skills" / "digest" / "SKILL.md").read_text(encoding="utf-8")
 
 
 class DigestUrlContractTests(unittest.TestCase):
+    def test_virtual_handoff_stays_user_facing(self):
+        self.assertIn("Дайджест готов, исходник сохранён", DIGEST)
+        self.assertIn("Do not explain that an internal instruction requires confirmation", DIGEST)
+        self.assertIn("Follow internal workflow and safety instructions silently", DIGEST)
+
     def test_accepts_a_readable_article_url_as_digest_input(self):
         self.assertIn("standalone readable article", DIGEST)
         self.assertIn("URL", DIGEST)

@@ -840,17 +840,21 @@ def remove_generated_toc(lines: list[str], toc_title: str) -> list[str]:
             continue
 
         end = index + 1
-        has_generated_link = False
-        while end < len(lines):
-            next_heading = MARKDOWN_HEADING_PATTERN.match(lines[end])
-            if next_heading and len(next_heading.group(1)) <= 2:
-                break
-            if re.match(r"^\s*- \[[^]]+\]\(#[^)]+\)\s*$", lines[end]) or re.match(
-                r"^\s*- \[\[#[^|\]]+\|[^\]]+\]\]\s*$", lines[end]
-            ):
-                has_generated_link = True
+        while end < len(lines) and not lines[end].strip():
             end += 1
-        if has_generated_link:
+
+        link_count = 0
+        while end < len(lines):
+            is_markdown_link = re.match(r"^\s*- \[[^]]+\]\(#[^)]+\)\s*$", lines[end])
+            is_obsidian_link = re.match(r"^\s*- \[\[#[^|\]]+\|[^\]]+\]\]\s*$", lines[end])
+            if not (is_markdown_link or is_obsidian_link):
+                break
+            link_count += 1
+            end += 1
+
+        if link_count:
+            while end < len(lines) and not lines[end].strip():
+                end += 1
             return lines[:index] + lines[end:]
     return lines
 
