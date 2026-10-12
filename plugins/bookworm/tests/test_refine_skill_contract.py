@@ -9,6 +9,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class RefineSkillContractTests(unittest.TestCase):
+    def marketplace_path(self) -> Path:
+        path = ROOT.parents[1] / ".agents" / "plugins" / "marketplace.json"
+        if not path.is_file():
+            self.skipTest("repository marketplace manifest is not bundled in the installed plugin")
+        return path
+
     def test_all_actions_keep_internal_instructions_out_of_user_messages(self) -> None:
         for name in ("digest", "refine", "enrich"):
             skill = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
@@ -194,8 +200,7 @@ class RefineSkillContractTests(unittest.TestCase):
 
     def test_public_plugin_names_are_english_only(self) -> None:
         manifest = json.loads((ROOT / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
-        marketplace_path = ROOT.parents[1] / ".agents" / "plugins" / "marketplace.json"
-        marketplace = json.loads(marketplace_path.read_text(encoding="utf-8"))
+        marketplace = json.loads(self.marketplace_path().read_text(encoding="utf-8"))
 
         self.assertEqual(manifest["interface"]["displayName"], "Bookworm")
         self.assertEqual(marketplace["interface"]["displayName"], "Bookworm")
@@ -203,8 +208,7 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertNotRegex(json.dumps(marketplace["interface"], ensure_ascii=False), r"[А-Яа-яЁё]")
 
     def test_public_marketplace_points_to_the_packaged_plugin(self) -> None:
-        marketplace_path = ROOT.parents[1] / ".agents" / "plugins" / "marketplace.json"
-        marketplace = json.loads(marketplace_path.read_text(encoding="utf-8"))
+        marketplace = json.loads(self.marketplace_path().read_text(encoding="utf-8"))
         self.assertEqual(marketplace["name"], "bookworm")
         plugin = marketplace["plugins"][0]
         self.assertEqual(plugin["name"], "bookworm")

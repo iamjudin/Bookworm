@@ -2,6 +2,11 @@
 
 All notable changes to Bookworm are documented here.
 
+## 0.1.13 — 2026-10-12
+
+- Installed-package contract tests now skip repository-only marketplace checks
+  when the marketplace manifest is intentionally absent from the runtime cache.
+
 ## 0.1.12 — 2026-10-12
 
 - Digest, Refine, and Enrich now keep skill instructions, runtime paths,

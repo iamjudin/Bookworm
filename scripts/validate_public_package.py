@@ -42,8 +42,8 @@ def main() -> None:
             fail(f"manifest missing {key}")
     if manifest["name"] != "bookworm":
         fail("manifest name must be bookworm")
-    if not manifest["version"].startswith("0.1.12+codex."):
-        fail("manifest version must match the 0.1.12 public release")
+    if not manifest["version"].startswith("0.1.13+codex."):
+        fail("manifest version must match the 0.1.13 public release")
     if manifest["license"] != "PolyForm-Noncommercial-1.0.0":
         fail("manifest license must match LICENSE")
     if not {"codex", "obsidian", "research"}.issubset(set(manifest["keywords"])):
