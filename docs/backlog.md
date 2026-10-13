@@ -16,6 +16,9 @@
 - Enrich gap and contribution metadata belongs in the temporary source ledger.
   Final notes keep the labelled source boundary and present the addition as
   natural reader-facing prose.
+- Every Refine pre-handoff response, including a single-document run, is
+  rendered by the deterministic preview helper and returned without appended
+  workflow rationale or instruction text.
 - Refine accepts multi-document batches. Every input remains an independent
   note with isolated sources, assets, validation, filename, and handoff status.
 - Refine renders transfer previews deterministically and blocks internal

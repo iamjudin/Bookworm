@@ -13,6 +13,9 @@ All notable changes to Bookworm are documented here.
 - Added a read-only structure audit and public synthetic fixtures for semantic
   preservation, section coverage, source-grounded enrichment, and stable
   handling of already readable notes.
+- Refine now requires its deterministic pre-handoff preview for single-document
+  runs as well as batches, preventing manual confirmation text from exposing
+  internal workflow instructions.
 
 ## 0.1.16 — 2026-10-13
 

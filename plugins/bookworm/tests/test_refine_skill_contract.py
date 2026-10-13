@@ -315,6 +315,8 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertIn("Return stdout verbatim", skill)
         self.assertIn("append nothing after its transfer question", skill)
         self.assertIn("approval rationale", skill)
+        self.assertIn("required for one document as well as a batch", skill)
+        self.assertIn("Never write a manual fallback", skill)
 
     def test_refine_handoff_audits_every_new_url_against_the_source_ledger(self) -> None:
         skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")

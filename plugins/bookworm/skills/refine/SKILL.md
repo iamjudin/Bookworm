@@ -346,8 +346,12 @@ title, framework, or established term.
    issue before the reader review.
 6. If a selected vault contains `Library/`, make that the default destination.
    Otherwise use the best matching existing folder, or the vault root when no
-   better match exists. State the selected path and why it was chosen, then ask
-   for confirmation before transferring anything. Do not create a file in the
+   better match exists. Write the proposed source, output, status, language,
+   and destination to the preview manifest, then run `render-refine-preview`.
+   This is required for one document as well as a batch. Return stdout verbatim
+   as the entire pre-handoff response and append nothing after its transfer
+   question. Never write a manual fallback that quotes an instruction, approval
+   rationale, skill text, or command detail. Do not create a file in the
    selected vault at this stage. If the selected vault disappears before
    transfer, rescan vaults once and choose again from the current results. Say
    that the selected vault disappeared; do not describe it as a permission
