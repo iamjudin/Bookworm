@@ -93,6 +93,11 @@ still found repeated profile layers. Segments, payment models, and experiment
 specifications each mixed prose or bullets with several adjacent generic
 two-column tables. This finding led to a narrower canonical-representation rule
 and a deterministic `repeated_profile_tables` warning grouped by main section.
+The next local runtime pass removed those repeated profile layers and kept the
+experiments as single field lists. It also exposed one remaining format gap: a
+short regional audience matrix stayed inside a `text` fence. The shared
+contract now distinguishes aligned reader-facing data from executable code,
+and the audit reports `fenced_data_table` so this case cannot pass unnoticed.
 
 The smoke confirms the preview correction and demonstrates why a clean
 mechanical report does not by itself establish reader usability. A corrected

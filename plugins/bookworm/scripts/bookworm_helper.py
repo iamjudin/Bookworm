@@ -332,6 +332,18 @@ def _table_cells(line: str) -> list[str]:
     return [cell.strip() for cell in re.split(r"(?<!\\)\|", line.strip().strip("|"))]
 
 
+def _looks_like_fenced_data_table(lines: list[str]) -> bool:
+    """Return true for a small aligned data matrix in a plain-text fence."""
+    rows = [line.strip() for line in lines if line.strip()]
+    if len(rows) < 3:
+        return False
+    columns = [re.split(r"\s{2,}", row) for row in rows]
+    widths = [len(row) for row in columns]
+    if min(widths) < 2 or max(widths) != min(widths):
+        return False
+    return any(re.search(r"\d", cell) for row in columns[1:] for cell in row)
+
+
 def reader_structure_audit(markdown: str) -> dict[str, object]:
     """Report deterministic reader-structure risks without rewriting content."""
     issues: list[dict[str, object]] = []
@@ -344,6 +356,9 @@ def reader_structure_audit(markdown: str) -> dict[str, object]:
     lines = markdown.splitlines()
     in_fence = False
     fence_marker = ""
+    fence_language = ""
+    fence_start: int | None = None
+    fence_lines: list[str] = []
     mermaid_start: int | None = None
     mermaid_lines: list[str] = []
 
@@ -355,7 +370,10 @@ def reader_structure_audit(markdown: str) -> dict[str, object]:
             if not in_fence:
                 in_fence = True
                 fence_marker = marker[0]
-                if fence.group(2).strip().casefold() == "mermaid":
+                fence_language = fence.group(2).strip().casefold()
+                fence_start = line_number
+                fence_lines = []
+                if fence_language == "mermaid":
                     mermaid_start = line_number
                     mermaid_lines = []
             elif marker[0] == fence_marker:
@@ -368,12 +386,22 @@ def reader_structure_audit(markdown: str) -> dict[str, object]:
                         "edge_count": len(re.findall(r"-->|---|==>|-.->", body)),
                         "longest_line": max((len(value) for value in mermaid_lines), default=0),
                     })
+                elif fence_language in {"text", "plain", "plaintext"} and _looks_like_fenced_data_table(fence_lines):
+                    warnings.append({
+                        "type": "fenced_data_table",
+                        "line": fence_start,
+                        "rows": len([value for value in fence_lines if value.strip()]),
+                    })
                 in_fence = False
                 fence_marker = ""
+                fence_language = ""
+                fence_start = None
+                fence_lines = []
                 mermaid_start = None
                 mermaid_lines = []
             continue
         if in_fence:
+            fence_lines.append(line)
             if mermaid_start is not None:
                 mermaid_lines.append(line)
             continue

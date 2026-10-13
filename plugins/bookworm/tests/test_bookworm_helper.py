@@ -90,6 +90,39 @@ flowchart TD
             {item["type"] for item in report["warnings"]},
         )
 
+    def test_reader_audit_flags_aligned_data_left_in_text_fence(self) -> None:
+        markdown = """## Аудитория
+
+```text
+Регион  Семьи, M  Аудитория, M
+Россия  7.2       1.2
+США     21.9      3.9
+```
+"""
+
+        report = reader_structure_audit(markdown)
+        warning = next(
+            item for item in report["warnings"]
+            if item["type"] == "fenced_data_table"
+        )
+
+        self.assertEqual(warning["line"], 3)
+        self.assertEqual(warning["rows"], 3)
+
+    def test_reader_audit_does_not_treat_executable_code_as_data_table(self) -> None:
+        markdown = """```python
+value = 10
+print(value)
+```
+"""
+
+        report = reader_structure_audit(markdown)
+
+        self.assertNotIn(
+            "fenced_data_table",
+            {item["type"] for item in report["warnings"]},
+        )
+
     def test_reader_audit_flags_repeated_generic_profile_tables_in_one_section(self) -> None:
         markdown = """## Варианты
 

@@ -15,6 +15,11 @@ Use this contract for every final Refine, Digest, and Enrich note.
 - Keep one canonical detail layer. Do not present complete profiles in prose
   and repeat the same profiles in a table.
 - Use Markdown tables. Convert reader-facing HTML tables before handoff.
+- Treat an aligned data matrix inside a `text` or `plain` fence as
+  reader-facing tabular data, not executable code. When its columns map
+  unambiguously and its cells remain short, convert it to a Markdown table and
+  preserve every header, value, unit, approximation sign, and note. Keep actual
+  source code and exact quoted blocks unchanged.
 - Do not turn every explanation into a table or every sentence into a bullet.
 
 Before keeping repeated fields, choose one canonical representation:
@@ -74,3 +79,5 @@ quotation in another form may be accepted after explicit review. Mermaid is
 reported as render-unverified until it is inspected in an actual renderer.
 Repeated generic two-column profile tables under one main section are reported
 for review because they often hide a comparison or duplicate nearby prose.
+Aligned data left inside a `text` or `plain` fence is also reported for review
+because Obsidian cannot scan or reflow it like a Markdown table.
