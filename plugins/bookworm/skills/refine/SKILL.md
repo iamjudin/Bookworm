@@ -349,7 +349,13 @@ title, framework, or established term.
 6. If a selected vault contains `Library/`, make that the default destination.
    Otherwise use the best matching existing folder, or the vault root when no
    better match exists. Write the proposed source, output, status, language,
-   and destination to the preview manifest, then run `render-refine-preview`.
+   and destination to the preview manifest. For every ready item, also write
+   `source_baseline` pointing to that input's untouched `converted.md` and
+   `source_ledger` pointing to its ledger. Then run `render-refine-preview`.
+   The preview helper compares the final prepared note directly with the
+   converted source baseline and refuses to ask for confirmation when a new URL
+   is missing from the opened-source ledger. Never use a semantic intermediate
+   such as `structured.md` as the baseline.
    This is required for one document as well as a batch. Return stdout verbatim
    as the entire pre-handoff response and append nothing after its transfer
    question. Never write a manual fallback that quotes an instruction, approval
@@ -425,8 +431,9 @@ python3 scripts/bookworm_helper.py render-refine-preview \
 ```
 
 The manifest contains `language` (`ru` or `en`), the reader-facing
-`destination`, and an `items` array. Each item contains `source`, `status`
-(`ready` or `failed`), and either `refined` or `reason`. Return stdout verbatim
+`destination`, and an `items` array. Each ready item contains `source`,
+`status`, `refined`, `source_baseline`, and `source_ledger`. A failed item
+contains `source`, `status`, and `reason`. Return stdout verbatim
 as the complete response and append nothing after its transfer question. This
 prevents internal instructions, runtime paths other than the prepared file
 links, and approval rationale from leaking into chat.

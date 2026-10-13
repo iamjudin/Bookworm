@@ -98,6 +98,11 @@ experiments as single field lists. It also exposed one remaining format gap: a
 short regional audience matrix stayed inside a `text` fence. The shared
 contract now distinguishes aligned reader-facing data from executable code,
 and the audit reports `fenced_data_table` so this case cannot pass unnoticed.
+An independent URL comparison also found that the live run had checked its
+final note against a semantic intermediate instead of the converted source.
+This allowed one unledgered URL into the preview. Preview generation now
+requires the converted baseline and source ledger for every ready item and
+performs the provenance audit before asking the user to transfer anything.
 
 The smoke confirms the preview correction and demonstrates why a clean
 mechanical report does not by itself establish reader usability. A corrected

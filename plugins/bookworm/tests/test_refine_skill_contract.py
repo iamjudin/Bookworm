@@ -329,6 +329,8 @@ class RefineSkillContractTests(unittest.TestCase):
 
         self.assertIn("Always create `source-ledger.json`", skill)
         self.assertIn("refuses the transfer when any newly inserted URL", skill)
+        self.assertIn("refuses to ask for confirmation when a new URL", skill)
+        self.assertIn("Never use a semantic intermediate", skill)
         self.assertIn("--source-baseline", skill)
         self.assertIn("--source-ledger", skill)
 

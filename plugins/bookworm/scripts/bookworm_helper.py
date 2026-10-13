@@ -286,9 +286,28 @@ def render_refine_preview(manifest: dict[str, object]) -> str:
         if status == "ready":
             if not isinstance(refined, str) or not refined:
                 raise ValueError(f"Preview item {index} has no refined file")
+            source_baseline = item.get("source_baseline")
+            source_ledger = item.get("source_ledger")
+            if not isinstance(source_baseline, str) or not source_baseline:
+                raise ValueError(f"Preview item {index} has no source baseline")
+            if not isinstance(source_ledger, str) or not source_ledger:
+                raise ValueError(f"Preview item {index} has no source ledger")
+            refined_file = Path(refined)
+            baseline_file = Path(source_baseline)
+            ledger_file = Path(source_ledger)
+            if not refined_file.is_file() or not baseline_file.is_file() or not ledger_file.is_file():
+                raise FileNotFoundError(f"Preview item {index} provenance files are missing")
+            ledger = json.loads(ledger_file.read_text(encoding="utf-8"))
+            if not isinstance(ledger, list):
+                raise ValueError(f"Preview item {index} source ledger must contain a JSON array")
+            audit_refined_sources(
+                baseline_file.read_text(encoding="utf-8"),
+                refined_file.read_text(encoding="utf-8"),
+                ledger,
+            )
             ready_count += 1
-            refined_path = str(Path(refined).resolve())
-            refined_name = Path(refined).name.replace("|", "\\|")
+            refined_path = str(refined_file.resolve())
+            refined_name = refined_file.name.replace("|", "\\|")
             rows.append(f"| {source_name} | [{refined_name}](<{refined_path}>) |")
         elif status == "failed":
             reason = item.get("reason")

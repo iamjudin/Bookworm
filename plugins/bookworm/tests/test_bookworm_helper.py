@@ -187,21 +187,54 @@ print(value)
             )
 
     def test_refine_preview_is_complete_and_contains_no_internal_rationale(self) -> None:
-        preview = render_refine_preview({
-            "language": "ru",
-            "destination": "Brain/Library",
-            "items": [{
-                "source": "/tmp/deep-research-report.md",
-                "refined": "/tmp/Исследование.md",
-                "status": "ready",
-            }],
-        })
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            baseline = root / "converted.md"
+            refined = root / "Исследование.md"
+            ledger = root / "source-ledger.json"
+            baseline.write_text("# Исследование\n", encoding="utf-8")
+            refined.write_text("# Исследование\n", encoding="utf-8")
+            ledger.write_text("[]\n", encoding="utf-8")
+            preview = render_refine_preview({
+                "language": "ru",
+                "destination": "Brain/Library",
+                "items": [{
+                    "source": "/tmp/deep-research-report.md",
+                    "refined": str(refined),
+                    "source_baseline": str(baseline),
+                    "source_ledger": str(ledger),
+                    "status": "ready",
+                }],
+            })
 
         self.assertIn("deep-research-report.md", preview)
         self.assertIn("Исследование.md", preview)
         self.assertTrue(preview.endswith("Перенести подготовленные заметки в `Brain/Library`?"))
         for forbidden in ("Only after", "explicitly confirms", "SKILL.md", "handoff helper"):
             self.assertNotIn(forbidden, preview)
+
+    def test_refine_preview_rejects_unledgered_url_before_confirmation(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            baseline = root / "converted.md"
+            refined = root / "refined.md"
+            ledger = root / "source-ledger.json"
+            baseline.write_text("# Source\n", encoding="utf-8")
+            refined.write_text("[New](https://example.com/new)\n", encoding="utf-8")
+            ledger.write_text("[]\n", encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "without opened-source provenance"):
+                render_refine_preview({
+                    "language": "ru",
+                    "destination": "Brain/Library",
+                    "items": [{
+                        "source": "/tmp/source.md",
+                        "refined": str(refined),
+                        "source_baseline": str(baseline),
+                        "source_ledger": str(ledger),
+                        "status": "ready",
+                    }],
+                })
 
     def test_refine_preview_rejects_internal_text_in_failure_reason(self) -> None:
         with self.assertRaisesRegex(ValueError, "internal workflow text"):
