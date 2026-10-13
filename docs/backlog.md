@@ -19,6 +19,9 @@
 - Every Refine pre-handoff response, including a single-document run, is
   rendered by the deterministic preview helper and returned without appended
   workflow rationale or instruction text.
+- Repeated short fields across several entities use one comparison matrix.
+  Long entity explanations stay in one prose layer. Experiment fields remain
+  together instead of being divided between bullets and generic profile tables.
 - Refine accepts multi-document batches. Every input remains an independent
   note with isolated sources, assets, validation, filename, and handoff status.
 - Refine renders transfer previews deterministically and blocks internal

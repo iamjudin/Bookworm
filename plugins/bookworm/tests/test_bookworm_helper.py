@@ -90,6 +90,31 @@ flowchart TD
             {item["type"] for item in report["warnings"]},
         )
 
+    def test_reader_audit_flags_repeated_generic_profile_tables_in_one_section(self) -> None:
+        markdown = """## Варианты
+
+### Alpha
+
+| Параметр | Описание |
+| --- | --- |
+| Цена | 10 |
+
+### Beta
+
+| Параметр | Описание |
+| --- | --- |
+| Цена | 12 |
+"""
+
+        report = reader_structure_audit(markdown)
+        warning = next(
+            item for item in report["warnings"]
+            if item["type"] == "repeated_profile_tables"
+        )
+
+        self.assertEqual(warning["section"], "варианты")
+        self.assertEqual(warning["tables"], 2)
+
     def test_source_audit_accepts_only_logged_opened_new_urls(self) -> None:
         source = "[Existing](https://example.com/existing)\n"
         refined = source + "\n[Added](https://example.com/added)\n"

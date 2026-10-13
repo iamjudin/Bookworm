@@ -97,6 +97,9 @@ class RefineSkillContractTests(unittest.TestCase):
             self.assertIn("audit-reader-structure", skill)
 
         self.assertIn("Move long explanations out of table cells", reference)
+        self.assertIn("use one matrix with entities as rows", reference)
+        self.assertIn("Do not append a separate", reference)
+        self.assertIn("Keep an experiment or procedure in one list", reference)
         self.assertIn("Use Markdown tables", reference)
         self.assertIn("avoid semicolons", reference)
         self.assertIn("Code and exact quotations remain exact", reference)

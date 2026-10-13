@@ -17,6 +17,21 @@ Use this contract for every final Refine, Digest, and Enrich note.
 - Use Markdown tables. Convert reader-facing HTML tables before handoff.
 - Do not turn every explanation into a table or every sentence into a bullet.
 
+Before keeping repeated fields, choose one canonical representation:
+
+1. When two or more entities share the same short fields and comparison is the
+   reading task, use one matrix with entities as rows and fields as columns.
+2. When the values need causal or multi-sentence explanation, use one section
+   per entity with short labelled paragraphs. Do not append a separate
+   `Parameter | Description` table that restates the same entity.
+3. Keep an experiment or procedure in one list or sequence. Do not split its
+   hypothesis and observations into bullets while moving channel, budget, or
+   intent into a second table.
+
+During reader review, compare every table with the prose immediately before and
+after it. Merge repeated facts into the chosen canonical layer while preserving
+details that appear in only one source layer.
+
 ## Preserve meaning and evidence boundaries
 
 Preserve numbers, units, negation, cumulative conditions, exceptions,
@@ -57,3 +72,5 @@ Review every reported issue. A semicolon inside fenced code or a Markdown
 blockquote is preserved and excluded from the reader-text check. An exact
 quotation in another form may be accepted after explicit review. Mermaid is
 reported as render-unverified until it is inspected in an actual renderer.
+Repeated generic two-column profile tables under one main section are reported
+for review because they often hide a comparison or duplicate nearby prose.

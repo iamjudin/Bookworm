@@ -343,7 +343,9 @@ title, framework, or established term.
    the shared reader contract. Map source propositions to the final note and
    final propositions back to the source. Then run `audit-reader-structure` on
    the temporary Markdown and resolve or explicitly review every reported
-   issue before the reader review.
+   issue before the reader review. Treat repeated generic profile-table
+   warnings as a request to choose one comparison matrix or one prose layer,
+   not as a request to delete unique facts.
 6. If a selected vault contains `Library/`, make that the default destination.
    Otherwise use the best matching existing folder, or the vault root when no
    better match exists. Write the proposed source, output, status, language,

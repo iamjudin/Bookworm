@@ -16,6 +16,8 @@ All notable changes to Bookworm are documented here.
 - Refine now requires its deterministic pre-handoff preview for single-document
   runs as well as batches, preventing manual confirmation text from exposing
   internal workflow instructions.
+- Reader review now detects repeated generic profile tables under one section
+  and requires one canonical comparison, prose, or procedural layer.
 
 ## 0.1.16 — 2026-10-13
 

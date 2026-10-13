@@ -81,3 +81,19 @@ plugin cache, marketplace record, tag, or remote branch was changed.
   width. The fixtures were not registered as a temporary Obsidian vault and
   were not copied into Brain, so horizontal scrolling remains unverified.
 - Package installation and public release require separate authorization.
+
+## Local runtime smoke
+
+A local runtime smoke used the installed Bookworm cache after confirming byte
+parity with the source package. The pre-handoff response was rendered without
+internal instruction text and no vault transfer occurred.
+
+The first reader audit passed its original mechanical checks but manual review
+still found repeated profile layers. Segments, payment models, and experiment
+specifications each mixed prose or bullets with several adjacent generic
+two-column tables. This finding led to a narrower canonical-representation rule
+and a deterministic `repeated_profile_tables` warning grouped by main section.
+
+The smoke confirms the preview correction and demonstrates why a clean
+mechanical report does not by itself establish reader usability. A corrected
+runtime rerun remains necessary before release readiness is claimed.

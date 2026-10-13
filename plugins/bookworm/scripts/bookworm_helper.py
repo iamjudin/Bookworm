@@ -339,6 +339,8 @@ def reader_structure_audit(markdown: str) -> dict[str, object]:
     headings: set[str] = set()
     toc_targets: list[tuple[int, str]] = []
     mermaid_blocks: list[dict[str, object]] = []
+    current_main_section = "document"
+    generic_profile_tables: dict[str, list[int]] = {}
     lines = markdown.splitlines()
     in_fence = False
     fence_marker = ""
@@ -378,7 +380,10 @@ def reader_structure_audit(markdown: str) -> dict[str, object]:
 
         heading = MARKDOWN_HEADING_PATTERN.match(line)
         if heading:
-            headings.add(_reader_heading_text(heading.group(2)))
+            normalized_heading = _reader_heading_text(heading.group(2))
+            headings.add(normalized_heading)
+            if len(heading.group(1)) == 2:
+                current_main_section = normalized_heading
         for target in OBSIDIAN_HEADING_LINK_PATTERN.findall(line):
             toc_targets.append((line_number, _reader_heading_text(target)))
 
@@ -389,6 +394,12 @@ def reader_structure_audit(markdown: str) -> dict[str, object]:
             cells = _table_cells(line)
             is_separator = all(re.fullmatch(r":?-{3,}:?", cell) for cell in cells if cell)
             if not is_separator:
+                normalized_cells = tuple(_reader_heading_text(cell) for cell in cells)
+                if normalized_cells in {
+                    ("parameter", "description"),
+                    ("параметр", "описание"),
+                }:
+                    generic_profile_tables.setdefault(current_main_section, []).append(line_number)
                 for column, cell in enumerate(cells, start=1):
                     plain = MARKDOWN_LINK_PATTERN.sub(r"\1", INLINE_CODE_PATTERN.sub("", cell))
                     sentence_breaks = len(re.findall(r"[.!?](?:\s|$)", plain))
@@ -413,6 +424,15 @@ def reader_structure_audit(markdown: str) -> dict[str, object]:
             "type": "mermaid_render_review_required",
             "blocks": len(mermaid_blocks),
         })
+
+    for section, table_lines in generic_profile_tables.items():
+        if len(table_lines) >= 2:
+            warnings.append({
+                "type": "repeated_profile_tables",
+                "section": section,
+                "tables": len(table_lines),
+                "lines": table_lines,
+            })
 
     return {
         "issues": issues,
