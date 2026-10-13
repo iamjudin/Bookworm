@@ -89,6 +89,47 @@ class RefineSkillContractTests(unittest.TestCase):
             self.assertIn("section-level sources", skill)
             self.assertIn("Mermaid configuration", skill)
 
+    def test_all_modes_load_the_shared_reader_structure_contract(self) -> None:
+        reference = (ROOT / "references" / "reader-structure.md").read_text(encoding="utf-8")
+        for name in ("digest", "refine", "enrich"):
+            skill = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("../../references/reader-structure.md", skill)
+            self.assertIn("audit-reader-structure", skill)
+
+        self.assertIn("Move long explanations out of table cells", reference)
+        self.assertIn("Use Markdown tables", reference)
+        self.assertIn("avoid semicolons", reference)
+        self.assertIn("Code and exact quotations remain exact", reference)
+        self.assertIn("`TD` or `TB` can still produce a wide graph", reference)
+        self.assertIn("against silently splitting one diagram", reference)
+        self.assertIn("numbers, units, negation, cumulative conditions", reference)
+
+    def test_refine_preserves_meaning_without_freezing_paragraph_shape(self) -> None:
+        skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
+
+        self.assertIn("Preserve meaning, not the physical paragraph shape", skill)
+        self.assertIn("split dense paragraphs at real idea boundaries", skill)
+        self.assertIn("source propositions to the final note", skill)
+        self.assertIn("final propositions back to the source", skill)
+        self.assertIn("must not shorten the research", skill)
+
+    def test_digest_applies_structure_during_composition_and_checks_questions(self) -> None:
+        skill = (ROOT / "skills" / "digest" / "SKILL.md").read_text(encoding="utf-8")
+
+        self.assertIn("while drafting each section", skill)
+        self.assertIn("Do not draft a compressed annotation", skill)
+        self.assertIn("catalogue of tables", skill)
+        self.assertIn("Ask several concrete questions", skill)
+        self.assertIn("the reason for the step", skill)
+
+    def test_enrich_requires_a_specific_nonduplicating_contribution(self) -> None:
+        skill = (ROOT / "skills" / "enrich" / "SKILL.md").read_text(encoding="utf-8")
+
+        self.assertIn("Every addition must close a specific gap", skill)
+        self.assertIn("single primary contribution", skill)
+        self.assertIn("Do not repeat material already present", skill)
+        self.assertIn("correct an original claim", skill)
+
     def test_unresolved_original_sources_do_not_block_enrich(self) -> None:
         refine = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
         enrich = (ROOT / "skills" / "enrich" / "SKILL.md").read_text(encoding="utf-8")

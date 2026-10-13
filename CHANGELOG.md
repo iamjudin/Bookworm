@@ -2,6 +2,18 @@
 
 All notable changes to Bookworm are documented here.
 
+## Unreleased
+
+- Digest, Refine, and Enrich now share one reader structure contract for
+  compact tables, purposeful lists, connected explanatory prose, navigation,
+  evidence boundaries, and Mermaid review.
+- Refine now distinguishes preservation of meaning from preservation of
+  paragraph shape and requires bidirectional proposition review after its
+  deterministic cleanup pass.
+- Added a read-only structure audit and public synthetic fixtures for semantic
+  preservation, section coverage, source-grounded enrichment, and stable
+  handling of already readable notes.
+
 ## 0.1.16 — 2026-10-13
 
 - Refine now renders its pre-handoff batch preview with a deterministic helper

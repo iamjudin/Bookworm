@@ -5,6 +5,10 @@ description: Use when the user wants to expand an existing note with clearly att
 
 # Enrich
 
+Read `../../references/reader-structure.md` before adding material. Apply the
+shared contract while keeping every addition visibly separate from the original
+authorial layer.
+
 ## Action Names
 
 Call this action `Bookworm: Enrich` in plugin UI, docs, metadata, and action labels. Russian may appear only in direct Russian-language communication with the user, such as progress updates, questions, final chat messages, and natural request examples.
@@ -61,6 +65,13 @@ using this exact block form:
 Do not make unlabelled additions and do not merge external material into the
 original prose. This preserves the boundary between the book or source note and
 the later enrichment.
+
+Every addition must close a specific gap by doing at least one of these jobs:
+explain a mechanism, work through a concrete example, compare alternatives,
+expose a limitation, or deepen application. Do not add a block merely to make
+the note longer. Do not repeat material already present, and do not silently
+correct an original claim. Record the gap and contribution in the temporary
+source ledger so reader review can verify why the block exists.
 
 ## Visual Enrichment Rules
 
@@ -146,6 +157,10 @@ tables are scannable, diagrams are legible, links open, and no duplicate
 summary layer repeats the same material. Check that every added paragraph is
 inside a labelled addition block and that sources are grouped by the relevant
 main section rather than dumped into one flat list.
+For every addition, identify the original gap, its single primary contribution,
+and the opened source that supports it. Remove additions that duplicate the
+note or have no concrete contribution. Run `audit-reader-structure` on the
+temporary Markdown and review every reported issue.
 For visual-asset enrichment, additionally verify the count of local Obsidian
 image embeds added and that every embedded asset resolves from the final note.
 If the count is zero, the preview must say plainly why no local illustrations

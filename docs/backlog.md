@@ -2,6 +2,20 @@
 
 ## Decisions
 
+- Digest, Refine, and Enrich share one reader structure contract. Tables are
+  for compact comparisons and repeated short fields, lists are for independent
+  points or procedures, and connected prose carries mechanisms, causes,
+  contradictions, uncertainty, and limitations.
+- Refine preserves semantic propositions and evidence boundaries rather than
+  physical paragraph shape. It may split dense prose, expose enumerations, and
+  move compact comparisons into Markdown tables without shortening research or
+  adding unsupported claims.
+- Reader structure validation combines a read-only deterministic audit with a
+  semantic and visual reader review. A clean audit is not proof of source
+  coverage or rendered Mermaid readability.
+- Enrich gap and contribution metadata belongs in the temporary source ledger.
+  Final notes keep the labelled source boundary and present the addition as
+  natural reader-facing prose.
 - Refine accepts multi-document batches. Every input remains an independent
   note with isolated sources, assets, validation, filename, and handoff status.
 - Refine renders transfer previews deterministically and blocks internal

@@ -33,6 +33,9 @@ MARKDOWN_SOURCE_LINK_PATTERN = re.compile(r"(?<!!)\[[^\]]+\]\(\s*https?://[^)\s]
 MARKDOWN_SOURCE_URL_PATTERN = re.compile(r"(?<!!)\[[^\]]+\]\(\s*(https?://[^)\s]+)[^)]*\)")
 BARE_URL_PATTERN = re.compile(r"(?<!\]\()(?<!\()https?://[^\s<>)\]]+")
 FOOTNOTE_REFERENCE_PATTERN = re.compile(r"(?<!\\)\[\^[^\]]+\]")
+OBSIDIAN_HEADING_LINK_PATTERN = re.compile(r"\[\[#([^|\]]+)(?:\|[^\]]+)?\]\]")
+INLINE_CODE_PATTERN = re.compile(r"`[^`]*`")
+MARKDOWN_LINK_PATTERN = re.compile(r"(!?\[[^\]]*\])\([^)]*\)")
 LABEL_VALUE_PATTERN = re.compile(r"^\*\*(.+?)(?::)?\*\*\s*:?\s*(.+?)\s*$")
 MERMAID_COMPACT_INIT = '%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 20, "rankSpacing": 25}} }%%'
 COMMON_RUSSIAN_HEADING_TRANSLATIONS = {
@@ -318,6 +321,110 @@ def render_refine_preview(manifest: dict[str, object]) -> str:
         if pattern.search(preview):
             raise ValueError("Preview contains internal workflow text")
     return preview
+
+
+def _reader_heading_text(value: str) -> str:
+    value = re.sub(r"[`*_~]", "", value)
+    return re.sub(r"\s+", " ", value).strip().casefold()
+
+
+def _table_cells(line: str) -> list[str]:
+    return [cell.strip() for cell in re.split(r"(?<!\\)\|", line.strip().strip("|"))]
+
+
+def reader_structure_audit(markdown: str) -> dict[str, object]:
+    """Report deterministic reader-structure risks without rewriting content."""
+    issues: list[dict[str, object]] = []
+    warnings: list[dict[str, object]] = []
+    headings: set[str] = set()
+    toc_targets: list[tuple[int, str]] = []
+    mermaid_blocks: list[dict[str, object]] = []
+    lines = markdown.splitlines()
+    in_fence = False
+    fence_marker = ""
+    mermaid_start: int | None = None
+    mermaid_lines: list[str] = []
+
+    for line_number, line in enumerate(lines, start=1):
+        stripped = line.strip()
+        fence = re.match(r"^(```+|~~~+)(.*)$", stripped)
+        if fence:
+            marker = fence.group(1)
+            if not in_fence:
+                in_fence = True
+                fence_marker = marker[0]
+                if fence.group(2).strip().casefold() == "mermaid":
+                    mermaid_start = line_number
+                    mermaid_lines = []
+            elif marker[0] == fence_marker:
+                if mermaid_start is not None:
+                    body = "\n".join(mermaid_lines)
+                    direction_match = re.search(r"\b(?:flowchart|graph)\s+(TB|TD|LR|RL|BT)\b", body, re.IGNORECASE)
+                    mermaid_blocks.append({
+                        "line": mermaid_start,
+                        "direction": direction_match.group(1).upper() if direction_match else "unknown",
+                        "edge_count": len(re.findall(r"-->|---|==>|-.->", body)),
+                        "longest_line": max((len(value) for value in mermaid_lines), default=0),
+                    })
+                in_fence = False
+                fence_marker = ""
+                mermaid_start = None
+                mermaid_lines = []
+            continue
+        if in_fence:
+            if mermaid_start is not None:
+                mermaid_lines.append(line)
+            continue
+
+        heading = MARKDOWN_HEADING_PATTERN.match(line)
+        if heading:
+            headings.add(_reader_heading_text(heading.group(2)))
+        for target in OBSIDIAN_HEADING_LINK_PATTERN.findall(line):
+            toc_targets.append((line_number, _reader_heading_text(target)))
+
+        if re.search(r"</?table\b|</?tr\b|</?(?:th|td)\b", line, re.IGNORECASE):
+            issues.append({"type": "html_table", "line": line_number})
+
+        if stripped.startswith("|") and stripped.endswith("|"):
+            cells = _table_cells(line)
+            is_separator = all(re.fullmatch(r":?-{3,}:?", cell) for cell in cells if cell)
+            if not is_separator:
+                for column, cell in enumerate(cells, start=1):
+                    plain = MARKDOWN_LINK_PATTERN.sub(r"\1", INLINE_CODE_PATTERN.sub("", cell))
+                    sentence_breaks = len(re.findall(r"[.!?](?:\s|$)", plain))
+                    if len(plain) > 180 or sentence_breaks >= 3:
+                        warnings.append({
+                            "type": "long_table_cell",
+                            "line": line_number,
+                            "column": column,
+                            "characters": len(plain),
+                        })
+
+        visible = MARKDOWN_LINK_PATTERN.sub(r"\1", INLINE_CODE_PATTERN.sub("", line))
+        if ";" in visible and not stripped.startswith(">"):
+            issues.append({"type": "reader_semicolon", "line": line_number})
+
+    for line_number, target in toc_targets:
+        if target not in headings:
+            issues.append({"type": "missing_heading_target", "line": line_number, "target": target})
+
+    if mermaid_blocks:
+        warnings.append({
+            "type": "mermaid_render_review_required",
+            "blocks": len(mermaid_blocks),
+        })
+
+    return {
+        "issues": issues,
+        "warnings": warnings,
+        "metrics": {
+            "headings": len(headings),
+            "toc_targets": len(toc_targets),
+            "mermaid_blocks": len(mermaid_blocks),
+        },
+        "mermaid": mermaid_blocks,
+        "rendering": "unverified" if mermaid_blocks else "not_applicable",
+    }
 
 
 def citation_inventory(source: str) -> list[dict[str, str | int]]:
@@ -1296,6 +1403,9 @@ def main(argv: list[str]) -> int:
     preview_cmd = sub.add_parser("render-refine-preview")
     preview_cmd.add_argument("--manifest", required=True, type=Path)
 
+    reader_audit_cmd = sub.add_parser("audit-reader-structure")
+    reader_audit_cmd.add_argument("path", type=Path)
+
     handoff_cmd = sub.add_parser("handoff-refined-note")
     handoff_cmd.add_argument("--source", required=True, type=Path)
     handoff_cmd.add_argument("--refined", required=True, type=Path)
@@ -1364,6 +1474,9 @@ def main(argv: list[str]) -> int:
         if not isinstance(manifest, dict):
             raise ValueError("Preview manifest must contain a JSON object")
         print(render_refine_preview(manifest))
+    elif args.command == "audit-reader-structure":
+        markdown = args.path.read_text(encoding="utf-8")
+        print(json.dumps(reader_structure_audit(markdown), ensure_ascii=False, indent=2))
     elif args.command == "handoff-refined-note":
         destination = handoff_refined_note(
             args.source,

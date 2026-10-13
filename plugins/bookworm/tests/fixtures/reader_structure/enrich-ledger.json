@@ -1,0 +1,11 @@
+[
+  {
+    "url": "https://www.rfc-editor.org/rfc/rfc2606",
+    "title": "RFC 2606 — Reserved Top Level DNS Names",
+    "claim": "Reserved example names reduce conflict with registered names",
+    "scope": "claim-level",
+    "opened": true,
+    "gap": "The note does not explain why reserved names are used",
+    "contribution": "mechanism"
+  }
+]

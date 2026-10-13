@@ -5,6 +5,9 @@ description: Digest books and standalone readable articles into Obsidian-ready w
 
 # Digest
 
+Read `../../references/reader-structure.md` before composing a note. Apply the
+shared contract while drafting each section, not only as final cleanup.
+
 ## Action Names
 
 Call this action `Bookworm: Digest` in plugin UI, docs, metadata, and action labels. Russian may appear only in direct Russian-language communication with the user, such as progress updates, questions, final chat messages, and natural request examples.
@@ -217,6 +220,13 @@ a concrete example or case, a failure mode or limitation, and a practical implic
 context, a technical source may need procedures and trade-offs, and a practical
 source may need reusable steps.
 
+Build the note from the chapter, section, or argument map using the appropriate
+reader form as each part is written. Do not draft a compressed annotation and
+try to recover missing mechanisms during cleanup. Do not turn the map into a
+catalogue of tables. Synthesis is allowed when it keeps the motivation behind
+steps, important examples, constraints, conditions of use, and evidence anchors
+available for later questions and application.
+
 Preserve:
 
 - key terms;
@@ -277,10 +287,12 @@ If a visual is essential, technical, or a practical example that teaches impleme
 7. Digest the source section by section, preserving enough context for future Q&A.
 8. Include important figures in place, with explanations.
 9. Run the internal quality gate.
-10. Write one Obsidian-ready Markdown file plus local assets in the run directory.
-11. Prune generated assets so only embedded visuals and useful manifests remain with the final note.
-12. Ask for explicit handoff confirmation before creating or replacing the vault note; then verify copied embeds after confirmation.
-13. After confirmed vault copy and verification, remove temporary working files from the scratch workspace so repeated runs do not leave clutter.
+10. Run `audit-reader-structure` on the temporary Markdown and review every
+    reported issue without treating a clean report as proof of source coverage.
+11. Write one Obsidian-ready Markdown file plus local assets in the run directory.
+12. Prune generated assets so only embedded visuals and useful manifests remain with the final note.
+13. Ask for explicit handoff confirmation before creating or replacing the vault note; then verify copied embeds after confirmation.
+14. After confirmed vault copy and verification, remove temporary working files from the scratch workspace so repeated runs do not leave clutter.
 
 ## Internal Quality Gate
 
@@ -301,7 +313,11 @@ Only show this checklist if the user explicitly asks for diagnostics.
 Before final handoff, read the note as it will appear in Obsidian. Check that
 the first two screens establish navigation and purpose, tables are scannable,
 diagrams are legible, links open, and no duplicate summary layer repeats the
-same material.
+same material. Confirm that the conclusion is findable, options are comparable,
+and the important exception remains visible. Ask several concrete questions of
+the finished note across different source sections. The answers must include
+the mechanism, the reason for the step, an example, a limitation, the condition
+of use, and the relevant source anchor when the source provides them.
 
 ## Copyright And Privacy
 

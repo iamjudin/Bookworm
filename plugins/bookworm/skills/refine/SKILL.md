@@ -5,6 +5,9 @@ description: Clean an existing Markdown, Word, PDF, or PowerPoint research expor
 
 # Refine
 
+Read `../../references/reader-structure.md` before editing a note. Apply that
+shared contract together with the Refine-specific preservation rules below.
+
 ## Action Names
 
 Call this action `Bookworm: Refine` in plugin UI, docs, metadata, and action labels. Russian may appear only in direct Russian-language communication with the user, such as progress updates, questions, final chat messages, and natural request examples.
@@ -46,9 +49,18 @@ It may:
 - add a compact manual table of contents;
 - remove one redundant top-level H1 when Obsidian will already display the
   filename as the inline title.
+- split dense paragraphs at real idea boundaries, expose an embedded
+  enumeration as a list, move a compact comparison into a Markdown table, and
+  move long explanations out of table cells.
 
-It must preserve prose, Markdown links, URL-only source lists, footnotes,
-images, embedded media, callouts, code blocks, and meaningful metadata.
+Preserve meaning, not the physical paragraph shape. Every source proposition,
+number, unit, negation, condition, exception, uncertainty marker, and evidence
+relationship must survive. Every final substantive proposition must be
+supported by the source. Refine may reorganize prose to make those propositions
+visible, but it must not shorten the research, repair its claims, or introduce
+analysis, sources, or conclusions without a separately authorized scope.
+Preserve Markdown links, URL-only source lists, footnotes, images, embedded
+media, callouts, code blocks, exact quotations, and meaningful metadata.
 
 ChatGPT citation markers such as `citeturn0search1` are export artifacts,
 not reader-facing URLs. Before removing one, inspect the nearby claim and repair
@@ -326,7 +338,12 @@ title, framework, or established term.
 5. Inspect the result before handoff. Verify that ordinary title links, bare
    URLs, and source sections remain; raw citation markers are gone; the body has
    no duplicate top H1; and the TOC links only to real main sections. Confirm
-   that Refine did not add examples, opinions, or new analysis.
+   that Refine did not add examples, opinions, or new analysis. After the
+   helper's cosmetic pass, perform a separate semantic structure pass using
+   the shared reader contract. Map source propositions to the final note and
+   final propositions back to the source. Then run `audit-reader-structure` on
+   the temporary Markdown and resolve or explicitly review every reported
+   issue before the reader review.
 6. If a selected vault contains `Library/`, make that the default destination.
    Otherwise use the best matching existing folder, or the vault root when no
    better match exists. State the selected path and why it was chosen, then ask
@@ -456,6 +473,11 @@ Before asking for handoff, read the temporary note as it will appear in
 Obsidian. Check that the first two screens establish navigation and purpose,
 tables are scannable, diagrams are legible, links open, source entries are
 reader-facing, and no duplicate summary layer repeats the same material.
+Confirm that a reader can find the conclusion, compare the meaningful options,
+and see the important exception without reconstructing the source. Recheck the
+source-to-final and final-to-source proposition maps, with special attention to
+numbers, units, negation, cumulative conditions, uncertainty, and links beside
+qualifications.
 Perform a visual-density review: count Mermaid blocks and large tables. If the
 note is visually dense, flag the choice in the preview for the user. Do not
 delete diagrams automatically; Refine preserves them unless the user asks for a

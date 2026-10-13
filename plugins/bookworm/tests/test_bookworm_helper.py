@@ -19,6 +19,7 @@ from bookworm_helper import (
     note_filename,
     handoff_refined_note,
     language_consistency_warnings,
+    reader_structure_audit,
     render_refine_preview,
     refine_markdown,
     resolve_citation_markers,
@@ -31,6 +32,64 @@ from bookworm_helper import (
 
 
 class RefineMarkdownTests(unittest.TestCase):
+    def test_reader_audit_flags_html_long_cells_and_missing_heading_targets(self) -> None:
+        markdown = """## Содержание
+
+- [[#Несуществующий раздел|Раздел]]
+
+<table><tr><td>HTML</td></tr></table>
+
+| Параметр | Описание |
+| --- | --- |
+| Риск | Очень длинное объяснение. Оно содержит несколько связанных причин. Оно также содержит важное ограничение, которое должно находиться вне узкой ячейки таблицы, чтобы читатель мог увидеть логическую связь и условие применения без горизонтальной прокрутки. |
+"""
+
+        report = reader_structure_audit(markdown)
+        issue_types = {item["type"] for item in report["issues"]}
+        warning_types = {item["type"] for item in report["warnings"]}
+
+        self.assertIn("html_table", issue_types)
+        self.assertIn("missing_heading_target", issue_types)
+        self.assertIn("long_table_cell", warning_types)
+
+    def test_reader_audit_preserves_code_and_quote_semicolons_but_flags_reader_text(self) -> None:
+        markdown = """## Раздел
+
+Новый текст; его нужно переписать.
+
+> «Точная цитата; сохраняется».
+
+```python
+first(); second()
+```
+"""
+
+        report = reader_structure_audit(markdown)
+        semicolon_lines = [
+            item["line"] for item in report["issues"]
+            if item["type"] == "reader_semicolon"
+        ]
+
+        self.assertEqual(semicolon_lines, [3])
+
+    def test_reader_audit_requires_render_review_even_for_td_mermaid(self) -> None:
+        markdown = """## Схема
+
+```mermaid
+flowchart TD
+    A[Очень длинная подпись первого узла] --> B[Очень длинная подпись второго узла]
+```
+"""
+
+        report = reader_structure_audit(markdown)
+
+        self.assertEqual(report["rendering"], "unverified")
+        self.assertEqual(report["mermaid"][0]["direction"], "TD")
+        self.assertIn(
+            "mermaid_render_review_required",
+            {item["type"] for item in report["warnings"]},
+        )
+
     def test_source_audit_accepts_only_logged_opened_new_urls(self) -> None:
         source = "[Existing](https://example.com/existing)\n"
         refined = source + "\n[Added](https://example.com/added)\n"
