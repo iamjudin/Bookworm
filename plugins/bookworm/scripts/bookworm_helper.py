@@ -30,6 +30,7 @@ CHATGPT_CITATION_PATTERN = re.compile(r"cite[^]*")
 NUMERIC_CITATION_PATTERN = re.compile(r"(?<!\w)\[(\d{1,4})\]")
 MARKDOWN_HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
 MARKDOWN_SOURCE_LINK_PATTERN = re.compile(r"(?<!!)\[[^\]]+\]\(\s*https?://[^)\s]+[^)]*\)")
+MARKDOWN_SOURCE_URL_PATTERN = re.compile(r"(?<!!)\[[^\]]+\]\(\s*(https?://[^)\s]+)[^)]*\)")
 BARE_URL_PATTERN = re.compile(r"(?<!\]\()(?<!\()https?://[^\s<>)\]]+")
 FOOTNOTE_REFERENCE_PATTERN = re.compile(r"(?<!\\)\[\^[^\]]+\]")
 LABEL_VALUE_PATTERN = re.compile(r"^\*\*(.+?)(?::)?\*\*\s*:?\s*(.+?)\s*$")
@@ -87,6 +88,15 @@ ALLOWED_SHORT_LATIN_TERMS = {
     "UI",
     "UX",
 }
+FORBIDDEN_USER_MESSAGE_PATTERNS = (
+    re.compile(r"\bSKILL\.md\b", re.IGNORECASE),
+    re.compile(r"\bOnly after\b", re.IGNORECASE),
+    re.compile(r"\bexplicitly confirms?\b", re.IGNORECASE),
+    re.compile(r"\bhandoff helper\b", re.IGNORECASE),
+    re.compile(r"\bmarkers_scanned\b"),
+    re.compile(r"\bverified_title_links_inserted\b"),
+    re.compile(r"/\.codex/plugins/"),
+)
 
 
 class TextAndImageParser(HTMLParser):
@@ -191,6 +201,123 @@ def source_counts(source: str) -> dict[str, int]:
         "bare_urls": len(BARE_URL_PATTERN.findall(source_without_markdown_links)),
         "footnote_references": len(FOOTNOTE_REFERENCE_PATTERN.findall(source)),
     }
+
+
+def source_urls(source: str) -> set[str]:
+    """Return normalized HTTP(S) URLs used as Markdown links or bare sources."""
+    markdown_urls = set(MARKDOWN_SOURCE_URL_PATTERN.findall(source))
+    source_without_markdown_links = MARKDOWN_SOURCE_LINK_PATTERN.sub("", source)
+    bare_urls = {url.rstrip(".,;:") for url in BARE_URL_PATTERN.findall(source_without_markdown_links)}
+    return markdown_urls | bare_urls
+
+
+def audit_refined_sources(
+    source: str,
+    refined: str,
+    source_ledger: list[dict[str, object]],
+) -> dict[str, int]:
+    """Fail when a newly inserted URL lacks complete opened-source provenance."""
+    original_urls = source_urls(source)
+    refined_urls = source_urls(refined)
+    added_urls = refined_urls - original_urls
+    valid_scopes = {"claim-level", "section-level", "named-item"}
+    verified_urls: set[str] = set()
+
+    for index, entry in enumerate(source_ledger, start=1):
+        if not isinstance(entry, dict):
+            raise ValueError(f"Source ledger entry {index} must be an object")
+        url = entry.get("url")
+        title = entry.get("title")
+        claim = entry.get("claim")
+        scope = entry.get("scope")
+        opened = entry.get("opened")
+        if not isinstance(url, str) or not re.match(r"^https?://", url):
+            raise ValueError(f"Source ledger entry {index} has no valid URL")
+        if not isinstance(title, str) or not title.strip():
+            raise ValueError(f"Source ledger entry {index} has no descriptive title")
+        if not isinstance(claim, str) or not claim.strip():
+            raise ValueError(f"Source ledger entry {index} has no claim description")
+        if scope not in valid_scopes:
+            raise ValueError(f"Source ledger entry {index} has an invalid scope")
+        if opened is not True:
+            raise ValueError(f"Source ledger entry {index} is not marked as opened")
+        verified_urls.add(url)
+
+    missing = sorted(added_urls - verified_urls)
+    if missing:
+        raise ValueError(
+            "Refined note contains new URLs without opened-source provenance: "
+            + ", ".join(missing)
+        )
+    return {
+        "original_urls": len(original_urls),
+        "refined_urls": len(refined_urls),
+        "added_urls": len(added_urls),
+        "verified_added_urls": len(added_urls & verified_urls),
+    }
+
+
+def render_refine_preview(manifest: dict[str, object]) -> str:
+    """Render a complete pre-handoff response without internal workflow text."""
+    language = manifest.get("language", "ru")
+    if language not in {"ru", "en"}:
+        raise ValueError("Preview language must be 'ru' or 'en'")
+    destination = manifest.get("destination")
+    items = manifest.get("items")
+    if not isinstance(destination, str) or not destination.strip():
+        raise ValueError("Preview destination is required")
+    if not isinstance(items, list) or not items:
+        raise ValueError("Preview requires at least one item")
+
+    rows: list[str] = []
+    ready_count = 0
+    for index, item in enumerate(items, start=1):
+        if not isinstance(item, dict):
+            raise ValueError(f"Preview item {index} must be an object")
+        source = item.get("source")
+        refined = item.get("refined")
+        status = item.get("status", "ready")
+        if not isinstance(source, str) or not source:
+            raise ValueError(f"Preview item {index} has no source")
+        source_name = Path(source).name.replace("|", "\\|")
+        if status == "ready":
+            if not isinstance(refined, str) or not refined:
+                raise ValueError(f"Preview item {index} has no refined file")
+            ready_count += 1
+            refined_path = str(Path(refined).resolve())
+            refined_name = Path(refined).name.replace("|", "\\|")
+            rows.append(f"| {source_name} | [{refined_name}](<{refined_path}>) |")
+        elif status == "failed":
+            reason = item.get("reason")
+            if not isinstance(reason, str) or not reason.strip():
+                raise ValueError(f"Preview item {index} has no failure reason")
+            escaped_reason = reason.replace("|", "\\|")
+            label = "Ошибка" if language == "ru" else "Failed"
+            rows.append(f"| {source_name} | {label}: {escaped_reason} |")
+        else:
+            raise ValueError(f"Preview item {index} has an invalid status")
+
+    if language == "ru":
+        heading = "Подготовленные заметки:"
+        headers = "| Исходный файл | Результат |\n| --- | --- |"
+        ending = (
+            f"\n\nФайлы пока не переносил. Перенести подготовленные заметки в `{destination}`?"
+            if ready_count
+            else "\n\nГотовых к переносу заметок нет."
+        )
+    else:
+        heading = "Prepared notes:"
+        headers = "| Source file | Result |\n| --- | --- |"
+        ending = (
+            f"\n\nThe files have not been transferred yet. Transfer the prepared notes to `{destination}`?"
+            if ready_count
+            else "\n\nNo notes are ready for transfer."
+        )
+    preview = f"{heading}\n\n{headers}\n" + "\n".join(rows) + ending
+    for pattern in FORBIDDEN_USER_MESSAGE_PATTERNS:
+        if pattern.search(preview):
+            raise ValueError("Preview contains internal workflow text")
+    return preview
 
 
 def citation_inventory(source: str) -> list[dict[str, str | int]]:
@@ -541,6 +668,8 @@ def handoff_refined_note(
     confirmation: str | None,
     run_dir: Path | None = None,
     assets_dir: Path | None = None,
+    source_baseline: Path | None = None,
+    source_ledger: Path | None = None,
     final_title: str | None = None,
     delete_source: bool = False,
 ) -> Path:
@@ -549,6 +678,20 @@ def handoff_refined_note(
         raise PermissionError("Final handoff requires explicit user confirmation")
     if not source_path.is_file() or not refined_path.is_file():
         raise FileNotFoundError("Source and refined files must exist before handoff")
+
+    if (source_baseline is None) != (source_ledger is None):
+        raise ValueError("Source baseline and source ledger must be provided together")
+    if source_baseline is not None and source_ledger is not None:
+        if not source_baseline.is_file() or not source_ledger.is_file():
+            raise FileNotFoundError("Source baseline and source ledger must exist before handoff")
+        ledger = json.loads(source_ledger.read_text(encoding="utf-8"))
+        if not isinstance(ledger, list):
+            raise ValueError("Source ledger must contain a JSON array")
+        audit_refined_sources(
+            source_baseline.read_text(encoding="utf-8"),
+            refined_path.read_text(encoding="utf-8"),
+            ledger,
+        )
 
     resolved_run_dir = run_dir.resolve() if run_dir is not None else None
     if resolved_run_dir is not None:
@@ -1150,6 +1293,9 @@ def main(argv: list[str]) -> int:
     citations_cmd = sub.add_parser("inspect-citations")
     citations_cmd.add_argument("path", type=Path)
 
+    preview_cmd = sub.add_parser("render-refine-preview")
+    preview_cmd.add_argument("--manifest", required=True, type=Path)
+
     handoff_cmd = sub.add_parser("handoff-refined-note")
     handoff_cmd.add_argument("--source", required=True, type=Path)
     handoff_cmd.add_argument("--refined", required=True, type=Path)
@@ -1157,6 +1303,8 @@ def main(argv: list[str]) -> int:
     handoff_cmd.add_argument("--confirmation", required=True)
     handoff_cmd.add_argument("--run-dir", type=Path)
     handoff_cmd.add_argument("--assets-dir", type=Path)
+    handoff_cmd.add_argument("--source-baseline", required=True, type=Path)
+    handoff_cmd.add_argument("--source-ledger", required=True, type=Path)
     handoff_cmd.add_argument("--final-title")
     handoff_cmd.add_argument(
         "--delete-source",
@@ -1211,6 +1359,11 @@ def main(argv: list[str]) -> int:
     elif args.command == "inspect-citations":
         source = args.path.read_text(encoding="utf-8")
         print(json.dumps({"citations": citation_inventory(source)}, ensure_ascii=False, indent=2))
+    elif args.command == "render-refine-preview":
+        manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
+        if not isinstance(manifest, dict):
+            raise ValueError("Preview manifest must contain a JSON object")
+        print(render_refine_preview(manifest))
     elif args.command == "handoff-refined-note":
         destination = handoff_refined_note(
             args.source,
@@ -1219,6 +1372,8 @@ def main(argv: list[str]) -> int:
             confirmation=args.confirmation,
             run_dir=args.run_dir,
             assets_dir=args.assets_dir,
+            source_baseline=args.source_baseline,
+            source_ledger=args.source_ledger,
             final_title=args.final_title,
             delete_source=args.delete_source,
         )

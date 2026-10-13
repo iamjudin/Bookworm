@@ -267,6 +267,22 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertIn("eight documents is a supported ordinary batch", skill)
         self.assertIn("Never claim that the batch succeeded", skill)
 
+    def test_refine_uses_deterministic_preview_without_appended_rationale(self) -> None:
+        skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
+
+        self.assertIn("render-refine-preview", skill)
+        self.assertIn("Return stdout verbatim", skill)
+        self.assertIn("append nothing after its transfer question", skill)
+        self.assertIn("approval rationale", skill)
+
+    def test_refine_handoff_audits_every_new_url_against_the_source_ledger(self) -> None:
+        skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
+
+        self.assertIn("Always create `source-ledger.json`", skill)
+        self.assertIn("refuses the transfer when any newly inserted URL", skill)
+        self.assertIn("--source-baseline", skill)
+        self.assertIn("--source-ledger", skill)
+
 
 if __name__ == "__main__":
     unittest.main()

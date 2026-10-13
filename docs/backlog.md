@@ -4,6 +4,10 @@
 
 - Refine accepts multi-document batches. Every input remains an independent
   note with isolated sources, assets, validation, filename, and handoff status.
+- Refine renders transfer previews deterministically and blocks internal
+  workflow text from the generated user-facing response.
+- Refine handoff compares the converted source with the final note and requires
+  complete opened-source ledger entries for every newly inserted URL.
 - Generic research-export H1 headings are not acceptable final filenames;
   Refine derives a concise topic-specific title from terms already in the note.
 - Manual invocation is acceptable and preferred for MVP: the user can call Bookworm explicitly with `$Bookworm` or a short request such as "Букворм, обработай EPUB".

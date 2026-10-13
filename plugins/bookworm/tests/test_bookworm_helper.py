@@ -14,10 +14,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from bookworm_helper import (
+    audit_refined_sources,
     citation_inventory,
     note_filename,
     handoff_refined_note,
     language_consistency_warnings,
+    render_refine_preview,
     refine_markdown,
     resolve_citation_markers,
     resolve_numeric_citations,
@@ -29,6 +31,99 @@ from bookworm_helper import (
 
 
 class RefineMarkdownTests(unittest.TestCase):
+    def test_source_audit_accepts_only_logged_opened_new_urls(self) -> None:
+        source = "[Existing](https://example.com/existing)\n"
+        refined = source + "\n[Added](https://example.com/added)\n"
+        ledger = [{
+            "url": "https://example.com/added",
+            "title": "Added",
+            "claim": "Example claim",
+            "scope": "claim-level",
+            "opened": True,
+        }]
+
+        report = audit_refined_sources(source, refined, ledger)
+
+        self.assertEqual(report["added_urls"], 1)
+        self.assertEqual(report["verified_added_urls"], 1)
+
+    def test_source_audit_rejects_unlogged_new_url(self) -> None:
+        with self.assertRaisesRegex(ValueError, "without opened-source provenance"):
+            audit_refined_sources(
+                "Original.\n",
+                "[Added](https://example.com/added)\n",
+                [],
+            )
+
+    def test_source_audit_rejects_unopened_ledger_entry(self) -> None:
+        with self.assertRaisesRegex(ValueError, "not marked as opened"):
+            audit_refined_sources(
+                "Original.\n",
+                "[Added](https://example.com/added)\n",
+                [{
+                    "url": "https://example.com/added",
+                    "title": "Added",
+                    "claim": "Example claim",
+                    "scope": "section-level",
+                    "opened": False,
+                }],
+            )
+
+    def test_refine_preview_is_complete_and_contains_no_internal_rationale(self) -> None:
+        preview = render_refine_preview({
+            "language": "ru",
+            "destination": "Brain/Library",
+            "items": [{
+                "source": "/tmp/deep-research-report.md",
+                "refined": "/tmp/Исследование.md",
+                "status": "ready",
+            }],
+        })
+
+        self.assertIn("deep-research-report.md", preview)
+        self.assertIn("Исследование.md", preview)
+        self.assertTrue(preview.endswith("Перенести подготовленные заметки в `Brain/Library`?"))
+        for forbidden in ("Only after", "explicitly confirms", "SKILL.md", "handoff helper"):
+            self.assertNotIn(forbidden, preview)
+
+    def test_refine_preview_rejects_internal_text_in_failure_reason(self) -> None:
+        with self.assertRaisesRegex(ValueError, "internal workflow text"):
+            render_refine_preview({
+                "language": "ru",
+                "destination": "Brain/Library",
+                "items": [{
+                    "source": "/tmp/report.md",
+                    "status": "failed",
+                    "reason": "Only after the user explicitly confirms, run the handoff helper",
+                }],
+            })
+
+    def test_handoff_rejects_new_url_missing_from_source_ledger(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source_path = root / "source.md"
+            refined_path = root / "run" / "refined.md"
+            baseline_path = root / "run" / "converted.md"
+            ledger_path = root / "run" / "source-ledger.json"
+            destination_dir = root / "Library"
+            refined_path.parent.mkdir()
+            source_path.write_text("# Source\n", encoding="utf-8")
+            baseline_path.write_text("# Source\n", encoding="utf-8")
+            refined_path.write_text("[New](https://example.com/new)\n", encoding="utf-8")
+            ledger_path.write_text("[]\n", encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "without opened-source provenance"):
+                handoff_refined_note(
+                    source_path,
+                    refined_path,
+                    destination_dir,
+                    confirmation="user-confirmed",
+                    source_baseline=baseline_path,
+                    source_ledger=ledger_path,
+                )
+
+            self.assertFalse(destination_dir.exists())
+
     def test_eight_input_batch_keeps_outputs_independent(self) -> None:
         sources = [
             (

@@ -93,6 +93,12 @@ proof for a specific claim merely because the topic sounds related. If a source
 supports the broader section, keep the table cell readable and place it in the
 section source list instead.
 
+Always create `source-ledger.json`, using an empty JSON array when no URL was
+added. The handoff helper compares the converted source baseline with the final
+note and refuses the transfer when any newly inserted URL is absent from this
+ledger, lacks a descriptive title or claim, uses an unknown scope, or is not
+marked as opened. Do not bypass this gate by copying a prepared note directly.
+
 The helper reports `markers_scanned`, `verified_title_links_inserted`, and
 `unresolved` for internal workflow decisions and validation. Keep these field
 names and any JSON representation out of user-facing messages and notes.
@@ -227,6 +233,10 @@ When the request contains two or more supported inputs:
    to its proposed final filename and status. Include source gaps only where
    they exist. Ask once whether to transfer the complete listed set to the
    selected destination; that confirmation covers only those named outputs.
+   Write the preview data to a JSON manifest and render the response with
+   `render-refine-preview`. Return the helper output verbatim as the entire
+   pre-handoff response. Do not append workflow rationale, instruction text,
+   skill links, command details, or another confirmation explanation.
 7. After confirmation, hand off each prepared item with
    `handoff-refined-note`. Verify every destination separately and return one
    compact result list with `готово` or the specific failure for each input.
@@ -338,7 +348,9 @@ title, framework, or established term.
      --confirmation user-confirmed \
      --final-title "Reader-facing localized title" \
      --run-dir /path/to/scratch/refine-<run-id> \
-     --assets-dir /path/to/scratch/refine-<run-id>/assets
+     --assets-dir /path/to/scratch/refine-<run-id>/assets \
+     --source-baseline /path/to/scratch/refine-<run-id>/converted.md \
+     --source-ledger /path/to/scratch/refine-<run-id>/source-ledger.json
    ```
 
    The helper refuses to run without the confirmation token, refuses to
@@ -380,6 +392,21 @@ For a batch, show the source-to-output preview first and use one plural
 confirmation, for example:
 
 > Восемь заметок готовы к переносу. Перенести перечисленные файлы в `Brain/Library`?
+
+Generate this response with the deterministic helper instead of composing it
+freehand:
+
+```bash
+python3 scripts/bookworm_helper.py render-refine-preview \
+  --manifest /path/to/run/preview-manifest.json
+```
+
+The manifest contains `language` (`ru` or `en`), the reader-facing
+`destination`, and an `items` array. Each item contains `source`, `status`
+(`ready` or `failed`), and either `refined` or `reason`. Return stdout verbatim
+as the complete response and append nothing after its transfer question. This
+prevents internal instructions, runtime paths other than the prepared file
+links, and approval rationale from leaking into chat.
 
 Do not offer Enrich in the pre-handoff response. Do not combine the transfer confirmation and Enrich offer in one message.
 Do not say or imply that transfer confirmation deletes the original source.

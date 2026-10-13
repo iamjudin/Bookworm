@@ -2,6 +2,13 @@
 
 All notable changes to Bookworm are documented here.
 
+## 0.1.16 — 2026-10-13
+
+- Refine now renders its pre-handoff batch preview with a deterministic helper
+  and rejects internal workflow text before it can appear in that response.
+- Refine handoff now audits every newly inserted URL against a complete source
+  ledger and refuses transfer when opened-source provenance is missing.
+
 ## 0.1.15 — 2026-10-12
 
 - Refine now accepts a batch of research documents and creates one independent
