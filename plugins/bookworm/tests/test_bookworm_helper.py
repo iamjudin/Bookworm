@@ -148,6 +148,46 @@ print(value)
         self.assertEqual(warning["section"], "варианты")
         self.assertEqual(warning["tables"], 2)
 
+    def test_reader_audit_flags_prose_followed_by_repeated_profile_fields(self) -> None:
+        markdown = """## Регионы
+
+### США
+
+Оплата доступна через магазины и карты. Продвижение идёт через родительские сайты.
+
+**Платежи и цены:** магазины и карты.
+
+**Каналы и особенности:** родительские сайты.
+"""
+
+        report = reader_structure_audit(markdown)
+        warning = next(
+            item for item in report["warnings"]
+            if item["type"] == "prose_field_profile_overlap"
+        )
+
+        self.assertEqual(warning["section"], "сша")
+        self.assertEqual(warning["fields"], 2)
+
+    def test_reader_audit_keeps_bulleted_experiment_fields_as_one_list(self) -> None:
+        markdown = """## Эксперименты
+
+### Проверка цены
+
+- **Гипотеза:** подписка понятнее.
+- **Канал:** родительское сообщество.
+- **Остановка:** менее 1% регистраций.
+
+Разбор объясняет, что покажет тест.
+"""
+
+        report = reader_structure_audit(markdown)
+
+        self.assertNotIn(
+            "prose_field_profile_overlap",
+            {item["type"] for item in report["warnings"]},
+        )
+
     def test_source_audit_accepts_only_logged_opened_new_urls(self) -> None:
         source = "[Existing](https://example.com/existing)\n"
         refined = source + "\n[Added](https://example.com/added)\n"
@@ -157,6 +197,7 @@ print(value)
             "claim": "Example claim",
             "scope": "claim-level",
             "opened": True,
+            "support": "full",
         }]
 
         report = audit_refined_sources(source, refined, ledger)
@@ -183,8 +224,63 @@ print(value)
                     "claim": "Example claim",
                     "scope": "section-level",
                     "opened": False,
+                    "support": "full",
                 }],
             )
+
+    def test_source_audit_requires_explicit_support_status(self) -> None:
+        with self.assertRaisesRegex(ValueError, "invalid support status"):
+            audit_refined_sources(
+                "Original.\n",
+                "[Added](https://example.com/added)\n",
+                [{
+                    "url": "https://example.com/added",
+                    "title": "Added",
+                    "claim": "Example claim",
+                    "scope": "section-level",
+                    "opened": True,
+                }],
+            )
+
+    def test_source_audit_rejects_partial_support_without_adjacent_limitation(self) -> None:
+        ledger = [{
+            "url": "https://example.com/product",
+            "title": "Product",
+            "claim": "The page confirms 84 cards",
+            "scope": "named-item",
+            "opened": True,
+            "support": "partial",
+            "unsupported_detail": "$21.99",
+            "limitation": "Цена $21.99 этой страницей не подтверждается.",
+        }]
+
+        with self.assertRaisesRegex(ValueError, "without its reader-facing limitation"):
+            audit_refined_sources(
+                "Original.\n",
+                "- [Product](https://example.com/product) — $21.99 за 84 карты.\n",
+                ledger,
+            )
+
+    def test_source_audit_accepts_partial_support_with_adjacent_limitation(self) -> None:
+        limitation = "Цена $21.99 этой страницей не подтверждается."
+        ledger = [{
+            "url": "https://example.com/product",
+            "title": "Product",
+            "claim": "The page confirms 84 cards",
+            "scope": "named-item",
+            "opened": True,
+            "support": "partial",
+            "unsupported_detail": "$21.99",
+            "limitation": limitation,
+        }]
+
+        report = audit_refined_sources(
+            "Original.\n",
+            f"- [Product](https://example.com/product) — 84 карты. {limitation}\n",
+            ledger,
+        )
+
+        self.assertEqual(report["partial_source_limitations"], 1)
 
     def test_refine_preview_is_complete_and_contains_no_internal_rationale(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

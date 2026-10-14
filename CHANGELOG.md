@@ -18,6 +18,11 @@ All notable changes to Bookworm are documented here.
   internal workflow instructions.
 - Reader review now detects repeated generic profile tables under one section
   and requires one canonical comparison, prose, or procedural layer.
+- Reader review now also flags entity profiles that repeat narrative prose in
+  two or more unbulleted fields while preserving bulleted experiment records.
+- Refine source ledgers distinguish full from partial support. A partially
+  supporting link cannot appear beside an unsupported detail unless its exact
+  limitation is visible in the same reader-facing block.
 
 ## 0.1.16 — 2026-10-13
 

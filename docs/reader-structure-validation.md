@@ -103,6 +103,13 @@ final note against a semantic intermediate instead of the converted source.
 This allowed one unledgered URL into the preview. Preview generation now
 requires the converted baseline and source ledger for every ready item and
 performs the provenance audit before asking the user to transfer anything.
+The next live run passed that URL-presence gate but exposed two narrower
+semantic risks. It repeated regional and payment-model facts in narrative prose
+and unbulleted fields, and it placed a partially supporting product page next
+to an unsupported historical price while moving the caveat elsewhere. The
+reader audit now reports `prose_field_profile_overlap`. Source ledgers now mark
+support as full or partial, and partial support requires the unsupported detail
+and its exact reader-facing limitation in the same local block.
 
 The smoke confirms the preview correction and demonstrates why a clean
 mechanical report does not by itself establish reader usability. A corrected

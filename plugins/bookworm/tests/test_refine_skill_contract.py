@@ -328,9 +328,13 @@ class RefineSkillContractTests(unittest.TestCase):
         skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
 
         self.assertIn("Always create `source-ledger.json`", skill)
-        self.assertIn("refuses the transfer when any newly inserted URL", skill)
+        self.assertIn("refuse the preview or transfer when any newly inserted URL", skill)
         self.assertIn("refuses to ask for confirmation when a new URL", skill)
         self.assertIn("Never use a semantic intermediate", skill)
+        self.assertIn("`support` set to `full` or `partial`", skill)
+        self.assertIn("exact `unsupported_detail`", skill)
+        self.assertIn("same paragraph, list", skill)
+        self.assertIn("`prose_field_profile_overlap`", skill)
         self.assertIn("--source-baseline", skill)
         self.assertIn("--source-ledger", skill)
 

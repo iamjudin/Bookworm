@@ -28,6 +28,13 @@
   workflow text from the generated user-facing response.
 - Refine handoff compares the converted source with the final note and requires
   complete opened-source ledger entries for every newly inserted URL.
+- Refine preview and handoff distinguish full and partial source support. When
+  a linked page does not support a nearby price, number, or other detail, the
+  exact limitation stays beside that link instead of only in a general source
+  status paragraph.
+- Narrative entity profiles and their unbulleted fields form one canonical
+  layer. The reader audit flags sections that use both forms together, while
+  bulleted experiment fields remain one intentional record.
 - Generic research-export H1 headings are not acceptable final filenames;
   Refine derives a concise topic-specific title from terms already in the note.
 - Manual invocation is acceptable and preferred for MVP: the user can call Bookworm explicitly with `$Bookworm` or a short request such as "Букворм, обработай EPUB".

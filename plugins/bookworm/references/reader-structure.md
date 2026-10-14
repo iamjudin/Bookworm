@@ -29,6 +29,9 @@ Before keeping repeated fields, choose one canonical representation:
 2. When the values need causal or multi-sentence explanation, use one section
    per entity with short labelled paragraphs. Do not append a separate
    `Parameter | Description` table that restates the same entity.
+   Within that entity, do not state payments, channels, price, repeat value, or
+   another field in an opening paragraph and then repeat it under bold field
+   labels. Put each fact in the paragraph or the labelled field once.
 3. Keep an experiment or procedure in one list or sequence. Do not split its
    hypothesis and observations into bullets while moving channel, budget, or
    intent into a second table.
@@ -79,5 +82,8 @@ quotation in another form may be accepted after explicit review. Mermaid is
 reported as render-unverified until it is inspected in an actual renderer.
 Repeated generic two-column profile tables under one main section are reported
 for review because they often hide a comparison or duplicate nearby prose.
+An entity section that combines narrative prose with two or more unbulleted
+bold fields is reported for review because it often repeats the same profile in
+two forms. Experiment fields written as bullets remain one intentional list.
 Aligned data left inside a `text` or `plain` fence is also reported for review
 because Obsidian cannot scan or reflow it like a Markdown table.

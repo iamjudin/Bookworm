@@ -99,17 +99,24 @@ python3 scripts/bookworm_helper.py refine-markdown \
 ```
 
 Maintain a source ledger in the run directory for every inserted link: its
-opened URL, descriptive title, the claim it supports, and whether it is a
-claim-level or section-level source. Never use a generic catalogue link as
+opened URL, descriptive title, the claim it supports, whether it is a
+claim-level or section-level source, and `support` set to `full` or `partial`.
+For partial support, also record the exact `unsupported_detail` and an exact
+reader-facing `limitation`. Put that limitation in the same paragraph, list
+item, or table row whenever the link appears beside the unsupported detail.
+Do not let a general source-status paragraph repair a misleading local link.
+Never use a generic catalogue link as
 proof for a specific claim merely because the topic sounds related. If a source
 supports the broader section, keep the table cell readable and place it in the
 section source list instead.
 
 Always create `source-ledger.json`, using an empty JSON array when no URL was
-added. The handoff helper compares the converted source baseline with the final
-note and refuses the transfer when any newly inserted URL is absent from this
-ledger, lacks a descriptive title or claim, uses an unknown scope, or is not
-marked as opened. Do not bypass this gate by copying a prepared note directly.
+added. The preview and handoff helpers compare the converted source baseline
+with the final note and refuse the preview or transfer when any newly inserted URL is
+absent from this ledger, lacks a descriptive title or claim, uses an unknown
+scope or support status, is not marked as opened, or presents a partially
+supported detail without its adjacent reader-facing limitation. Do not bypass
+this gate by copying a prepared note directly.
 
 The helper reports `markers_scanned`, `verified_title_links_inserted`, and
 `unresolved` for internal workflow decisions and validation. Keep these field
@@ -346,6 +353,9 @@ title, framework, or established term.
    issue before the reader review. Treat repeated generic profile-table
    warnings as a request to choose one comparison matrix or one prose layer,
    not as a request to delete unique facts.
+   Treat `prose_field_profile_overlap` the same way: merge the opening prose and
+   unbulleted fields into one canonical profile while retaining every unique
+   statement. Bulleted experiment fields are an intentional single list.
 6. If a selected vault contains `Library/`, make that the default destination.
    Otherwise use the best matching existing folder, or the vault root when no
    better match exists. Write the proposed source, output, status, language,

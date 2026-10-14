@@ -224,7 +224,9 @@ def audit_refined_sources(
     refined_urls = source_urls(refined)
     added_urls = refined_urls - original_urls
     valid_scopes = {"claim-level", "section-level", "named-item"}
+    valid_support = {"full", "partial"}
     verified_urls: set[str] = set()
+    partial_entries: list[tuple[str, str, str]] = []
 
     for index, entry in enumerate(source_ledger, start=1):
         if not isinstance(entry, dict):
@@ -234,6 +236,7 @@ def audit_refined_sources(
         claim = entry.get("claim")
         scope = entry.get("scope")
         opened = entry.get("opened")
+        support = entry.get("support")
         if not isinstance(url, str) or not re.match(r"^https?://", url):
             raise ValueError(f"Source ledger entry {index} has no valid URL")
         if not isinstance(title, str) or not title.strip():
@@ -244,6 +247,16 @@ def audit_refined_sources(
             raise ValueError(f"Source ledger entry {index} has an invalid scope")
         if opened is not True:
             raise ValueError(f"Source ledger entry {index} is not marked as opened")
+        if support not in valid_support:
+            raise ValueError(f"Source ledger entry {index} has an invalid support status")
+        if support == "partial":
+            unsupported_detail = entry.get("unsupported_detail")
+            limitation = entry.get("limitation")
+            if not isinstance(unsupported_detail, str) or not unsupported_detail.strip():
+                raise ValueError(f"Source ledger entry {index} has no unsupported detail")
+            if not isinstance(limitation, str) or not limitation.strip():
+                raise ValueError(f"Source ledger entry {index} has no reader-facing limitation")
+            partial_entries.append((url, unsupported_detail.strip(), limitation.strip()))
         verified_urls.add(url)
 
     missing = sorted(added_urls - verified_urls)
@@ -252,11 +265,20 @@ def audit_refined_sources(
             "Refined note contains new URLs without opened-source provenance: "
             + ", ".join(missing)
         )
+    blocks = [block for block in re.split(r"\n\s*\n", refined) if block.strip()]
+    for url, unsupported_detail, limitation in partial_entries:
+        for block in blocks:
+            if url in block and unsupported_detail in block and limitation not in block:
+                raise ValueError(
+                    "Partially supported source is presented beside an unsupported detail "
+                    "without its reader-facing limitation: " + url
+                )
     return {
         "original_urls": len(original_urls),
         "refined_urls": len(refined_urls),
         "added_urls": len(added_urls),
         "verified_added_urls": len(added_urls & verified_urls),
+        "partial_source_limitations": len(partial_entries),
     }
 
 
@@ -380,6 +402,8 @@ def reader_structure_audit(markdown: str) -> dict[str, object]:
     fence_lines: list[str] = []
     mermaid_start: int | None = None
     mermaid_lines: list[str] = []
+    profile_section: dict[str, object] | None = None
+    profile_sections: list[dict[str, object]] = []
 
     for line_number, line in enumerate(lines, start=1):
         stripped = line.strip()
@@ -427,10 +451,20 @@ def reader_structure_audit(markdown: str) -> dict[str, object]:
 
         heading = MARKDOWN_HEADING_PATTERN.match(line)
         if heading:
+            if profile_section is not None:
+                profile_sections.append(profile_section)
+                profile_section = None
             normalized_heading = _reader_heading_text(heading.group(2))
             headings.add(normalized_heading)
             if len(heading.group(1)) == 2:
                 current_main_section = normalized_heading
+            elif len(heading.group(1)) == 3:
+                profile_section = {
+                    "title": normalized_heading,
+                    "line": line_number,
+                    "prose_lines": 0,
+                    "field_lines": [],
+                }
         for target in OBSIDIAN_HEADING_LINK_PATTERN.findall(line):
             toc_targets.append((line_number, _reader_heading_text(target)))
 
@@ -461,6 +495,15 @@ def reader_structure_audit(markdown: str) -> dict[str, object]:
         visible = MARKDOWN_LINK_PATTERN.sub(r"\1", INLINE_CODE_PATTERN.sub("", line))
         if ";" in visible and not stripped.startswith(">"):
             issues.append({"type": "reader_semicolon", "line": line_number})
+        if profile_section is not None and stripped:
+            unbulleted_field = re.match(r"^\*\*[^*]+:\*\*\s+.+$", stripped)
+            if unbulleted_field:
+                profile_section["field_lines"].append(line_number)
+            elif not stripped.startswith(("#", "-", "*", "|", ">")):
+                profile_section["prose_lines"] += 1
+
+    if profile_section is not None:
+        profile_sections.append(profile_section)
 
     for line_number, target in toc_targets:
         if target not in headings:
@@ -479,6 +522,17 @@ def reader_structure_audit(markdown: str) -> dict[str, object]:
                 "section": section,
                 "tables": len(table_lines),
                 "lines": table_lines,
+            })
+
+    for section in profile_sections:
+        field_lines = section["field_lines"]
+        if section["prose_lines"] and len(field_lines) >= 2:
+            warnings.append({
+                "type": "prose_field_profile_overlap",
+                "section": section["title"],
+                "line": section["line"],
+                "fields": len(field_lines),
+                "field_lines": field_lines,
             })
 
     return {
