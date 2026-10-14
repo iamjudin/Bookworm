@@ -188,6 +188,67 @@ print(value)
             {item["type"] for item in report["warnings"]},
         )
 
+    def test_reader_audit_flags_adjacent_profile_paragraphs_with_repeated_fields(self) -> None:
+        markdown = """## Регионы
+
+### США
+
+Оплата доступна через Apple и Google. Каналы включают Facebook и сайты для родителей.
+
+Цена подписки — $5 в месяц. Продвижение идёт через Facebook и родительские сообщества.
+"""
+
+        report = reader_structure_audit(markdown)
+        warning = next(
+            item for item in report["warnings"]
+            if item["type"] == "adjacent_profile_prose_overlap"
+        )
+
+        self.assertEqual(warning["section"], "сша")
+        self.assertEqual(warning["repeated_fields"], ["channels", "commerce"])
+
+    def test_reader_audit_flags_roles_repeated_between_prose_and_table(self) -> None:
+        markdown = """## Сегменты
+
+### Семьи и школы
+
+Пользователь — ребёнок. Покупает родитель, а инициатором выступает педагог.
+
+| Сегмент | Использует | Покупает | Инициирует |
+| --- | --- | --- | --- |
+| Семья | Ребёнок | Родитель | Педагог |
+"""
+
+        report = reader_structure_audit(markdown)
+        warning = next(
+            item for item in report["warnings"]
+            if item["type"] == "prose_table_profile_overlap"
+        )
+
+        self.assertEqual(warning["section"], "семьи и школы")
+        self.assertEqual(
+            warning["repeated_fields"],
+            ["roles_buyer", "roles_initiator", "roles_user"],
+        )
+
+    def test_reader_audit_allows_prose_and_table_with_distinct_reading_jobs(self) -> None:
+        markdown = """## Варианты
+
+### Выбор
+
+Ограничение связано с неопределённостью исходных данных.
+
+| Вариант | Цена | Канал |
+| --- | --- | --- |
+| A | $5 | Сообщество |
+"""
+
+        report = reader_structure_audit(markdown)
+        warning_types = {item["type"] for item in report["warnings"]}
+
+        self.assertNotIn("prose_table_profile_overlap", warning_types)
+        self.assertNotIn("adjacent_profile_prose_overlap", warning_types)
+
     def test_source_audit_accepts_only_logged_opened_new_urls(self) -> None:
         source = "[Existing](https://example.com/existing)\n"
         refined = source + "\n[Added](https://example.com/added)\n"

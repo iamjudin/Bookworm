@@ -35,6 +35,9 @@
 - Narrative entity profiles and their unbulleted fields form one canonical
   layer. The reader audit flags sections that use both forms together, while
   bulleted experiment fields remain one intentional record.
+- Entity profiles also use one canonical layer when a source repeats roles,
+  payments, channels, prices, or repeat value across adjacent prose or a
+  prose-plus-table combination. The audit warnings require semantic review.
 - Generic research-export H1 headings are not acceptable final filenames;
   Refine derives a concise topic-specific title from terms already in the note.
 - Manual invocation is acceptable and preferred for MVP: the user can call Bookworm explicitly with `$Bookworm` or a short request such as "Букворм, обработай EPUB".

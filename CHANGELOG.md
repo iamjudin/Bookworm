@@ -4,6 +4,9 @@ All notable changes to Bookworm are documented here.
 
 ## Unreleased
 
+- Extended Refine reader review to catch repeated profile facts across adjacent
+  prose paragraphs and between prose and comparison tables during batch runs.
+
 - Digest, Refine, and Enrich now share one reader structure contract for
   compact tables, purposeful lists, connected explanatory prose, navigation,
   evidence boundaries, and Mermaid review.

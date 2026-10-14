@@ -335,6 +335,8 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertIn("exact `unsupported_detail`", skill)
         self.assertIn("same paragraph, list", skill)
         self.assertIn("`prose_field_profile_overlap`", skill)
+        self.assertIn("`adjacent_profile_prose_overlap`", skill)
+        self.assertIn("`prose_table_profile_overlap`", skill)
         self.assertIn("--source-baseline", skill)
         self.assertIn("--source-ledger", skill)
 

@@ -29,9 +29,11 @@ Before keeping repeated fields, choose one canonical representation:
 2. When the values need causal or multi-sentence explanation, use one section
    per entity with short labelled paragraphs. Do not append a separate
    `Parameter | Description` table that restates the same entity.
-   Within that entity, do not state payments, channels, price, repeat value, or
-   another field in an opening paragraph and then repeat it under bold field
-   labels. Put each fact in the paragraph or the labelled field once.
+   Within that entity, do not state payments, channels, price, repeat value,
+   roles, or another field in one paragraph and then repeat it in another
+   paragraph, under bold field labels, or in a table. When a source contains
+   both prose and a profile row, merge their unique details into one canonical
+   representation instead of appending the row as a second profile.
 3. Keep an experiment or procedure in one list or sequence. Do not split its
    hypothesis and observations into bullets while moving channel, budget, or
    intent into a second table.
@@ -85,5 +87,9 @@ for review because they often hide a comparison or duplicate nearby prose.
 An entity section that combines narrative prose with two or more unbulleted
 bold fields is reported for review because it often repeats the same profile in
 two forms. Experiment fields written as bullets remain one intentional list.
+Adjacent entity paragraphs that repeat two or more profile fields are reported
+as `adjacent_profile_prose_overlap`. A table and nearby prose that repeat two
+or more profile fields are reported as `prose_table_profile_overlap`. These are
+coarse reader-review warnings, so inspect the actual meaning before merging.
 Aligned data left inside a `text` or `plain` fence is also reported for review
 because Obsidian cannot scan or reflow it like a Markdown table.

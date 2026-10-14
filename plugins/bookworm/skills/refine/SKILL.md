@@ -356,6 +356,12 @@ title, framework, or established term.
    Treat `prose_field_profile_overlap` the same way: merge the opening prose and
    unbulleted fields into one canonical profile while retaining every unique
    statement. Bulleted experiment fields are an intentional single list.
+   Treat `adjacent_profile_prose_overlap` and `prose_table_profile_overlap` as
+   prompts for the same semantic comparison. Merge only facts that repeat.
+   Keep causal explanations, limitations, and details that occur in one layer
+   only. When converting a source profile row into an entity section, integrate
+   its unique fields into the existing section instead of appending a second
+   paragraph with the same payments, channels, prices, roles, or repeat value.
 6. If a selected vault contains `Library/`, make that the default destination.
    Otherwise use the best matching existing folder, or the vault root when no
    better match exists. Write the proposed source, output, status, language,

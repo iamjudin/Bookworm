@@ -385,6 +385,62 @@ def _looks_like_fenced_data_table(lines: list[str]) -> bool:
     return any(re.search(r"\d", cell) for row in columns[1:] for cell in row)
 
 
+PROFILE_SIGNAL_PATTERNS = {
+    "roles_user": re.compile(
+        r"\b(?:users?|uses?|usage|пользовател\w*|использу\w*)\b",
+        re.IGNORECASE,
+    ),
+    "roles_buyer": re.compile(
+        r"\b(?:buyers?|buys?|purchases?|покупа\w*|плательщик\w*)\b",
+        re.IGNORECASE,
+    ),
+    "roles_initiator": re.compile(
+        r"\b(?:initiators?|initiat\w*|инициатор\w*|инициир\w*)\b",
+        re.IGNORECASE,
+    ),
+    "commerce": re.compile(
+        r"(?:[$€£]|\b(?:usd|gbp|eur|payments?|pricing|prices?|costs?|subscriptions?|"
+        r"оплат\w*|плат[её]ж\w*|цен\w*|стоимост\w*|подпис\w*)\b)",
+        re.IGNORECASE,
+    ),
+    "channels": re.compile(
+        r"\b(?:channels?|marketing|advertis\w*|facebook|instagram|seo|aso|"
+        r"канал\w*|сообществ\w*|сайт\w*|блог\w*|реклам\w*)\b",
+        re.IGNORECASE,
+    ),
+    "localization": re.compile(
+        r"\b(?:languages?|locali[sz]\w*|content|язык\w*|локализац\w*|контент\w*)\b",
+        re.IGNORECASE,
+    ),
+    "repeat_value": re.compile(
+        r"\b(?:retention|churn|ltv|repeat\w*|удерж\w*|отток\w*|повторн\w*)\b",
+        re.IGNORECASE,
+    ),
+}
+
+
+def _profile_signal_categories(value: str) -> set[str]:
+    """Return coarse profile fields used only for reader-review warnings."""
+    visible = MARKDOWN_LINK_PATTERN.sub(r"\1", INLINE_CODE_PATTERN.sub("", value))
+    return {
+        name
+        for name, pattern in PROFILE_SIGNAL_PATTERNS.items()
+        if pattern.search(visible)
+    }
+
+
+def _finish_profile_prose_block(profile_section: dict[str, object] | None) -> None:
+    if profile_section is None:
+        return
+    current = profile_section["current_prose"]
+    if current:
+        profile_section["prose_blocks"].append({
+            "line": current[0][0],
+            "text": " ".join(value for _, value in current),
+        })
+        current.clear()
+
+
 def reader_structure_audit(markdown: str) -> dict[str, object]:
     """Report deterministic reader-structure risks without rewriting content."""
     issues: list[dict[str, object]] = []
@@ -452,6 +508,7 @@ def reader_structure_audit(markdown: str) -> dict[str, object]:
         heading = MARKDOWN_HEADING_PATTERN.match(line)
         if heading:
             if profile_section is not None:
+                _finish_profile_prose_block(profile_section)
                 profile_sections.append(profile_section)
                 profile_section = None
             normalized_heading = _reader_heading_text(heading.group(2))
@@ -464,6 +521,10 @@ def reader_structure_audit(markdown: str) -> dict[str, object]:
                     "line": line_number,
                     "prose_lines": 0,
                     "field_lines": [],
+                    "prose_blocks": [],
+                    "current_prose": [],
+                    "table_lines": [],
+                    "table_text": [],
                 }
         for target in OBSIDIAN_HEADING_LINK_PATTERN.findall(line):
             toc_targets.append((line_number, _reader_heading_text(target)))
@@ -472,9 +533,13 @@ def reader_structure_audit(markdown: str) -> dict[str, object]:
             issues.append({"type": "html_table", "line": line_number})
 
         if stripped.startswith("|") and stripped.endswith("|"):
+            _finish_profile_prose_block(profile_section)
             cells = _table_cells(line)
             is_separator = all(re.fullmatch(r":?-{3,}:?", cell) for cell in cells if cell)
             if not is_separator:
+                if profile_section is not None:
+                    profile_section["table_lines"].append(line_number)
+                    profile_section["table_text"].extend(cells)
                 normalized_cells = tuple(_reader_heading_text(cell) for cell in cells)
                 if normalized_cells in {
                     ("parameter", "description"),
@@ -498,11 +563,18 @@ def reader_structure_audit(markdown: str) -> dict[str, object]:
         if profile_section is not None and stripped:
             unbulleted_field = re.match(r"^\*\*[^*]+:\*\*\s+.+$", stripped)
             if unbulleted_field:
+                _finish_profile_prose_block(profile_section)
                 profile_section["field_lines"].append(line_number)
             elif not stripped.startswith(("#", "-", "*", "|", ">")):
                 profile_section["prose_lines"] += 1
+                profile_section["current_prose"].append((line_number, stripped))
+            else:
+                _finish_profile_prose_block(profile_section)
+        elif profile_section is not None:
+            _finish_profile_prose_block(profile_section)
 
     if profile_section is not None:
+        _finish_profile_prose_block(profile_section)
         profile_sections.append(profile_section)
 
     for line_number, target in toc_targets:
@@ -534,6 +606,37 @@ def reader_structure_audit(markdown: str) -> dict[str, object]:
                 "fields": len(field_lines),
                 "field_lines": field_lines,
             })
+
+        prose_blocks = section["prose_blocks"]
+        for previous, current in zip(prose_blocks, prose_blocks[1:]):
+            repeated = sorted(
+                _profile_signal_categories(previous["text"])
+                & _profile_signal_categories(current["text"])
+            )
+            if len(repeated) >= 2:
+                warnings.append({
+                    "type": "adjacent_profile_prose_overlap",
+                    "section": section["title"],
+                    "line": section["line"],
+                    "paragraph_lines": [previous["line"], current["line"]],
+                    "repeated_fields": repeated,
+                })
+
+        if section["table_text"] and prose_blocks:
+            prose_signals = set().union(*(
+                _profile_signal_categories(block["text"])
+                for block in prose_blocks
+            ))
+            table_signals = _profile_signal_categories(" ".join(section["table_text"]))
+            repeated = sorted(prose_signals & table_signals)
+            if len(repeated) >= 2:
+                warnings.append({
+                    "type": "prose_table_profile_overlap",
+                    "section": section["title"],
+                    "line": section["line"],
+                    "table_lines": section["table_lines"],
+                    "repeated_fields": repeated,
+                })
 
     return {
         "issues": issues,

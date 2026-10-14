@@ -111,6 +111,14 @@ reader audit now reports `prose_field_profile_overlap`. Source ledgers now mark
 support as full or partial, and partial support requires the unsupported detail
 and its exact reader-facing limitation in the same local block.
 
+A later two-document batch smoke confirmed independent outputs and preserved
+sources, but exposed two additional shapes of the same duplication: adjacent
+regional paragraphs repeated payments and channels, and segment prose repeated
+user, buyer, and initiator roles from a nearby table. The reader audit now
+reports `adjacent_profile_prose_overlap` and `prose_table_profile_overlap` as
+review warnings. Refine must compare the underlying facts and keep one
+canonical layer without dropping details unique to either source layer.
+
 The smoke confirms the preview correction and demonstrates why a clean
 mechanical report does not by itself establish reader usability. A corrected
 runtime rerun remains necessary before release readiness is claimed.
