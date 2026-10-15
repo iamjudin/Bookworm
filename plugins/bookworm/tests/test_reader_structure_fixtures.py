@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests" / "fixtures" / "reader_structure"
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from bookworm_helper import reader_structure_audit, refine_markdown, source_urls
+from bookworm_helper import ensure_bookworm_tag, reader_structure_audit, refine_markdown, source_urls
 
 
 class ReaderStructureFixtureTests(unittest.TestCase):
@@ -45,9 +45,11 @@ class ReaderStructureFixtureTests(unittest.TestCase):
 
     def test_refine_leaves_an_already_readable_note_stable(self) -> None:
         readable = self.fixture("readable-note.md")
+        tagged = ensure_bookworm_tag(readable, "research")
 
-        self.assertEqual(refine_markdown(readable), readable)
-        self.assertEqual(reader_structure_audit(readable)["issues"], [])
+        self.assertEqual(refine_markdown(readable), tagged)
+        self.assertEqual(refine_markdown(tagged), tagged)
+        self.assertEqual(reader_structure_audit(tagged)["issues"], [])
 
     def test_digest_fixture_covers_sections_and_answers_application_questions(self) -> None:
         source = self.fixture("digest-source.md")

@@ -1104,6 +1104,81 @@ def strip_inline_title(lines: list[str]) -> list[str]:
     return lines
 
 
+BOOKWORM_NOTE_TAGS = {
+    "research": "bookworm/research",
+    "book": "bookworm/book",
+    "article": "bookworm/article",
+}
+
+
+def split_frontmatter(lines: list[str]) -> tuple[list[str], list[str]]:
+    """Split leading YAML frontmatter from reader-facing Markdown lines."""
+    if not lines or lines[0].strip() != "---":
+        return [], lines
+    for index in range(1, len(lines)):
+        if lines[index].strip() == "---":
+            return lines[: index + 1], lines[index + 1 :]
+    return [], lines
+
+
+def ensure_bookworm_tag(markdown: str, note_type: str) -> str:
+    """Add one canonical nested Obsidian tag while preserving other metadata."""
+    try:
+        tag = BOOKWORM_NOTE_TAGS[note_type]
+    except KeyError as error:
+        raise ValueError(f"Unknown Bookworm note type: {note_type}") from error
+
+    lines = markdown.splitlines()
+    frontmatter, body = split_frontmatter(lines)
+    if not frontmatter:
+        tagged = ["---", "tags:", f"  - {tag}", "---", "", *lines]
+        return "\n".join(tagged).rstrip() + "\n"
+
+    metadata = frontmatter[1:-1]
+    tags_index = next(
+        (index for index, line in enumerate(metadata) if re.match(r"^tags\s*:", line)),
+        None,
+    )
+    if tags_index is None:
+        metadata.extend(["tags:", f"  - {tag}"])
+    else:
+        line = metadata[tags_index]
+        value = line.split(":", 1)[1].strip()
+        existing: list[str] = []
+        block_end = tags_index + 1
+        if value.startswith("[") and value.endswith("]"):
+            existing = [
+                item.strip().strip("'\"")
+                for item in value[1:-1].split(",")
+                if item.strip()
+            ]
+            if tag not in existing:
+                existing.append(tag)
+                metadata[tags_index] = "tags: [" + ", ".join(existing) + "]"
+        elif value:
+            existing = [value.strip("'\"")]
+            if tag not in existing:
+                metadata[tags_index : tags_index + 1] = [
+                    "tags:",
+                    *[f"  - {item}" for item in [*existing, tag]],
+                ]
+        else:
+            while block_end < len(metadata):
+                item = re.match(r"^\s+-\s+(.+?)\s*$", metadata[block_end])
+                if not item:
+                    break
+                existing.append(item.group(1).strip("'\""))
+                block_end += 1
+            if tag not in existing:
+                metadata.insert(block_end, f"  - {tag}")
+
+    result = ["---", *metadata, "---"]
+    if body and body[0].strip():
+        result.append("")
+    result.extend(body)
+    return "\n".join(result).rstrip() + "\n"
+
+
 def convert_label_value_runs(lines: list[str]) -> list[str]:
     """Turn adjacent reader-facing field/value runs into compact tables."""
     converted: list[str] = []
@@ -1366,6 +1441,7 @@ def refine_markdown(source: str, toc_title: str = "Содержание") -> str
     lines = localize_common_headings(lines)
     lines = compact_mermaid_blocks(lines)
 
+    frontmatter, lines = split_frontmatter(lines)
     while lines and not lines[0].strip():
         lines.pop(0)
     while lines and not lines[-1].strip():
@@ -1375,6 +1451,9 @@ def refine_markdown(source: str, toc_title: str = "Содержание") -> str
     sections = main_sections(lines, toc_title)
     if not sections:
         result = f"{body}\n" if body else ""
+        if frontmatter:
+            result = "\n".join(frontmatter) + (f"\n\n{result}" if result else "\n")
+        result = ensure_bookworm_tag(result, "research")
         assert_sources_preserved(
             before_sources,
             source_counts(result),
@@ -1387,6 +1466,9 @@ def refine_markdown(source: str, toc_title: str = "Содержание") -> str
         + [f"- [[#{anchor}|{title}]]" for title, anchor in sections]
     )
     result = f"{toc}\n\n{body}\n" if body else f"{toc}\n"
+    if frontmatter:
+        result = "\n".join(frontmatter) + "\n\n" + result
+    result = ensure_bookworm_tag(result, "research")
     assert_sources_preserved(
         before_sources,
         source_counts(result),
@@ -1616,6 +1698,11 @@ def main(argv: list[str]) -> int:
     refine_cmd.add_argument("--toc-title", default="Содержание")
     refine_cmd.add_argument("--verified-sources", type=Path)
 
+    tag_cmd = sub.add_parser("tag-note")
+    tag_cmd.add_argument("path", type=Path)
+    tag_cmd.add_argument("--type", required=True, choices=sorted(BOOKWORM_NOTE_TAGS))
+    tag_cmd.add_argument("--out", required=True, type=Path)
+
     convert_cmd = sub.add_parser("convert-refine-input")
     convert_cmd.add_argument("path", type=Path)
     convert_cmd.add_argument("--out", required=True, type=Path)
@@ -1684,6 +1771,15 @@ def main(argv: list[str]) -> int:
             "language_warnings": language_consistency_warnings(refined),
             **citation_report,
             **numeric_report,
+        }, ensure_ascii=False))
+    elif args.command == "tag-note":
+        tagged = ensure_bookworm_tag(args.path.read_text(encoding="utf-8"), args.type)
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(tagged, encoding="utf-8")
+        print(json.dumps({
+            "input": str(args.path),
+            "output": str(args.out),
+            "tag": BOOKWORM_NOTE_TAGS[args.type],
         }, ensure_ascii=False))
     elif args.command == "convert-refine-input":
         print(json.dumps(

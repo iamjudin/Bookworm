@@ -4,6 +4,12 @@ All notable changes to Bookworm are documented here.
 
 ## Unreleased
 
+## 0.1.17 — 2026-10-15
+
+- Added canonical nested Obsidian source tags for every Bookworm note:
+  `bookworm/research`, `bookworm/book`, and `bookworm/article`. Existing YAML
+  metadata and tags are preserved, and repeated processing stays idempotent.
+
 - Extended Refine reader review to catch repeated profile facts across adjacent
   prose paragraphs and between prose and comparison tables during batch runs.
 

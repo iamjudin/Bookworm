@@ -90,7 +90,12 @@ request language for the final filename. Under `## Источники` / `## Sou
 - Use simple ASCII-safe asset filenames.
 - Use the book's language for visible headings, navigation labels, figure notes, and reader-facing text unless the user asks otherwise.
 - Use the book's language or the user's request language for user-facing progress updates and final chat messages. For example, when processing a Russian book for a Russian-speaking user, write progress updates in Russian instead of defaulting to English.
-- Keep tags, frontmatter, and broader Obsidian metadata out of the MVP unless the user is designing the whole vault workflow.
+- Add exactly one canonical nested Bookworm source tag in YAML frontmatter:
+  `bookworm/book` for a full book, `bookworm/article` for a standalone article
+  or essay, and `bookworm/research` for a research paper or report. Preserve
+  existing frontmatter and tags. Before preview and handoff, run `tag-note`
+  with the classified source type so repeated processing cannot duplicate the
+  tag.
 
 ## Vault Handoff
 

@@ -1,6 +1,6 @@
 {
   "name": "bookworm",
-  "version": "0.1.16+codex.20261013114500",
+  "version": "0.1.17+codex.20261015125152",
   "description": "Bookworm digests books and articles, safely refines research, and enriches notes with verified sources.",
   "license": "PolyForm-Noncommercial-1.0.0",
   "keywords": [

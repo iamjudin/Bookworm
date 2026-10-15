@@ -54,6 +54,18 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertIn("repair broken or raw source citations", skill)
         self.assertIn("Do not add examples, opinions, or new analysis", skill)
 
+    def test_all_modes_preserve_nested_bookworm_source_tags(self) -> None:
+        refine = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
+        digest = (ROOT / "skills" / "digest" / "SKILL.md").read_text(encoding="utf-8")
+        enrich = (ROOT / "skills" / "enrich" / "SKILL.md").read_text(encoding="utf-8")
+
+        self.assertIn("bookworm/research", refine)
+        for tag in ("bookworm/research", "bookworm/book", "bookworm/article"):
+            self.assertIn(tag, digest)
+            self.assertIn(tag, enrich)
+        self.assertIn("never duplicate", refine)
+        self.assertIn("never add the same tag twice", enrich)
+
     def test_enrich_labels_every_added_block_with_its_source(self) -> None:
         skill = (ROOT / "skills" / "enrich" / "SKILL.md").read_text(encoding="utf-8")
 

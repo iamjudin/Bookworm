@@ -30,6 +30,11 @@ same request. A batch such as eight research exports produces eight independent
 notes. Never merge separate inputs into one note unless the user explicitly
 asks for a synthesis, which is outside ordinary Refine behavior.
 
+Every completed Refine note must carry the nested Obsidian tag
+`bookworm/research` in YAML frontmatter. The deterministic `refine-markdown`
+helper adds it while preserving existing frontmatter and tags. Keep the tag in
+the preview and final vault note, and never duplicate it on repeated runs.
+
 Prefer explicit invocation, for example `$Bookworm: Refine` with a Markdown
 file or “Букворм, подчисти этот Deep Research”.
 

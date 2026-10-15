@@ -24,6 +24,12 @@ question naturally in the language of the note/request.
 an existing Markdown note. Unlike `Bookworm: Refine`, it increases substantive
 content; it does not repair or replace the original source layer.
 
+Preserve the note's canonical nested Bookworm source tag during Enrich:
+`bookworm/research`, `bookworm/book`, or `bookworm/article`. Enrichment does not
+change the source type. If an older Bookworm note has no such tag, classify its
+original source and run `tag-note` on the temporary copy before preview. Keep
+all unrelated frontmatter and tags, and never add the same tag twice.
+
 Use it for requests such as “добавь практические примеры”, “углуби тему”, or
 “дополни ресёрч контекстом”.
 

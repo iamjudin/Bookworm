@@ -28,10 +28,35 @@ from bookworm_helper import (
     convert_refine_input,
     default_vault_roots,
     detect_vaults,
+    ensure_bookworm_tag,
 )
 
 
 class RefineMarkdownTests(unittest.TestCase):
+    def test_refine_adds_nested_research_tag_as_valid_frontmatter(self) -> None:
+        result = refine_markdown("# Исследование\n\n## Выводы\n\nТекст.\n")
+
+        self.assertTrue(result.startswith("---\ntags:\n  - bookworm/research\n---\n"))
+        self.assertIn("## Содержание", result)
+
+    def test_bookworm_tag_merges_existing_frontmatter_and_is_idempotent(self) -> None:
+        source = "---\naliases: [Тест]\ntags:\n  - existing/topic\n---\n\n## Раздел\n"
+
+        once = ensure_bookworm_tag(source, "article")
+        twice = ensure_bookworm_tag(once, "article")
+
+        self.assertEqual(twice, once)
+        self.assertIn("aliases: [Тест]", once)
+        self.assertIn("  - existing/topic", once)
+        self.assertEqual(once.count("bookworm/article"), 1)
+
+    def test_bookworm_tag_supports_inline_tag_lists(self) -> None:
+        source = "---\ntags: [existing/topic]\n---\n\nText.\n"
+
+        result = ensure_bookworm_tag(source, "book")
+
+        self.assertIn("tags: [existing/topic, bookworm/book]", result)
+
     def test_reader_audit_flags_html_long_cells_and_missing_heading_targets(self) -> None:
         markdown = """## Содержание
 

@@ -2,6 +2,12 @@
 
 ## Decisions
 
+- Every Bookworm-created note carries one nested Obsidian source-type tag in
+  YAML frontmatter: `bookworm/research`, `bookworm/book`, or
+  `bookworm/article`. Refine uses research, Digest classifies the source, and
+  Enrich preserves the existing type. Repeated runs merge tags without
+  duplication.
+
 - Digest, Refine, and Enrich share one reader structure contract. Tables are
   for compact comparisons and repeated short fields, lists are for independent
   points or procedures, and connected prose carries mechanisms, causes,
