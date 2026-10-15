@@ -47,7 +47,8 @@ class ReaderStructureFixtureTests(unittest.TestCase):
         readable = self.fixture("readable-note.md")
         tagged = ensure_bookworm_tag(readable, "research")
 
-        self.assertEqual(refine_markdown(readable), tagged)
+        self.assertEqual(refine_markdown(readable), readable)
+        self.assertEqual(refine_markdown(readable, note_type="research"), tagged)
         self.assertEqual(refine_markdown(tagged), tagged)
         self.assertEqual(reader_structure_audit(tagged)["issues"], [])
 

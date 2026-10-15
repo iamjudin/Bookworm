@@ -90,12 +90,15 @@ request language for the final filename. Under `## Источники` / `## Sou
 - Use simple ASCII-safe asset filenames.
 - Use the book's language for visible headings, navigation labels, figure notes, and reader-facing text unless the user asks otherwise.
 - Use the book's language or the user's request language for user-facing progress updates and final chat messages. For example, when processing a Russian book for a Russian-speaking user, write progress updates in Russian instead of defaulting to English.
-- Add exactly one canonical nested Bookworm source tag in YAML frontmatter:
+- Treat Bookworm source tags as a per-vault user preference. Read it with
+  `tag-preference` before the handoff preview. If it is unset, combine the tag
+  choice with the transfer question and offer the classified tag:
   `bookworm/book` for a full book, `bookworm/article` for a standalone article
-  or essay, and `bookworm/research` for a research paper or report. Preserve
-  existing frontmatter and tags. Before preview and handoff, run `tag-note`
-  with the classified source type so repeated processing cannot duplicate the
-  tag.
+  or essay, and `bookworm/research` for a research paper or report. Say the
+  choice will be remembered for that vault and store it only after the user
+  replies. When enabled, run `tag-note` on the temporary copy before handoff.
+  When disabled, do not add a Bookworm tag. Preserve existing frontmatter and
+  tags, never duplicate a tag, and never modify the original source.
 
 ## Vault Handoff
 
@@ -108,7 +111,11 @@ When a final digest is created outside a detected vault because of workspace per
 
 Keep that question concise and user-facing. In Russian, for example:
 
-> Дайджест готов, исходник сохранён. Перенести заметку и выбранные иллюстрации в `Brain/Library`?
+> Дайджест готов, исходник сохранён. Перенести заметку и выбранные иллюстрации в `Brain/Library` с тегом `bookworm/book` или без тегов? Выбор сохраню для этого хранилища.
+
+Use this combined version only while the selected vault's preference is unset.
+For a saved preference, ask the ordinary transfer question and apply the saved
+choice without asking again.
 
 Do not explain that an internal instruction requires confirmation.
 

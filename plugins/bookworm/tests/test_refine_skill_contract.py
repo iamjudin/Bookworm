@@ -63,8 +63,9 @@ class RefineSkillContractTests(unittest.TestCase):
         for tag in ("bookworm/research", "bookworm/book", "bookworm/article"):
             self.assertIn(tag, digest)
             self.assertIn(tag, enrich)
+        self.assertIn("per-vault user preference", refine)
         self.assertIn("never duplicate", refine)
-        self.assertIn("never add the same tag twice", enrich)
+        self.assertIn("same tag twice", enrich)
 
     def test_enrich_labels_every_added_block_with_its_source(self) -> None:
         skill = (ROOT / "skills" / "enrich" / "SKILL.md").read_text(encoding="utf-8")

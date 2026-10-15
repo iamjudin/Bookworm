@@ -30,10 +30,14 @@ same request. A batch such as eight research exports produces eight independent
 notes. Never merge separate inputs into one note unless the user explicitly
 asks for a synthesis, which is outside ordinary Refine behavior.
 
-Every completed Refine note must carry the nested Obsidian tag
-`bookworm/research` in YAML frontmatter. The deterministic `refine-markdown`
-helper adds it while preserving existing frontmatter and tags. Keep the tag in
-the preview and final vault note, and never duplicate it on repeated runs.
+Source tags are a per-vault user preference. Before preparing a vault handoff,
+read that vault's preference with `tag-preference`. If it is unset, combine the
+tag choice with the existing transfer question: offer transfer with
+`bookworm/research` or without Bookworm tags, and say the choice will be
+remembered for that vault. Store the answer only after the user replies. If the
+preference is enabled, add the tag to the temporary copy with `tag-note` before
+handoff. If disabled, do not add it. Preserve existing frontmatter and tags,
+never duplicate the tag, and never tag the original source outside the vault.
 
 Prefer explicit invocation, for example `$Bookworm: Refine` with a Markdown
 file or “Букворм, подчисти этот Deep Research”.
@@ -372,7 +376,10 @@ title, framework, or established term.
    better match exists. Write the proposed source, output, status, language,
    and destination to the preview manifest. For every ready item, also write
    `source_baseline` pointing to that input's untouched `converted.md` and
-   `source_ledger` pointing to its ledger. Then run `render-refine-preview`.
+   `source_ledger` pointing to its ledger. Read the vault preference with
+   `tag-preference`, and put its `source_tags` result in the manifest as
+   `tag_preference`; set `note_type` to `research`. Then run
+   `render-refine-preview`.
    The preview helper compares the final prepared note directly with the
    converted source baseline and refuses to ask for confirmation when a new URL
    is missing from the opened-source ledger. Never use a semantic intermediate
@@ -387,6 +394,12 @@ title, framework, or established term.
    failure or silently close the workflow. If no current vault is suitable,
    leave the refined copy in outputs and ask the user where to place it.
 7. Only after the user explicitly confirms the transfer, run the handoff helper.
+   If the preference was unset, interpret “with tags” as both transfer
+   confirmation and permission to save `enabled`, and “without tags” as both
+   transfer confirmation and permission to save `disabled`. Save that one
+   choice with `tag-preference --set`. For `enabled`, apply `tag-note` to the
+   temporary refined copy before handoff. Do not ask about tags again for this
+   vault unless the user explicitly asks to change the preference.
    Never use direct `cp`, `mv`, `rm`, or another filesystem shortcut for this
    handoff:
 
@@ -427,10 +440,12 @@ title, framework, or established term.
 ## Transfer Confirmation Response
 
 After a temporary refined copy is ready and before a verified handoff, report
-the selected destination and ask only for transfer confirmation. In Russian,
-use an informal question such as:
+the selected destination and ask for transfer confirmation. When the vault tag
+preference is unset, the same question must offer transfer with the proposed
+tag or without tags and say the choice will be remembered for that vault. In
+Russian, use an informal question such as:
 
-> Перенести очищенную копию в `Brain/Library`?
+> Перенести очищенную копию в `Brain/Library` с тегом `bookworm/research` или без тегов? Выбор сохраню для этого хранилища.
 
 State that the file has not been transferred yet and that transfer starts after
 the user's answer. Do not explain that an internal rule requires confirmation.
@@ -438,7 +453,8 @@ For example:
 
 > Файл пока не переносил. Перенести очищенную копию в `Brain/Library`?
 
-For a batch, show the source-to-output preview first and use one plural
+When a saved preference exists, use the ordinary transfer question and do not
+ask about tags again. For a batch, show the source-to-output preview first and use one plural
 confirmation, for example:
 
 > Восемь заметок готовы к переносу. Перенести перечисленные файлы в `Brain/Library`?

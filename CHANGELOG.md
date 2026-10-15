@@ -4,6 +4,16 @@ All notable changes to Bookworm are documented here.
 
 ## Unreleased
 
+## 0.1.18 — 2026-10-15
+
+- Changed nested Obsidian source tags from mandatory output to a remembered
+  per-vault preference. On first transfer, Bookworm asks once whether to add
+  the proposed source tag and combines that choice with the existing transfer
+  confirmation. Later runs reuse the saved choice for that vault.
+- Refine no longer tags an original or temporary note before the selected
+  vault's preference is known. Existing Bookworm tags remain intact during
+  Refine and Enrich.
+
 ## 0.1.17 — 2026-10-15
 
 - Added canonical nested Obsidian source tags for every Bookworm note:

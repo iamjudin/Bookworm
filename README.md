@@ -39,7 +39,9 @@ Start a new Codex chat and invoke one of the Bookworm actions:
 
 Bookworm works on a temporary copy first. For vault handoff it asks for
 confirmation before creating, replacing, moving, or cleaning files in your
-Obsidian vault.
+Obsidian vault. On the first handoff to a vault, the same question lets you
+enable or disable nested Bookworm source tags. That choice is remembered for
+the vault and can be changed later.
 
 ## Install
 

@@ -28,16 +28,38 @@ from bookworm_helper import (
     convert_refine_input,
     default_vault_roots,
     detect_vaults,
+    bookworm_tag_preference,
     ensure_bookworm_tag,
+    set_bookworm_tag_preference,
 )
 
 
 class RefineMarkdownTests(unittest.TestCase):
-    def test_refine_adds_nested_research_tag_as_valid_frontmatter(self) -> None:
+    def test_refine_leaves_source_untagged_until_vault_preference_is_known(self) -> None:
         result = refine_markdown("# Исследование\n\n## Выводы\n\nТекст.\n")
 
-        self.assertTrue(result.startswith("---\ntags:\n  - bookworm/research\n---\n"))
+        self.assertNotIn("bookworm/research", result)
         self.assertIn("## Содержание", result)
+
+    def test_refine_adds_tag_only_when_note_type_is_requested(self) -> None:
+        result = refine_markdown(
+            "# Исследование\n\n## Выводы\n\nТекст.\n",
+            note_type="research",
+        )
+
+        self.assertTrue(result.startswith("---\ntags:\n  - bookworm/research\n---\n"))
+
+    def test_vault_tag_preference_is_unset_then_persists_one_choice(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            vault = Path(directory)
+            (vault / ".obsidian").mkdir()
+
+            self.assertEqual(bookworm_tag_preference(vault), "unset")
+            settings = set_bookworm_tag_preference(vault, "enabled")
+
+            self.assertEqual(settings, vault / ".obsidian" / "bookworm.json")
+            self.assertEqual(bookworm_tag_preference(vault), "enabled")
+            self.assertEqual(json.loads(settings.read_text())["source_tags"], "enabled")
 
     def test_bookworm_tag_merges_existing_frontmatter_and_is_idempotent(self) -> None:
         source = "---\naliases: [Тест]\ntags:\n  - existing/topic\n---\n\n## Раздел\n"
@@ -380,6 +402,7 @@ print(value)
             preview = render_refine_preview({
                 "language": "ru",
                 "destination": "Brain/Library",
+                "tag_preference": "disabled",
                 "items": [{
                     "source": "/tmp/deep-research-report.md",
                     "refined": str(refined),
@@ -394,6 +417,32 @@ print(value)
         self.assertTrue(preview.endswith("Перенести подготовленные заметки в `Brain/Library`?"))
         for forbidden in ("Only after", "explicitly confirms", "SKILL.md", "handoff helper"):
             self.assertNotIn(forbidden, preview)
+
+    def test_refine_preview_combines_first_tag_choice_with_transfer(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            baseline = root / "converted.md"
+            refined = root / "Исследование.md"
+            ledger = root / "source-ledger.json"
+            baseline.write_text("# Исследование\n", encoding="utf-8")
+            refined.write_text("# Исследование\n", encoding="utf-8")
+            ledger.write_text("[]\n", encoding="utf-8")
+            preview = render_refine_preview({
+                "language": "ru",
+                "destination": "Brain/Library",
+                "tag_preference": "unset",
+                "note_type": "research",
+                "items": [{
+                    "source": "/tmp/deep-research-report.md",
+                    "refined": str(refined),
+                    "source_baseline": str(baseline),
+                    "source_ledger": str(ledger),
+                    "status": "ready",
+                }],
+            })
+
+        self.assertIn("с тегом `bookworm/research` или без тегов?", preview)
+        self.assertIn("Выбор сохраню для этого хранилища.", preview)
 
     def test_refine_preview_rejects_unledgered_url_before_confirmation(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

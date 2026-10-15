@@ -293,6 +293,13 @@ def render_refine_preview(manifest: dict[str, object]) -> str:
         raise ValueError("Preview destination is required")
     if not isinstance(items, list) or not items:
         raise ValueError("Preview requires at least one item")
+    tag_preference = manifest.get("tag_preference", "unset")
+    if tag_preference not in {"unset", "enabled", "disabled"}:
+        raise ValueError("Tag preference must be 'unset', 'enabled', or 'disabled'")
+    note_type = manifest.get("note_type", "research")
+    if note_type not in BOOKWORM_NOTE_TAGS:
+        raise ValueError("Preview note type is invalid")
+    note_tag = BOOKWORM_NOTE_TAGS[str(note_type)]
 
     rows: list[str] = []
     ready_count = 0
@@ -344,19 +351,37 @@ def render_refine_preview(manifest: dict[str, object]) -> str:
     if language == "ru":
         heading = "Подготовленные заметки:"
         headers = "| Исходный файл | Результат |\n| --- | --- |"
-        ending = (
-            f"\n\nФайлы пока не переносил. Перенести подготовленные заметки в `{destination}`?"
-            if ready_count
-            else "\n\nГотовых к переносу заметок нет."
-        )
+        if not ready_count:
+            ending = "\n\nГотовых к переносу заметок нет."
+        elif tag_preference == "unset":
+            ending = (
+                f"\n\nФайлы пока не переносил. Перенести подготовленные заметки в `{destination}` "
+                f"с тегом `{note_tag}` или без тегов? Выбор сохраню для этого хранилища."
+            )
+        elif tag_preference == "enabled":
+            ending = (
+                f"\n\nФайлы пока не переносил. При переносе добавлю тег `{note_tag}`. "
+                f"Перенести подготовленные заметки в `{destination}`?"
+            )
+        else:
+            ending = f"\n\nФайлы пока не переносил. Перенести подготовленные заметки в `{destination}`?"
     else:
         heading = "Prepared notes:"
         headers = "| Source file | Result |\n| --- | --- |"
-        ending = (
-            f"\n\nThe files have not been transferred yet. Transfer the prepared notes to `{destination}`?"
-            if ready_count
-            else "\n\nNo notes are ready for transfer."
-        )
+        if not ready_count:
+            ending = "\n\nNo notes are ready for transfer."
+        elif tag_preference == "unset":
+            ending = (
+                f"\n\nThe files have not been transferred yet. Transfer the prepared notes to `{destination}` "
+                f"with the `{note_tag}` tag or without tags? I will remember the choice for this vault."
+            )
+        elif tag_preference == "enabled":
+            ending = (
+                f"\n\nThe files have not been transferred yet. The `{note_tag}` tag will be added. "
+                f"Transfer the prepared notes to `{destination}`?"
+            )
+        else:
+            ending = f"\n\nThe files have not been transferred yet. Transfer the prepared notes to `{destination}`?"
     preview = f"{heading}\n\n{headers}\n" + "\n".join(rows) + ending
     for pattern in FORBIDDEN_USER_MESSAGE_PATTERNS:
         if pattern.search(preview):
@@ -1110,6 +1135,43 @@ BOOKWORM_NOTE_TAGS = {
     "article": "bookworm/article",
 }
 
+BOOKWORM_VAULT_SETTINGS = Path(".obsidian") / "bookworm.json"
+
+
+def bookworm_tag_preference(vault_root: Path) -> str:
+    """Read the saved per-vault source-tag preference."""
+    settings_path = vault_root / BOOKWORM_VAULT_SETTINGS
+    if not settings_path.is_file():
+        return "unset"
+    settings = json.loads(settings_path.read_text(encoding="utf-8"))
+    if not isinstance(settings, dict):
+        raise ValueError("Bookworm vault settings must contain a JSON object")
+    preference = settings.get("source_tags", "unset")
+    if preference not in {"enabled", "disabled"}:
+        raise ValueError("Bookworm source_tags preference is invalid")
+    return str(preference)
+
+
+def set_bookworm_tag_preference(vault_root: Path, preference: str) -> Path:
+    """Persist a source-tag choice for one Obsidian vault."""
+    if preference not in {"enabled", "disabled"}:
+        raise ValueError("Tag preference must be 'enabled' or 'disabled'")
+    obsidian_dir = vault_root / ".obsidian"
+    if not obsidian_dir.is_dir():
+        raise ValueError("Tag preference can only be stored for an Obsidian vault")
+    settings_path = vault_root / BOOKWORM_VAULT_SETTINGS
+    settings: dict[str, object] = {}
+    if settings_path.is_file():
+        loaded = json.loads(settings_path.read_text(encoding="utf-8"))
+        if not isinstance(loaded, dict):
+            raise ValueError("Bookworm vault settings must contain a JSON object")
+        settings.update(loaded)
+    settings.update({"schema": 1, "source_tags": preference})
+    temporary = settings_path.with_suffix(".json.tmp")
+    temporary.write_text(json.dumps(settings, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    temporary.replace(settings_path)
+    return settings_path
+
 
 def split_frontmatter(lines: list[str]) -> tuple[list[str], list[str]]:
     """Split leading YAML frontmatter from reader-facing Markdown lines."""
@@ -1427,7 +1489,11 @@ def main_sections(lines: list[str], toc_title: str) -> list[tuple[str, str]]:
     return sections
 
 
-def refine_markdown(source: str, toc_title: str = "Содержание") -> str:
+def refine_markdown(
+    source: str,
+    toc_title: str = "Содержание",
+    note_type: str | None = None,
+) -> str:
     """Make a cosmetic Obsidian-ready copy without rewriting research content."""
     before_sources = source_counts(source)
     cleaned = CHATGPT_CITATION_PATTERN.sub("", source)
@@ -1453,7 +1519,8 @@ def refine_markdown(source: str, toc_title: str = "Содержание") -> str
         result = f"{body}\n" if body else ""
         if frontmatter:
             result = "\n".join(frontmatter) + (f"\n\n{result}" if result else "\n")
-        result = ensure_bookworm_tag(result, "research")
+        if note_type is not None:
+            result = ensure_bookworm_tag(result, note_type)
         assert_sources_preserved(
             before_sources,
             source_counts(result),
@@ -1468,7 +1535,8 @@ def refine_markdown(source: str, toc_title: str = "Содержание") -> str
     result = f"{toc}\n\n{body}\n" if body else f"{toc}\n"
     if frontmatter:
         result = "\n".join(frontmatter) + "\n\n" + result
-    result = ensure_bookworm_tag(result, "research")
+    if note_type is not None:
+        result = ensure_bookworm_tag(result, note_type)
     assert_sources_preserved(
         before_sources,
         source_counts(result),
@@ -1697,11 +1765,16 @@ def main(argv: list[str]) -> int:
     refine_cmd.add_argument("--out", required=True, type=Path)
     refine_cmd.add_argument("--toc-title", default="Содержание")
     refine_cmd.add_argument("--verified-sources", type=Path)
+    refine_cmd.add_argument("--note-type", choices=sorted(BOOKWORM_NOTE_TAGS))
 
     tag_cmd = sub.add_parser("tag-note")
     tag_cmd.add_argument("path", type=Path)
     tag_cmd.add_argument("--type", required=True, choices=sorted(BOOKWORM_NOTE_TAGS))
     tag_cmd.add_argument("--out", required=True, type=Path)
+
+    preference_cmd = sub.add_parser("tag-preference")
+    preference_cmd.add_argument("--vault", required=True, type=Path)
+    preference_cmd.add_argument("--set", dest="preference", choices=("enabled", "disabled"))
 
     convert_cmd = sub.add_parser("convert-refine-input")
     convert_cmd.add_argument("path", type=Path)
@@ -1751,7 +1824,7 @@ def main(argv: list[str]) -> int:
         )
         resolved, citation_report = resolve_citation_markers(source, verified_sources)
         resolved, numeric_report = resolve_numeric_citations(resolved, verified_sources)
-        refined = refine_markdown(resolved, args.toc_title)
+        refined = refine_markdown(resolved, args.toc_title, args.note_type)
         source_bounds = _source_section_bounds(refined.splitlines())
         source_section = (
             "\n".join(refined.splitlines()[source_bounds[0]:source_bounds[1]])
@@ -1780,6 +1853,15 @@ def main(argv: list[str]) -> int:
             "input": str(args.path),
             "output": str(args.out),
             "tag": BOOKWORM_NOTE_TAGS[args.type],
+        }, ensure_ascii=False))
+    elif args.command == "tag-preference":
+        settings_path = None
+        if args.preference is not None:
+            settings_path = set_bookworm_tag_preference(args.vault, args.preference)
+        print(json.dumps({
+            "vault": str(args.vault),
+            "source_tags": bookworm_tag_preference(args.vault),
+            "settings": str(settings_path) if settings_path is not None else None,
         }, ensure_ascii=False))
     elif args.command == "convert-refine-input":
         print(json.dumps(

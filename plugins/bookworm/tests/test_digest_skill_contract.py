@@ -44,9 +44,10 @@ class DigestUrlContractTests(unittest.TestCase):
         self.assertIn("Handoff confirmation covers", DIGEST)
         self.assertIn("temporary run files", DIGEST)
 
-    def test_digest_adds_one_nested_source_type_tag(self):
+    def test_digest_offers_one_nested_source_type_tag_per_vault(self):
         for tag in ("bookworm/book", "bookworm/article", "bookworm/research"):
             self.assertIn(tag, DIGEST)
+        self.assertIn("per-vault user preference", DIGEST)
         self.assertIn("run `tag-note`", DIGEST)
 
 

@@ -24,11 +24,15 @@ question naturally in the language of the note/request.
 an existing Markdown note. Unlike `Bookworm: Refine`, it increases substantive
 content; it does not repair or replace the original source layer.
 
-Preserve the note's canonical nested Bookworm source tag during Enrich:
+Preserve any existing canonical nested Bookworm source tag during Enrich:
 `bookworm/research`, `bookworm/book`, or `bookworm/article`. Enrichment does not
-change the source type. If an older Bookworm note has no such tag, classify its
-original source and run `tag-note` on the temporary copy before preview. Keep
-all unrelated frontmatter and tags, and never add the same tag twice.
+change the source type or remove an existing tag. If the note has no Bookworm
+tag, read the selected vault's per-vault preference with `tag-preference`. When
+enabled, classify the original source and run `tag-note` on the temporary copy.
+When disabled, leave it untagged. When unset, combine the tag choice with the
+transfer question, remember the user's answer for that vault, and apply it to
+the temporary copy only. Keep unrelated frontmatter and tags, never add the
+same tag twice, and never tag the original source outside the vault.
 
 Use it for requests such as “добавь практические примеры”, “углуби тему”, or
 “дополни ресёрч контекстом”.
@@ -178,6 +182,9 @@ Follow the same vault discovery and confirmation rules as Refine. Work on a
 temporary copy, report the selected destination and enrichment scope, then
 ask before replacing or moving the original. Do not delete the source file
 until the final note and its source links have been verified.
+If the selected vault's tag preference is unset and the note has no existing
+Bookworm tag, combine the preference choice with this handoff question. For a
+saved preference, apply it without asking again.
 Keep the confirmation concise and user-facing. In Russian, for example:
 
 > Готова копия с дополнениями. Заменить ею заметку в `Brain/Library`?
