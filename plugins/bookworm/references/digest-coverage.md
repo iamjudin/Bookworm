@@ -83,6 +83,14 @@ Create `coverage-ledger.json` in the temporary run directory:
       "note_reference": "assets/book/chapter-01/process.png"
     },
     {
+      "source_file": "OEBPS/Text/chapter02.xhtml",
+      "source_image": "../Images/comparison.png",
+      "decision": "reconstructed",
+      "note_section": "Comparison matrix",
+      "reconstruction": "markdown_table",
+      "reason": "The source table was consolidated without losing rows or relationships"
+    },
+    {
       "source_file": "OEBPS/Text/chapter01.xhtml",
       "source_image": "../Images/divider.png",
       "decision": "decorative",
@@ -104,11 +112,25 @@ Create `coverage-ledger.json` in the temporary run directory:
 ```
 
 Account for every image occurrence reported by the source inventory. Use
-`included` for a meaning-bearing visual embedded or faithfully reconstructed in
-the note. Use `decorative` only for a graphic without reader meaning and
-`duplicate` only for an exact repeated visual. Both omission decisions require
-a concrete reason. A visual that explains, compares, demonstrates or visualizes
-an idea is meaning-bearing even when the surrounding prose also describes it.
+`included` only when `note_reference` is the exact target of an Obsidian or
+Markdown image embed in the note. A prose phrase is not an included visual. Do
+not claim one embed for two distinct source visuals; classify an exact repeat as
+`duplicate` or use one lossless reconstruction for cumulative material.
+
+Use `reconstructed` for a lossless reader-facing reconstruction. Name its exact
+`note_section`, set `reconstruction` to `markdown_table`, `mermaid`,
+`ordered_steps`, or `structured_list`, and record why the reconstruction is
+preferable or necessary. Ordinary prose does not satisfy this decision. Several
+progressive or cumulative source visuals may point to one consolidated
+reconstruction only when it preserves every distinct row, label, relationship,
+condition, and exception from all of them.
+
+Use `decorative` only for a graphic without reader meaning and `duplicate` only
+for an exact repeated visual. Both omission decisions require a concrete reason.
+A visual that explains, compares, demonstrates or visualizes an idea is
+meaning-bearing even when surrounding prose also describes it. Progressive
+summary tables are not exact duplicates merely because later tables repeat
+earlier rows.
 
 Evidence excerpts must be exact, meaningful phrases from the named final note
 sections. Do not use headings, generic boilerplate or the same sentence for
@@ -133,8 +155,9 @@ python3 scripts/bookworm_helper.py audit-digest-coverage \
 ```
 
 The command fails when source items are unaccounted, too much source material
-is excluded, a source visual is unaccounted or a meaning-bearing visual is absent
-from the note, a coverage group has fewer than three relevant reading jobs or no
+is excluded, a source visual is unaccounted, an `included` reference is not a
+real embed or its local asset is missing, a declared reconstruction has no
+matching structured block, a coverage group has fewer than three relevant reading jobs or no
 core mechanism/application, book-wide evidence misses a dimension, evidence is
 absent from its named note section, or later-use questions do not span the book. Resolve a
 failure by returning to the source and expanding or correcting the relevant

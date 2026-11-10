@@ -28,6 +28,12 @@
 - Digest accounts for every source visual. It includes every image that
   explains, compares, demonstrates or otherwise carries meaning, and omits only
   decoration or exact duplicates with a recorded reason.
+- Digest visual accounting distinguishes real embeds from structured
+  reconstructions. `included` must name an actual image embed, while
+  `reconstructed` must point to a checked Markdown table, Mermaid diagram,
+  ordered procedure, or structured list. Plain prose cannot satisfy visual
+  coverage. Progressive summary tables are not exact duplicates, though they
+  may share one lossless consolidated reconstruction.
 - Multi-book Digest runs isolate inventory, ledger, note, questions, and gate
   result per book so one strong output cannot hide a shallow one.
 

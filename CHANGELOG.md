@@ -4,6 +4,11 @@ All notable changes to Bookworm are documented here.
 
 ## Unreleased
 
+- Tightened Digest visual coverage so an `included` source visual must resolve
+  to a real note embed and local asset. Lossless Markdown reconstructions now
+  use a separate checked decision, while prose references and incomplete
+  cumulative-table summaries fail the blocking gate.
+
 ## 0.1.20 — 2026-11-10
 
 - Decoupled Digest coverage evidence from visible prose structure. Coverage now

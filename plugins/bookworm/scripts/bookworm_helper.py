@@ -34,6 +34,10 @@ MARKDOWN_SOURCE_URL_PATTERN = re.compile(r"(?<!!)\[[^\]]+\]\(\s*(https?://[^)\s]
 BARE_URL_PATTERN = re.compile(r"(?<!\]\()(?<!\()https?://[^\s<>)\]]+")
 FOOTNOTE_REFERENCE_PATTERN = re.compile(r"(?<!\\)\[\^[^\]]+\]")
 OBSIDIAN_HEADING_LINK_PATTERN = re.compile(r"\[\[#([^|\]]+)(?:\|[^\]]+)?\]\]")
+OBSIDIAN_EMBED_TARGET_PATTERN = re.compile(r"!\[\[([^|\]]+)(?:\|[^\]]+)?\]\]")
+MARKDOWN_IMAGE_TARGET_PATTERN = re.compile(
+    r"!\[[^\]]*\]\(\s*(?:<([^>]+)>|([^\s)]+))(?:\s+[^)]*)?\)"
+)
 INLINE_CODE_PATTERN = re.compile(r"`[^`]*`")
 MARKDOWN_LINK_PATTERN = re.compile(r"(!?\[[^\]]*\])\([^)]*\)")
 LABEL_VALUE_PATTERN = re.compile(r"^\*\*(.+?)(?::)?\*\*\s*:?\s*(.+?)\s*$")
@@ -767,6 +771,7 @@ def digest_coverage_audit(
     inventory: dict[str, object],
     ledger: dict[str, object],
     markdown: str,
+    note_path: Path | None = None,
 ) -> dict[str, object]:
     """Audit whether a book digest accounts for its source and supports later use.
 
@@ -937,8 +942,30 @@ def digest_coverage_audit(
     for dimension in sorted(set(DIGEST_COVERAGE_DIMENSIONS) - book_dimensions):
         issues.append({"type": "missing_coverage_dimension", "group": "book", "dimension": dimension})
 
+    embedded_visuals = {
+        target.strip()
+        for target in OBSIDIAN_EMBED_TARGET_PATTERN.findall(markdown)
+        if target.strip()
+    }
+    for angle_target, plain_target in MARKDOWN_IMAGE_TARGET_PATTERN.findall(markdown):
+        target = (angle_target or plain_target).strip()
+        if target:
+            embedded_visuals.add(target)
+
+    reconstruction_formats = {
+        "markdown_table": lambda body: bool(re.search(
+            r"(?m)^\s*\|?.*\|.*\n\s*\|?\s*:?-{3,}:?\s*\|",
+            body,
+        )),
+        "mermaid": lambda body: bool(re.search(r"(?m)^```mermaid\s*$", body)),
+        "ordered_steps": lambda body: len(re.findall(r"(?m)^\s*\d+[.)]\s+", body)) >= 2,
+        "structured_list": lambda body: len(re.findall(r"(?m)^\s*[-*+]\s+", body)) >= 2,
+    }
+
     accounted_visuals: set[tuple[str, str]] = set()
+    used_visual_references: dict[str, tuple[str, str]] = {}
     included_visuals = 0
+    reconstructed_visuals = 0
     for index, visual in enumerate(visuals, start=1):
         if not isinstance(visual, dict):
             issues.append({"type": "invalid_visual_entry", "visual": index})
@@ -969,10 +996,75 @@ def digest_coverage_audit(
             note_reference = visual.get("note_reference")
             if not isinstance(note_reference, str) or not note_reference.strip():
                 issues.append({"type": "missing_visual_reference", "source": source_file, "image": source_image})
-            elif note_reference not in markdown:
-                issues.append({"type": "visual_reference_not_in_note", "source": source_file, "image": source_image})
+            elif note_reference.strip() not in embedded_visuals:
+                issues.append({
+                    "type": "visual_reference_not_embed",
+                    "source": source_file,
+                    "image": source_image,
+                })
             else:
-                included_visuals += 1
+                reference = note_reference.strip()
+                first_visual = used_visual_references.get(reference)
+                if first_visual is not None and first_visual != key:
+                    issues.append({
+                        "type": "visual_embed_reused",
+                        "source": source_file,
+                        "image": source_image,
+                        "first_source": first_visual[0],
+                        "first_image": first_visual[1],
+                    })
+                elif (
+                    note_path is not None
+                    and not re.match(r"^[a-z][a-z0-9+.-]*://", reference, re.I)
+                    and not (note_path.parent / reference).is_file()
+                ):
+                    issues.append({
+                        "type": "missing_visual_asset",
+                        "source": source_file,
+                        "image": source_image,
+                        "reference": reference,
+                    })
+                else:
+                    used_visual_references[reference] = key
+                    included_visuals += 1
+        elif decision == "reconstructed":
+            note_section = visual.get("note_section")
+            reconstruction = visual.get("reconstruction")
+            reason = visual.get("reason")
+            if not isinstance(reason, str) or len(reason.strip()) < 12:
+                issues.append({
+                    "type": "weak_visual_reconstruction_reason",
+                    "source": source_file,
+                    "image": source_image,
+                })
+            if not isinstance(note_section, str) or not note_section.strip():
+                issues.append({
+                    "type": "missing_visual_reconstruction_section",
+                    "source": source_file,
+                    "image": source_image,
+                })
+            elif _reader_heading_text(note_section) not in note_sections:
+                issues.append({
+                    "type": "visual_reconstruction_section_not_in_note",
+                    "source": source_file,
+                    "image": source_image,
+                })
+            elif reconstruction not in reconstruction_formats:
+                issues.append({
+                    "type": "unsupported_visual_reconstruction",
+                    "source": source_file,
+                    "image": source_image,
+                })
+            elif not reconstruction_formats[reconstruction](
+                note_sections[_reader_heading_text(note_section)]
+            ):
+                issues.append({
+                    "type": "visual_reconstruction_not_found",
+                    "source": source_file,
+                    "image": source_image,
+                })
+            else:
+                reconstructed_visuals += 1
         elif decision in {"decorative", "duplicate"}:
             reason = visual.get("reason")
             if not isinstance(reason, str) or len(reason.strip()) < 12:
@@ -1069,6 +1161,7 @@ def digest_coverage_audit(
             "source_visuals": len(source_visuals),
             "accounted_visuals": len(accounted_visuals),
             "included_visuals": included_visuals,
+            "reconstructed_visuals": reconstructed_visuals,
         },
     }
 
@@ -2290,6 +2383,7 @@ def main(argv: list[str]) -> int:
             inventory,
             ledger,
             args.note.read_text(encoding="utf-8"),
+            note_path=args.note,
         )
         print(json.dumps(report, ensure_ascii=False, indent=2))
         if report["issues"]:

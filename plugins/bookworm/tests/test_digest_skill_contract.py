@@ -50,6 +50,12 @@ class DigestUrlContractTests(unittest.TestCase):
         self.assertIn("per-vault user preference", DIGEST)
         self.assertIn("run `tag-note`", DIGEST)
 
+    def test_visual_coverage_requires_an_embed_or_structured_reconstruction(self):
+        self.assertIn("exact target of", DIGEST)
+        self.assertIn("Plain prose is not a visual", DIGEST)
+        self.assertIn("cumulative tables are not exact duplicates", DIGEST)
+        self.assertIn("reconstructed", DIGEST)
+
 
 if __name__ == "__main__":
     unittest.main()

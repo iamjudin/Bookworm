@@ -36,6 +36,45 @@ from bookworm_helper import (
 
 
 class RefineMarkdownTests(unittest.TestCase):
+    def _single_visual_digest(
+        self,
+        note: str,
+        visual: dict[str, str] | list[dict[str, str]],
+    ) -> dict[str, object]:
+        visuals = visual if isinstance(visual, list) else [visual]
+        inventory = {
+            "chapters": [{
+                "file": "chapter.xhtml",
+                "word_count": 800,
+                "images": [entry["source_image"] for entry in visuals],
+            }],
+        }
+        evidence = {
+            "mechanism": ["Механизм связывает наблюдение с решением через явную проверку результата."],
+            "motivation": ["Такой порядок нужен, чтобы отделить причину от случайного совпадения."],
+            "example": ["В примере команда повторила проверку десять раз перед изменением процесса."],
+            "limitation": ["Метод не помогает, если результат действия нельзя наблюдать после проверки."],
+            "application": ["Применяй его только с измеримым признаком и назначенным сроком обзора."],
+        }
+        ledger = {
+            "schema": 1,
+            "groups": [{
+                "id": "method",
+                "source_files": ["chapter.xhtml"],
+                "note_sections": ["Метод"],
+                "evidence": evidence,
+            }],
+            "excluded": [],
+            "visuals": visuals,
+            "questions": [{
+                "question": "Почему проверка нужна и когда метод перестаёт помогать?",
+                "group_id": "method",
+                "answer_evidence": [evidence["motivation"][0], evidence["limitation"][0]],
+                "dimensions": ["mechanism", "motivation", "example", "limitation", "application"],
+            }],
+        }
+        return digest_coverage_audit(inventory, ledger, note)
+
     def test_digest_coverage_gate_accepts_independent_working_note(self) -> None:
         inventory = {
             "kind": "epub",
@@ -208,6 +247,189 @@ class RefineMarkdownTests(unittest.TestCase):
         self.assertEqual(report["issues"], [])
         self.assertEqual(report["metrics"]["source_visuals"], 2)
         self.assertEqual(report["metrics"]["included_visuals"], 1)
+
+    def test_digest_coverage_rejects_plain_prose_as_an_included_visual(self) -> None:
+        note = """## Метод
+
+Механизм связывает наблюдение с решением через явную проверку результата.
+
+Такой порядок нужен, чтобы отделить причину от случайного совпадения.
+
+В примере команда повторила проверку десять раз перед изменением процесса.
+
+Метод не помогает, если результат действия нельзя наблюдать после проверки.
+
+Применяй его только с измеримым признаком и назначенным сроком обзора.
+"""
+        report = self._single_visual_digest(note, {
+            "source_file": "chapter.xhtml",
+            "source_image": "../Images/process.png",
+            "decision": "included",
+            "note_reference": "Механизм связывает наблюдение с решением",
+        })
+
+        self.assertIn("visual_reference_not_embed", {
+            issue["type"] for issue in report["issues"]
+        })
+        self.assertEqual(report["metrics"]["included_visuals"], 0)
+
+    def test_digest_coverage_rejects_a_missing_embedded_asset_for_cli_use(self) -> None:
+        note = """## Метод
+
+Механизм связывает наблюдение с решением через явную проверку результата.
+
+Такой порядок нужен, чтобы отделить причину от случайного совпадения.
+
+В примере команда повторила проверку десять раз перед изменением процесса.
+
+Метод не помогает, если результат действия нельзя наблюдать после проверки.
+
+Применяй его только с измеримым признаком и назначенным сроком обзора.
+
+![[assets/book/process.png|700]]
+"""
+        with tempfile.TemporaryDirectory() as root:
+            note_path = Path(root) / "note.md"
+            note_path.write_text(note, encoding="utf-8")
+            report = digest_coverage_audit(
+                {
+                    "chapters": [{
+                        "file": "chapter.xhtml",
+                        "word_count": 800,
+                        "images": ["../Images/process.png"],
+                    }],
+                },
+                {
+                    "schema": 1,
+                    "groups": [{
+                        "id": "method",
+                        "source_files": ["chapter.xhtml"],
+                        "note_sections": ["Метод"],
+                        "evidence": {
+                            "mechanism": ["Механизм связывает наблюдение с решением через явную проверку результата."],
+                            "motivation": ["Такой порядок нужен, чтобы отделить причину от случайного совпадения."],
+                            "example": ["В примере команда повторила проверку десять раз перед изменением процесса."],
+                            "limitation": ["Метод не помогает, если результат действия нельзя наблюдать после проверки."],
+                            "application": ["Применяй его только с измеримым признаком и назначенным сроком обзора."],
+                        },
+                    }],
+                    "excluded": [],
+                    "visuals": [{
+                        "source_file": "chapter.xhtml",
+                        "source_image": "../Images/process.png",
+                        "decision": "included",
+                        "note_reference": "assets/book/process.png",
+                    }],
+                    "questions": [{
+                        "question": "Почему проверка нужна и когда метод перестаёт помогать?",
+                        "group_id": "method",
+                        "answer_evidence": [
+                            "Такой порядок нужен, чтобы отделить причину от случайного совпадения.",
+                            "Метод не помогает, если результат действия нельзя наблюдать после проверки.",
+                        ],
+                        "dimensions": ["mechanism", "motivation", "example", "limitation", "application"],
+                    }],
+                },
+                note,
+                note_path=note_path,
+            )
+
+        self.assertIn("missing_visual_asset", {
+            issue["type"] for issue in report["issues"]
+        })
+
+    def test_digest_coverage_rejects_one_embed_claimed_by_two_visuals(self) -> None:
+        note = """## Метод
+
+Механизм связывает наблюдение с решением через явную проверку результата.
+
+Такой порядок нужен, чтобы отделить причину от случайного совпадения.
+
+В примере команда повторила проверку десять раз перед изменением процесса.
+
+Метод не помогает, если результат действия нельзя наблюдать после проверки.
+
+Применяй его только с измеримым признаком и назначенным сроком обзора.
+
+![[assets/book/process.png|700]]
+"""
+        report = self._single_visual_digest(note, [
+            {
+                "source_file": "chapter.xhtml",
+                "source_image": "../Images/process.png",
+                "decision": "included",
+                "note_reference": "assets/book/process.png",
+            },
+            {
+                "source_file": "chapter.xhtml",
+                "source_image": "../Images/comparison.png",
+                "decision": "included",
+                "note_reference": "assets/book/process.png",
+            },
+        ])
+
+        self.assertIn("visual_embed_reused", {
+            issue["type"] for issue in report["issues"]
+        })
+        self.assertEqual(report["metrics"]["included_visuals"], 1)
+
+    def test_digest_coverage_accepts_a_structured_visual_reconstruction(self) -> None:
+        note = """## Метод
+
+Механизм связывает наблюдение с решением через явную проверку результата.
+
+Такой порядок нужен, чтобы отделить причину от случайного совпадения.
+
+В примере команда повторила проверку десять раз перед изменением процесса.
+
+Метод не помогает, если результат действия нельзя наблюдать после проверки.
+
+Применяй его только с измеримым признаком и назначенным сроком обзора.
+
+| Этап | Проверка |
+| --- | --- |
+| Наблюдение | Причина зафиксирована |
+| Решение | Результат измерим |
+"""
+        report = self._single_visual_digest(note, {
+            "source_file": "chapter.xhtml",
+            "source_image": "../Images/process.png",
+            "decision": "reconstructed",
+            "note_section": "Метод",
+            "reconstruction": "markdown_table",
+            "reason": "The source table was consolidated without losing any rows",
+        })
+
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["metrics"]["included_visuals"], 0)
+        self.assertEqual(report["metrics"]["reconstructed_visuals"], 1)
+
+    def test_digest_coverage_rejects_prose_only_visual_reconstruction(self) -> None:
+        note = """## Метод
+
+Механизм связывает наблюдение с решением через явную проверку результата.
+
+Такой порядок нужен, чтобы отделить причину от случайного совпадения.
+
+В примере команда повторила проверку десять раз перед изменением процесса.
+
+Метод не помогает, если результат действия нельзя наблюдать после проверки.
+
+Применяй его только с измеримым признаком и назначенным сроком обзора.
+"""
+        report = self._single_visual_digest(note, {
+            "source_file": "chapter.xhtml",
+            "source_image": "../Images/process.png",
+            "decision": "reconstructed",
+            "note_section": "Метод",
+            "reconstruction": "markdown_table",
+            "reason": "The source table was consolidated without losing any rows",
+        })
+
+        self.assertIn("visual_reconstruction_not_found", {
+            issue["type"] for issue in report["issues"]
+        })
+        self.assertEqual(report["metrics"]["reconstructed_visuals"], 0)
 
     def test_digest_coverage_rejects_an_unaccounted_source_visual(self) -> None:
         inventory = {

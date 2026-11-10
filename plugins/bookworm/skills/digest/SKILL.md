@@ -304,11 +304,24 @@ During analysis, classify visuals internally:
 In the final note:
 
 - do not show the classification labels;
-- include every `meaning-bearing` visual in the relevant reader section;
+- embed every `meaning-bearing` visual in the relevant reader section by
+  default;
 - omit only decorative visuals and exact duplicates, recording a concrete reason
   for each omission in the temporary coverage ledger;
-- if a meaning-bearing visual cannot be extracted, preserve its meaning with a
-  faithful explanation or reconstruction and record that fallback;
+- use `included` in the ledger only when `note_reference` is the exact target of
+  an image embed. Never point it at a prose sentence merely because that
+  sentence mentions the visual's topic;
+- do not claim one embed for several distinct source visuals. Use `duplicate`
+  only for an exact repeat or map cumulative material to one checked lossless
+  reconstruction;
+- if extraction is impossible or a lossless consolidation materially improves
+  reading, use `reconstructed` and preserve the visual as a Markdown table,
+  Mermaid diagram, ordered procedure, or structured list. Record the exact note
+  section, reconstruction format, and reason. Plain prose is not a visual
+  reconstruction;
+- cumulative tables are not exact duplicates. They may share one consolidated
+  reconstruction only when it contains every distinct row, label, relationship,
+  condition, and exception from each source table;
 - use a natural reader-facing block:
 
 ```markdown
@@ -325,7 +338,10 @@ In the final note:
 **Как применить:** ...
 ```
 
-If a visual is essential, technical, or a practical example that teaches implementation, the digest is incomplete unless it includes the image, a faithful verbal explanation, or a useful reconstruction such as a table, Mermaid diagram, or step-by-step reading guide.
+If a visual is essential, technical, or a practical example that teaches
+implementation, the digest is incomplete unless it embeds the image or contains
+a checked structured reconstruction. A verbal summary alone does not satisfy
+visual coverage.
 
 ## Workflow
 
@@ -334,7 +350,7 @@ If a visual is essential, technical, or a practical example that teaches impleme
 3. Detect a likely Obsidian vault with `scripts/bookworm_helper.py detect-vaults` when an output location is not given.
 4. Determine source language and visible heading language.
 5. Inventory every source visual. Mark each as meaning-bearing, decorative or
-   an exact duplicate, and plan extraction or faithful reconstruction for every
+   an exact duplicate, and plan extraction or structured reconstruction for every
    meaning-bearing item.
 6. For a book, save the complete inspection result as `source-inventory.json`
    and build coverage groups before drafting. For a batch, keep every book's
@@ -349,14 +365,15 @@ If a visual is essential, technical, or a practical example that teaches impleme
 10. Create `coverage-ledger.json` after drafting. Record at least three relevant
    dimensions per group, including mechanism or application, and cover all five
    dimensions across the book. Account for every source visual and verify that
-   each meaning-bearing item appears in the note. A natural passage may support
+   each meaning-bearing item appears as an embed or checked reconstruction. A natural passage may support
    several dimensions inside its group. Ask later-use questions spanning the
    beginning, middle and end.
 11. Run `audit-digest-coverage` for every book. Expand or correct the failing
     note sections from the source until the audit passes. Never weaken the map
     or exclude substantive material merely to pass.
-12. Include every meaning-bearing figure in place, with an explanation or
-    faithful reconstruction when the original cannot be embedded.
+12. Include every meaning-bearing figure in place, with an embed or checked
+    structured reconstruction when the original cannot be embedded or several
+    cumulative visuals are consolidated without information loss.
 13. Run the internal quality gate.
 14. Run `audit-reader-structure` on the temporary Markdown and review every
     reported issue without treating a clean report as proof of source coverage.

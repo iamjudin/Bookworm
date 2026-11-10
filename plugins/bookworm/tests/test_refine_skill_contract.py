@@ -148,7 +148,7 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertIn("numbered procedure", skill)
         self.assertIn("Put `## Коротко` first", skill)
         self.assertIn("author's composition is the default information architecture", skill)
-        self.assertIn("include every `meaning-bearing` visual", skill)
+        self.assertIn("embed every `meaning-bearing` visual", skill)
         self.assertIn("Account for every source visual", skill)
 
     def test_enrich_requires_a_specific_nonduplicating_contribution(self) -> None:
