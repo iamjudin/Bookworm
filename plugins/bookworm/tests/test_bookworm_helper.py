@@ -88,6 +88,236 @@ class RefineMarkdownTests(unittest.TestCase):
         self.assertEqual(report["issues"], [])
         self.assertEqual(report["metrics"]["covered_word_share"], 1.0)
 
+    def test_digest_coverage_accepts_natural_sections_without_five_part_template(self) -> None:
+        inventory = {
+            "chapters": [
+                {"file": "chapter-1.xhtml", "word_count": 900},
+                {"file": "chapter-2.xhtml", "word_count": 1100},
+            ],
+        }
+        note = """## Наблюдение и решение
+
+Команда сначала фиксирует наблюдение, а затем выбирает проверяемое действие. Такой порядок нужен, чтобы решение отвечало на фактическую причину. В примере участники повторили проверку восемь раз до изменения процесса.
+
+## Граница и применение
+
+Проверка не помогает, если результат действия нельзя наблюдать. Поэтому заранее выбери измеримый признак и срок следующего обзора.
+"""
+        ledger = {
+            "schema": 1,
+            "groups": [
+                {
+                    "id": "observe",
+                    "source_files": ["chapter-1.xhtml"],
+                    "note_sections": ["Наблюдение и решение"],
+                    "evidence": {
+                        "mechanism": ["Команда сначала фиксирует наблюдение, а затем выбирает проверяемое действие."],
+                        "motivation": ["Такой порядок нужен, чтобы решение отвечало на фактическую причину."],
+                        "example": ["В примере участники повторили проверку восемь раз до изменения процесса."],
+                    },
+                },
+                {
+                    "id": "apply",
+                    "source_files": ["chapter-2.xhtml"],
+                    "note_sections": ["Граница и применение"],
+                    "evidence": {
+                        "mechanism": ["Проверка не помогает, если результат действия нельзя наблюдать."],
+                        "limitation": ["Проверка не помогает, если результат действия нельзя наблюдать."],
+                        "application": ["Поэтому заранее выбери измеримый признак и срок следующего обзора."],
+                    },
+                },
+            ],
+            "excluded": [],
+            "questions": [{
+                "question": "Почему наблюдение предшествует решению и где находится граница метода?",
+                "group_id": "observe",
+                "answer_evidence": [
+                    "Такой порядок нужен, чтобы решение отвечало на фактическую причину.",
+                    "Проверка не помогает, если результат действия нельзя наблюдать.",
+                ],
+                "dimensions": ["mechanism", "motivation", "example", "limitation", "application"],
+            }],
+        }
+
+        report = digest_coverage_audit(inventory, ledger, note)
+
+        self.assertEqual(report["issues"], [])
+
+    def test_digest_coverage_accounts_for_meaningful_and_decorative_visuals(self) -> None:
+        inventory = {
+            "chapters": [{
+                "file": "chapter.xhtml",
+                "word_count": 800,
+                "images": ["../Images/process.png", "../Images/divider.png"],
+            }],
+        }
+        note = """## Метод
+
+Механизм связывает наблюдение с решением через явную проверку результата.
+
+Такой порядок нужен, чтобы отделить причину от случайного совпадения.
+
+В примере команда повторила проверку десять раз перед изменением процесса.
+
+Метод не помогает, если результат действия нельзя наблюдать после проверки.
+
+Применяй его только с измеримым признаком и назначенным сроком обзора.
+
+![[assets/book/process.png|700]]
+"""
+        evidence = {
+            "mechanism": ["Механизм связывает наблюдение с решением через явную проверку результата."],
+            "motivation": ["Такой порядок нужен, чтобы отделить причину от случайного совпадения."],
+            "example": ["В примере команда повторила проверку десять раз перед изменением процесса."],
+            "limitation": ["Метод не помогает, если результат действия нельзя наблюдать после проверки."],
+            "application": ["Применяй его только с измеримым признаком и назначенным сроком обзора."],
+        }
+        ledger = {
+            "schema": 1,
+            "groups": [{
+                "id": "method",
+                "source_files": ["chapter.xhtml"],
+                "note_sections": ["Метод"],
+                "evidence": evidence,
+            }],
+            "excluded": [],
+            "visuals": [
+                {
+                    "source_file": "chapter.xhtml",
+                    "source_image": "../Images/process.png",
+                    "decision": "included",
+                    "note_reference": "assets/book/process.png",
+                },
+                {
+                    "source_file": "chapter.xhtml",
+                    "source_image": "../Images/divider.png",
+                    "decision": "decorative",
+                    "reason": "Repeated ornamental divider without reader meaning",
+                },
+            ],
+            "questions": [{
+                "question": "Почему проверка нужна и когда метод перестаёт помогать?",
+                "group_id": "method",
+                "answer_evidence": [evidence["motivation"][0], evidence["limitation"][0]],
+                "dimensions": ["mechanism", "motivation", "example", "limitation", "application"],
+            }],
+        }
+
+        report = digest_coverage_audit(inventory, ledger, note)
+
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["metrics"]["source_visuals"], 2)
+        self.assertEqual(report["metrics"]["included_visuals"], 1)
+
+    def test_digest_coverage_rejects_an_unaccounted_source_visual(self) -> None:
+        inventory = {
+            "chapters": [{
+                "file": "chapter.xhtml",
+                "word_count": 800,
+                "images": ["../Images/process.png"],
+            }],
+        }
+        note = """## Метод
+
+Механизм связывает наблюдение с решением через явную проверку результата.
+
+Такой порядок нужен, чтобы отделить причину от случайного совпадения.
+
+В примере команда повторила проверку десять раз перед изменением процесса.
+
+Метод не помогает, если результат действия нельзя наблюдать после проверки.
+
+Применяй его только с измеримым признаком и назначенным сроком обзора.
+"""
+        evidence = {
+            "mechanism": ["Механизм связывает наблюдение с решением через явную проверку результата."],
+            "motivation": ["Такой порядок нужен, чтобы отделить причину от случайного совпадения."],
+            "example": ["В примере команда повторила проверку десять раз перед изменением процесса."],
+            "limitation": ["Метод не помогает, если результат действия нельзя наблюдать после проверки."],
+            "application": ["Применяй его только с измеримым признаком и назначенным сроком обзора."],
+        }
+        ledger = {
+            "schema": 1,
+            "groups": [{
+                "id": "method",
+                "source_files": ["chapter.xhtml"],
+                "note_sections": ["Метод"],
+                "evidence": evidence,
+            }],
+            "excluded": [],
+            "visuals": [],
+            "questions": [{
+                "question": "Почему проверка нужна и когда метод перестаёт помогать?",
+                "group_id": "method",
+                "answer_evidence": [evidence["motivation"][0], evidence["limitation"][0]],
+                "dimensions": ["mechanism", "motivation", "example", "limitation", "application"],
+            }],
+        }
+
+        issue_types = {
+            issue["type"] for issue in digest_coverage_audit(inventory, ledger, note)["issues"]
+        }
+
+        self.assertIn("missing_visual_inventory", issue_types)
+        self.assertIn("unaccounted_visual", issue_types)
+
+    def test_digest_coverage_rejects_a_group_with_only_two_reading_jobs(self) -> None:
+        inventory = {
+            "chapters": [
+                {"file": "chapter-1.xhtml", "word_count": 900},
+                {"file": "chapter-2.xhtml", "word_count": 1100},
+            ],
+        }
+        note = """## Первый раздел
+
+Механизм связывает наблюдение с проверяемым решением и сохраняет исходную причину.
+
+## Второй раздел
+
+Пример показывает повторную проверку результата. Ограничение возникает без наблюдаемого результата. Применяй метод только с назначенным сроком обзора.
+"""
+        ledger = {
+            "schema": 1,
+            "groups": [
+                {
+                    "id": "thin",
+                    "source_files": ["chapter-1.xhtml"],
+                    "note_sections": ["Первый раздел"],
+                    "evidence": {
+                        "mechanism": ["Механизм связывает наблюдение с проверяемым решением и сохраняет исходную причину."],
+                        "motivation": ["Механизм связывает наблюдение с проверяемым решением и сохраняет исходную причину."],
+                    },
+                },
+                {
+                    "id": "complete",
+                    "source_files": ["chapter-2.xhtml"],
+                    "note_sections": ["Второй раздел"],
+                    "evidence": {
+                        "example": ["Пример показывает повторную проверку результата."],
+                        "limitation": ["Ограничение возникает без наблюдаемого результата."],
+                        "application": ["Применяй метод только с назначенным сроком обзора."],
+                    },
+                },
+            ],
+            "excluded": [],
+            "questions": [{
+                "question": "Как работает метод и какое условие ограничивает применение?",
+                "group_id": "thin",
+                "answer_evidence": [
+                    "Механизм связывает наблюдение с проверяемым решением и сохраняет исходную причину.",
+                    "Ограничение возникает без наблюдаемого результата.",
+                ],
+                "dimensions": ["mechanism", "motivation", "example", "limitation", "application"],
+            }],
+        }
+
+        report = digest_coverage_audit(inventory, ledger, note)
+
+        self.assertIn(
+            "insufficient_group_dimensions",
+            {issue["type"] for issue in report["issues"]},
+        )
+
     def test_digest_coverage_gate_rejects_clean_but_overcompressed_note(self) -> None:
         inventory = {
             "kind": "epub",
@@ -341,6 +571,40 @@ flowchart TD
         self.assertIn(
             "mermaid_render_review_required",
             {item["type"] for item in report["warnings"]},
+        )
+
+    def test_reader_audit_flags_long_toc_before_orientation(self) -> None:
+        toc = "\n".join(f"- [[#Раздел {index}|Раздел {index}]]" for index in range(1, 14))
+        sections = "\n\n".join(f"## Раздел {index}\n\nТекст." for index in range(1, 14))
+        markdown = f"## Содержание\n\n{toc}\n\n## Коротко\n\nОриентация.\n\n{sections}\n"
+
+        report = reader_structure_audit(markdown)
+        warning = next(
+            item for item in report["warnings"]
+            if item["type"] == "long_toc_before_orientation"
+        )
+
+        self.assertEqual(warning["entries"], 13)
+
+    def test_reader_audit_flags_prose_protocol_but_accepts_numbered_steps(self) -> None:
+        prose = """## Протокол применения
+
+Выбери действие. Привяжи его к сигналу. Проверь результат. Назначь обзор.
+"""
+        numbered = """## Протокол применения
+
+1. Выбери действие.
+2. Привяжи его к сигналу.
+3. Проверь результат и назначь обзор.
+"""
+
+        self.assertIn(
+            "prose_procedure",
+            {item["type"] for item in reader_structure_audit(prose)["warnings"]},
+        )
+        self.assertNotIn(
+            "prose_procedure",
+            {item["type"] for item in reader_structure_audit(numbered)["warnings"]},
         )
 
     def test_reader_audit_flags_aligned_data_left_in_text_fence(self) -> None:

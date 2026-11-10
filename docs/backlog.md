@@ -13,6 +13,21 @@
   temporary inventory and ledger. Substantive source items must be accounted
   for, up to six distinct reader groups must carry exact evidence for the five
   reading jobs, and later-use questions must be answerable from the final note.
+- Digest coverage dimensions are verification axes, not a prose template. Each
+  source group carries at least three relevant jobs including mechanism or
+  application, the book covers all five jobs overall, and the final note keeps
+  the source's natural explanatory movement. Do not invent a missing job or
+  serialize every group as five matching paragraphs.
+- Practical books keep a source-grounded application protocol as a numbered
+  procedure when it contains three or more dependent actions. A short
+  orientation comes before a long table of contents, and navigation for more
+  than twelve substantive sections is grouped by meaningful parts.
+- The author's coherent composition, explanatory sequence and tone are the
+  primary structure for Digest. Shared modules repair missing or damaged
+  organization, but do not replace a usable authorial system.
+- Digest accounts for every source visual. It includes every image that
+  explains, compares, demonstrates or otherwise carries meaning, and omits only
+  decoration or exact duplicates with a recorded reason.
 - Multi-book Digest runs isolate inventory, ledger, note, questions, and gate
   result per book so one strong output cannot hide a shallow one.
 

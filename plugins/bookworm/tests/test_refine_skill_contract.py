@@ -122,6 +122,7 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertIn("`TD` or `TB` can still produce a wide graph", reference)
         self.assertIn("against silently splitting one diagram", reference)
         self.assertIn("numbers, units, negation, cumulative conditions", reference)
+        self.assertIn("Verification categories are not a composition template", reference)
 
     def test_refine_preserves_meaning_without_freezing_paragraph_shape(self) -> None:
         skill = (ROOT / "skills" / "refine" / "SKILL.md").read_text(encoding="utf-8")
@@ -143,6 +144,12 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertIn("audit-digest-coverage", skill)
         self.assertIn("self-contained artifact", skill)
         self.assertIn("Source context still present", skill)
+        self.assertIn("five-paragraph writing template", skill)
+        self.assertIn("numbered procedure", skill)
+        self.assertIn("Put `## Коротко` first", skill)
+        self.assertIn("author's composition is the default information architecture", skill)
+        self.assertIn("include every `meaning-bearing` visual", skill)
+        self.assertIn("Account for every source visual", skill)
 
     def test_enrich_requires_a_specific_nonduplicating_contribution(self) -> None:
         skill = (ROOT / "skills" / "enrich" / "SKILL.md").read_text(encoding="utf-8")
@@ -241,11 +248,16 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertIn("not by a compression percentage", skill)
         self.assertIn("mechanism", skill)
         self.assertIn("example", skill)
-        self.assertIn("failure mode or limitation", skill)
+        self.assertIn("Do not invent an example", skill)
+        self.assertIn("the reader jobs the source actually provides", skill)
         self.assertIn("practical implication", skill)
         self.assertIn("Every source", coverage)
         self.assertIn("one inventory, ledger, note and gate result per book", coverage)
         self.assertIn("Do not exclude a substantive chapter", coverage)
+        self.assertIn("audit axes, not a reader-facing outline", coverage)
+        self.assertIn("at least three relevant dimensions", coverage)
+        self.assertIn("must not dictate paragraph", coverage)
+        self.assertIn("Account for every image occurrence", coverage)
 
     def test_bookworm_asks_for_ambiguous_vault_destination(self) -> None:
         for name in ("digest", "refine"):

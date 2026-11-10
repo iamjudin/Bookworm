@@ -50,6 +50,17 @@ reader-evidence dimensions. Negative fixtures prove that an otherwise clean
 overview fails when chapters are missing, dimensions are absent, questions are
 insufficient, or a whole book is collapsed into one coverage group.
 
+A later real-book comparison exposed a second-order failure: treating the five
+coverage dimensions as a visible paragraph template made otherwise complete
+notes mechanical. Coverage now requires at least three source-relevant jobs per
+group and all five across the book, while the author's coherent composition and
+tone remain primary. Reader audit warnings also expose a long table of contents
+before orientation and a multi-step application protocol flattened into prose.
+
+Visual coverage now accounts for every source image occurrence. Meaning-bearing
+visuals must be embedded or faithfully reconstructed. Only decoration and exact
+duplicates may be omitted, with a concrete temporary-ledger reason.
+
 ### Enrich result
 
 The original note names reserved example domains but does not explain why they
@@ -61,7 +72,7 @@ ledger instead of appearing as technical labels in the reader note.
 
 | Check | Result |
 | --- | --- |
-| Complete Bookworm test suite under system Python | 129 passed, 4 dependency-based skips in 0.268 seconds |
+| Complete Bookworm test suite under system Python | 135 passed, 4 dependency-based skips |
 | Public package validator | Passed |
 | Git whitespace validation | Passed |
 | Skill Creator quick validator | Not run because its PyYAML dependency is absent from the available Python runtime |

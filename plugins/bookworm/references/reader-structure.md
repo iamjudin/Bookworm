@@ -21,6 +21,14 @@ Use this contract for every final Refine, Digest, and Enrich note.
   preserve every header, value, unit, approximation sign, and note. Keep actual
   source code and exact quoted blocks unchanged.
 - Do not turn every explanation into a table or every sentence into a bullet.
+- Verification categories are not a composition template. When an audit tracks
+  mechanisms, motivations, examples, limitations and applications, weave the
+  source-supported jobs into the form that fits the passage. Do not serialize
+  them as the same five paragraphs in every section.
+- Preserve the author's coherent composition and explanatory tone as the
+  primary reader system. Restructure only when the source has no usable system,
+  the export has damaged it, or a local form blocks comprehension. Do not force
+  a coherent book into a shared outline.
 
 Before keeping repeated fields, choose one canonical representation:
 
@@ -57,7 +65,10 @@ full stop, comma, list, or short paragraph instead.
 ## Navigation and diagrams
 
 Every table-of-contents entry must point to a real heading. Keep the first
-screen useful for orientation without duplicating the detailed sections.
+screen useful for orientation without duplicating the detailed sections. Put a
+short orientation before a long table of contents. When a book has more than
+twelve substantive sections, group navigation by meaningful parts instead of
+listing every chapter before the reader sees the note's purpose.
 
 Treat Mermaid direction as an input to rendering, not proof of readability.
 `TD` or `TB` can still produce a wide graph. Inspect the actual rendered width,

@@ -4,6 +4,19 @@ All notable changes to Bookworm are documented here.
 
 ## Unreleased
 
+- Decoupled Digest coverage evidence from visible prose structure. Coverage now
+  requires three relevant jobs per source group and all five jobs across the
+  book without forcing every section into the same five-paragraph sequence.
+- Practical application protocols now remain numbered procedures when they
+  contain dependent steps. Long book navigation follows the orientation layer
+  instead of consuming the first screen.
+- Digest now treats the author's composition and explanatory tone as the
+  primary note structure, using shared modules only to repair missing or damaged
+  organization.
+- Every source visual is now accounted. Meaning-bearing diagrams, examples,
+  maps, screenshots and illustrations must be included or faithfully
+  reconstructed, while only decoration and exact duplicates may be omitted.
+
 ## 0.1.19 — 2026-11-10
 
 - Added a blocking book-digest coverage gate so a polished overview cannot

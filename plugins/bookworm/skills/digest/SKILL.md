@@ -88,7 +88,12 @@ request language for the final filename. Under `## Источники` / `## Sou
   filename except for established product names, acronyms, author names, or
   terms that are more readable in the original.
 - If the note filename is the book title and Obsidian will show the inline title, do not add a duplicate top-level `# Book Title` heading inside the note.
-- For substantial notes, add a compact manual table of contents near the top. When relying on Obsidian's inline title, make `## Содержание` the first section in the file, followed by links to the main `##` sections, then continue with `## Коротко`.
+- For substantial notes, add a compact manual table of contents near the top.
+  Put `## Коротко` first so the reader sees the book's purpose before navigation.
+  For practical books, follow it with `## Протокол применения`, then add
+  `## Содержание`. When the book needs more than twelve substantive sections,
+  group navigation by meaningful parts instead of listing every chapter on the
+  first screen.
 - Store visual assets in a shared library assets folder, such as `Library/assets/<source-slug>/<section-slug>/` for notes in `Library/`.
 - For notes stored in `Library/`, embed important images with paths relative to the library folder: `![[assets/book-slug/chapter-06/figure-01.png|700]]`.
 - After selecting final visuals, keep only the assets that are actually embedded in the final note, plus a manifest if useful. Do not copy the whole extraction dump into the vault.
@@ -180,6 +185,14 @@ When including fenced code templates in the final note, avoid Markdown heading m
 
 ### Research Information Architecture
 
+The author's composition is the default information architecture. Preserve the
+book's meaningful parts, sequence of explanation, contrasts, recurring motifs
+and explanatory tone while paraphrasing. Do not reorganize a coherent book into
+a Bookworm house template merely because the template is available. Add or
+repair structure only when the source has no usable reader system, its export
+has lost that system, or a local passage needs a different form to stay readable.
+Keep those interventions minimal and traceable to the source.
+
 Apply these rules to any research topic, not only books, methods, or a particular note. Preserve facts, examples, claims, and evidence while reducing repetition: give the reader one orientation layer first, then detailed material once in the relevant sections. Keep a comparison or synthesis only when it has a distinct reading job; otherwise merge duplicate wording into its canonical section rather than dropping information.
 
 Link named items where opening them helps. Put section-level sources at the end under `## Источники` / `## Sources`, grouped by the relevant main section, so comparison tables stay readable. In Markdown tables, escape a pipe inside a link label as `\\|` rather than allowing it to create a false column.
@@ -198,9 +211,12 @@ When external sources support a whole section, collect them at the end of the no
 
 For editable Mermaid, prefer portrait `flowchart TB` or `TD`. When there is no intentional source-specific configuration, add compact Mermaid configuration: `%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 20, "rankSpacing": 25}} }%%`. It prevents the rendered diagram from filling the note width; shorten labels if it remains large. Convert `flowchart LR` to `flowchart TD` when this preserves the graph's meaning. Do not split a Mermaid diagram: retain one editable graph and add concise explanatory text when its full context matters. Never replace Mermaid with a raster image.
 
-## Practical Non-Fiction Template
+## Optional Practical Non-Fiction Modules
 
-Adapt headings to the book language. For Russian books, use:
+These are optional reader jobs, not a required outline. Reuse the author's own
+part and chapter structure when it already carries them. When the source lacks
+a usable orientation layer, adapt only the needed headings to the book
+language. For Russian books, possible modules include:
 
 - `Коротко`
 - `Главный тезис`
@@ -232,10 +248,12 @@ Avoid slash labels like `Capture / Сохраняем` in final reader-facing te
 The digest should be complete enough that Codex can later answer questions about the book and help the user apply its methodology without rereading the source.
 
 Judge fullness by source coverage, not by a compression percentage. For every
-substantive chapter, section, or article argument, retain its central mechanism,
-a concrete example or case, a failure mode or limitation, and a practical implication. Adapt this to the kind of source: a history may need causal
-context, a technical source may need procedures and trade-offs, and a practical
-source may need reusable steps.
+substantive chapter, section, or article argument, retain its central meaning
+and the reader jobs the source actually provides. Do not invent an example,
+limitation or practical implication merely to complete a template. Adapt the
+coverage to the kind of source: a history may need causal context, a technical
+source may need procedures and trade-offs, and a practical source may need
+reusable steps.
 
 Build the note from the chapter, section, or argument map using the appropriate
 reader form as each part is written. Do not draft a compressed annotation and
@@ -257,6 +275,12 @@ Preserve:
 
 Do not over-compress. If a person, case, term, or example is important, briefly explain it so the note is understandable without prior knowledge of the book.
 
+Treat `Протокол применения` as a source-grounded synthesis, not an author quote
+or a place for a generic recap. When it contains three or more dependent
+actions, render it as a numbered procedure with conditions, a recovery path and
+the decision points needed to diagnose failure. Preserve useful procedures from
+an earlier accepted digest unless the source review shows they were unsupported.
+
 For a book, the fullness standard is blocking rather than advisory. Preserve
 the complete source inventory and a temporary coverage ledger described in
 `digest-coverage.md`, then pass `audit-digest-coverage` before asking for vault
@@ -265,22 +289,26 @@ hand off a structurally tidy overview when the coverage audit fails.
 
 ## Figures And Visuals
 
-Images are first-class content.
+Images are first-class content. Account for every source visual during source
+mapping, not only the visuals noticed while drafting.
 
 During analysis, classify visuals internally:
 
-- `decorative`: cover, ornament, incidental image;
-- `supporting`: helpful illustration, but not required;
-- `essential`: meaning is lost without it;
-- `technical`: diagram, table, graph, screenshot, workflow, architecture, or dense figure.
-- `practical example`: real folder structures, checklists, before/after examples, worked examples, or screenshots that show how to apply the method.
+- `decorative`: ornament, divider, vignette, background or incidental graphic
+  that carries no reader meaning;
+- `meaning-bearing`: any visual that explains, compares, demonstrates,
+  visualizes or preserves source meaning, including supporting illustrations,
+  diagrams, tables, graphs, screenshots, workflows, architecture, maps,
+  checklists, before/after examples and worked examples.
 
 In the final note:
 
 - do not show the classification labels;
-- include or reconstruct `essential` and `technical` visuals;
-- include a compact selection of `practical example` visuals when they make the method easier to implement, especially folder structures, workflow screenshots, and worked examples;
-- omit redundant examples only after the note preserves the underlying pattern clearly;
+- include every `meaning-bearing` visual in the relevant reader section;
+- omit only decorative visuals and exact duplicates, recording a concrete reason
+  for each omission in the temporary coverage ledger;
+- if a meaning-bearing visual cannot be extracted, preserve its meaning with a
+  faithful explanation or reconstruction and record that fallback;
 - use a natural reader-facing block:
 
 ```markdown
@@ -305,7 +333,9 @@ If a visual is essential, technical, or a practical example that teaches impleme
 2. Create a temporary run directory and collect the working Markdown and selected assets there; never write an empty or provisional note to the vault.
 3. Detect a likely Obsidian vault with `scripts/bookworm_helper.py detect-vaults` when an output location is not given.
 4. Determine source language and visible heading language.
-5. Extract or plan important visual assets.
+5. Inventory every source visual. Mark each as meaning-bearing, decorative or
+   an exact duplicate, and plan extraction or faithful reconstruction for every
+   meaning-bearing item.
 6. For a book, save the complete inspection result as `source-inventory.json`
    and build coverage groups before drafting. For a batch, keep every book's
    inventory, ledger, note and result isolated and finish the coverage gate for
@@ -313,20 +343,27 @@ If a visual is essential, technical, or a practical example that teaches impleme
 7. Build a chapter, section, or article-argument map. Account for every source
    item in a substantive group or a concrete non-substantive exclusion.
 8. Digest the source section by section, preserving enough context for future Q&A.
-9. Create `coverage-ledger.json` with exact final-note evidence for mechanism,
-   motivation, example, limitation and application in every group. Ask later-use
-   questions spanning the beginning, middle and end of the book.
-10. Run `audit-digest-coverage` for every book. Expand or correct the failing
+9. Draft each group in the source's natural explanatory order and choose prose,
+   lists or compact comparisons by reading task. Do not use the ledger's five
+   dimensions as a five-paragraph writing template.
+10. Create `coverage-ledger.json` after drafting. Record at least three relevant
+   dimensions per group, including mechanism or application, and cover all five
+   dimensions across the book. Account for every source visual and verify that
+   each meaning-bearing item appears in the note. A natural passage may support
+   several dimensions inside its group. Ask later-use questions spanning the
+   beginning, middle and end.
+11. Run `audit-digest-coverage` for every book. Expand or correct the failing
     note sections from the source until the audit passes. Never weaken the map
     or exclude substantive material merely to pass.
-11. Include important figures in place, with explanations.
-12. Run the internal quality gate.
-13. Run `audit-reader-structure` on the temporary Markdown and review every
+12. Include every meaning-bearing figure in place, with an explanation or
+    faithful reconstruction when the original cannot be embedded.
+13. Run the internal quality gate.
+14. Run `audit-reader-structure` on the temporary Markdown and review every
     reported issue without treating a clean report as proof of source coverage.
-14. Write one Obsidian-ready Markdown file plus local assets in the run directory.
-15. Prune generated assets so only embedded visuals and useful manifests remain with the final note.
-16. Ask for explicit handoff confirmation before creating or replacing the vault note only after both audits pass; then verify copied embeds after confirmation.
-17. After confirmed vault copy and verification, remove temporary working files from the scratch workspace so repeated runs do not leave clutter.
+15. Write one Obsidian-ready Markdown file plus local assets in the run directory.
+16. Prune generated assets so only embedded visuals and useful manifests remain with the final note.
+17. Ask for explicit handoff confirmation before creating or replacing the vault note only after both audits pass; then verify copied embeds after confirmation.
+18. After confirmed vault copy and verification, remove temporary working files from the scratch workspace so repeated runs do not leave clutter.
 
 ## Internal Quality Gate
 

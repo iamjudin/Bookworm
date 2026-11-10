@@ -663,6 +663,8 @@ def reader_structure_audit(markdown: str) -> dict[str, object]:
                     "repeated_fields": repeated,
                 })
 
+    warnings.extend(_reader_orientation_warnings(markdown))
+
     return {
         "issues": issues,
         "warnings": warnings,
@@ -709,6 +711,58 @@ def _markdown_sections(markdown: str) -> dict[str, str]:
     return sections
 
 
+def _reader_orientation_warnings(markdown: str) -> list[dict[str, object]]:
+    """Report top-of-note shapes that hide orientation or flatten procedures."""
+    warnings: list[dict[str, object]] = []
+    lines = markdown.splitlines()
+    headings: list[tuple[int, int, str]] = []
+    for index, line in enumerate(lines):
+        match = MARKDOWN_HEADING_PATTERN.match(line)
+        if match:
+            headings.append((index, len(match.group(1)), _reader_heading_text(match.group(2))))
+
+    orientation_names = {"коротко", "at a glance", "overview", "summary"}
+    toc_names = {"содержание", "contents", "table of contents"}
+    protocol_names = {"протокол применения", "application protocol"}
+    orientation_index = next(
+        (index for index, _level, title in headings if title in orientation_names),
+        None,
+    )
+
+    for position, (index, level, title) in enumerate(headings):
+        end = len(lines)
+        for next_index, next_level, _next_title in headings[position + 1:]:
+            if next_level <= level:
+                end = next_index
+                break
+        body_lines = lines[index + 1:end]
+
+        if title in toc_names:
+            entries = sum(
+                1 for line in body_lines
+                if re.match(r"^\s*[-*]\s+\[\[#", line)
+            )
+            if entries > 12 and (orientation_index is None or index < orientation_index):
+                warnings.append({
+                    "type": "long_toc_before_orientation",
+                    "line": index + 1,
+                    "entries": entries,
+                })
+
+        if title in protocol_names:
+            body = "\n".join(body_lines).strip()
+            has_ordered_steps = bool(re.search(r"(?m)^\s*\d+[.)]\s+", body))
+            sentence_count = len(re.findall(r"[.!?](?:\s|$)", body))
+            if sentence_count >= 3 and not has_ordered_steps:
+                warnings.append({
+                    "type": "prose_procedure",
+                    "line": index + 1,
+                    "sentences": sentence_count,
+                })
+
+    return warnings
+
+
 def digest_coverage_audit(
     inventory: dict[str, object],
     ledger: dict[str, object],
@@ -729,6 +783,7 @@ def digest_coverage_audit(
         }
 
     inventory_by_id: dict[str, dict[str, object]] = {}
+    source_visuals: set[tuple[str, str]] = set()
     total_words = 0
     for index, item in enumerate(source_items, start=1):
         if not isinstance(item, dict):
@@ -747,11 +802,21 @@ def digest_coverage_audit(
             word_count = 0
         inventory_by_id[source_id] = item
         total_words += word_count
+        images = item.get("images", [])
+        if not isinstance(images, list):
+            issues.append({"type": "invalid_source_images", "source": source_id})
+            images = []
+        for image in images:
+            if not isinstance(image, str) or not image.strip():
+                issues.append({"type": "invalid_source_image", "source": source_id})
+                continue
+            source_visuals.add((source_id, image))
 
     if ledger.get("schema") != 1:
         issues.append({"type": "invalid_coverage_schema"})
     groups = ledger.get("groups")
     excluded = ledger.get("excluded", [])
+    visuals = ledger.get("visuals", [])
     questions = ledger.get("questions")
     if not isinstance(groups, list) or not groups:
         issues.append({"type": "missing_coverage_groups"})
@@ -762,12 +827,18 @@ def digest_coverage_audit(
     if not isinstance(questions, list):
         issues.append({"type": "missing_digest_questions"})
         questions = []
+    if not isinstance(visuals, list):
+        issues.append({"type": "invalid_visual_inventory"})
+        visuals = []
+    if source_visuals and not visuals:
+        issues.append({"type": "missing_visual_inventory"})
 
     note_sections = _markdown_sections(markdown)
     accounted: dict[str, str] = {}
     group_ids: set[str] = set()
     used_note_sections: dict[str, str] = {}
     used_evidence: dict[str, str] = {}
+    book_dimensions: set[str] = set()
 
     for index, group in enumerate(groups, start=1):
         if not isinstance(group, dict):
@@ -826,11 +897,16 @@ def digest_coverage_audit(
         if not isinstance(evidence, dict):
             issues.append({"type": "missing_group_evidence", "group": group_id})
             evidence = {}
-        for dimension in DIGEST_COVERAGE_DIMENSIONS:
-            excerpts = evidence.get(dimension)
-            if not isinstance(excerpts, list) or not excerpts:
-                issues.append({"type": "missing_coverage_dimension", "group": group_id, "dimension": dimension})
+        group_dimensions: set[str] = set()
+        for dimension, excerpts in evidence.items():
+            if dimension not in DIGEST_COVERAGE_DIMENSIONS:
+                issues.append({"type": "unknown_coverage_dimension", "group": group_id, "dimension": dimension})
                 continue
+            if not isinstance(excerpts, list) or not excerpts:
+                issues.append({"type": "empty_coverage_dimension", "group": group_id, "dimension": dimension})
+                continue
+            group_dimensions.add(dimension)
+            book_dimensions.add(dimension)
             for excerpt in excerpts:
                 if not isinstance(excerpt, str) or len(_normalized_evidence(excerpt)) < 24:
                     issues.append({"type": "weak_coverage_evidence", "group": group_id, "dimension": dimension})
@@ -849,6 +925,63 @@ def digest_coverage_audit(
                         "first": used_evidence[normalized],
                     })
                 used_evidence[normalized] = group_id
+        if len(group_dimensions) < 3:
+            issues.append({
+                "type": "insufficient_group_dimensions",
+                "group": group_id,
+                "required": 3,
+            })
+        if not group_dimensions.intersection({"mechanism", "application"}):
+            issues.append({"type": "missing_group_core", "group": group_id})
+
+    for dimension in sorted(set(DIGEST_COVERAGE_DIMENSIONS) - book_dimensions):
+        issues.append({"type": "missing_coverage_dimension", "group": "book", "dimension": dimension})
+
+    accounted_visuals: set[tuple[str, str]] = set()
+    included_visuals = 0
+    for index, visual in enumerate(visuals, start=1):
+        if not isinstance(visual, dict):
+            issues.append({"type": "invalid_visual_entry", "visual": index})
+            continue
+        source_file = visual.get("source_file")
+        source_image = visual.get("source_image")
+        if not isinstance(source_file, str) or not isinstance(source_image, str):
+            issues.append({"type": "invalid_visual_source", "visual": index})
+            continue
+        key = (source_file, source_image)
+        if key not in source_visuals:
+            issues.append({
+                "type": "unknown_source_visual",
+                "source": source_file,
+                "image": source_image,
+            })
+            continue
+        if key in accounted_visuals:
+            issues.append({
+                "type": "visual_accounted_twice",
+                "source": source_file,
+                "image": source_image,
+            })
+            continue
+        accounted_visuals.add(key)
+        decision = visual.get("decision")
+        if decision == "included":
+            note_reference = visual.get("note_reference")
+            if not isinstance(note_reference, str) or not note_reference.strip():
+                issues.append({"type": "missing_visual_reference", "source": source_file, "image": source_image})
+            elif note_reference not in markdown:
+                issues.append({"type": "visual_reference_not_in_note", "source": source_file, "image": source_image})
+            else:
+                included_visuals += 1
+        elif decision in {"decorative", "duplicate"}:
+            reason = visual.get("reason")
+            if not isinstance(reason, str) or len(reason.strip()) < 12:
+                issues.append({"type": "weak_visual_omission_reason", "source": source_file, "image": source_image})
+        else:
+            issues.append({"type": "invalid_visual_decision", "source": source_file, "image": source_image})
+
+    for source_file, source_image in sorted(source_visuals - accounted_visuals):
+        issues.append({"type": "unaccounted_visual", "source": source_file, "image": source_image})
 
     excluded_words = 0
     for index, item in enumerate(excluded, start=1):
@@ -933,6 +1066,9 @@ def digest_coverage_audit(
             "covered_word_share": round(covered_words / total_words, 4) if total_words else 0.0,
             "questions": len(questions),
             "questioned_groups": len(questioned_groups),
+            "source_visuals": len(source_visuals),
+            "accounted_visuals": len(accounted_visuals),
+            "included_visuals": included_visuals,
         },
     }
 
