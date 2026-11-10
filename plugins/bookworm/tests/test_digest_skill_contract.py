@@ -56,6 +56,11 @@ class DigestUrlContractTests(unittest.TestCase):
         self.assertIn("cumulative tables are not exact duplicates", DIGEST)
         self.assertIn("reconstructed", DIGEST)
 
+    def test_visual_captions_explain_meaning_without_continuation_tautologies(self):
+        self.assertIn("A bare instruction", DIGEST)
+        self.assertIn("name the continuation", DIGEST)
+        self.assertIn("Do not write tautologies", DIGEST)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -795,6 +795,41 @@ flowchart TD
             {item["type"] for item in report["warnings"]},
         )
 
+    def test_reader_audit_flags_action_only_visual_explanations_and_redundant_continuations(self) -> None:
+        markdown = """## Примеры
+
+**Таблица 3, продолжение. Продолжение примеров петли**
+
+![[assets/book/table-03b.png|700]]
+
+Сравни примеры.
+"""
+
+        warning_types = {
+            item["type"] for item in reader_structure_audit(markdown)["warnings"]
+        }
+
+        self.assertIn("action_only_visual_explanation", warning_types)
+        self.assertIn("redundant_visual_continuation_title", warning_types)
+
+    def test_reader_audit_accepts_an_informative_visual_explanation_and_distinct_continuation(self) -> None:
+        markdown = """## Примеры
+
+**Таблица 3, продолжение — дополнительные сценарии петли**
+
+![[assets/book/table-03b.png|700]]
+
+Продолжение добавляет сценарии перегрузки, усталости и отвлечения, сохраняя переход от сигнала к награде.
+"""
+
+        warning_types = {
+            item["type"] for item in reader_structure_audit(markdown)["warnings"]
+        }
+
+        self.assertNotIn("action_only_visual_explanation", warning_types)
+        self.assertNotIn("redundant_visual_continuation_title", warning_types)
+        self.assertNotIn("missing_visual_explanation", warning_types)
+
     def test_reader_audit_flags_long_toc_before_orientation(self) -> None:
         toc = "\n".join(f"- [[#Раздел {index}|Раздел {index}]]" for index in range(1, 14))
         sections = "\n\n".join(f"## Раздел {index}\n\nТекст." for index in range(1, 14))

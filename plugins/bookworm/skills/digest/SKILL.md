@@ -322,6 +322,14 @@ In the final note:
 - cumulative tables are not exact duplicates. They may share one consolidated
   reconstruction only when it contains every distinct row, label, relationship,
   condition, and exception from each source table;
+- give every meaning-bearing embed a concise source-aware title and a factual
+  explanation of what the reader should learn from it or why it changes the
+  surrounding argument. A bare instruction such as "Compare", "Check" or
+  "Choose" is not an explanation;
+- when a source table or figure continues across images, name the continuation
+  once and add the new content or range, for example `Table 3, continued — more
+  habit-loop examples`. Do not write tautologies such as `Table 3, continued —
+  continuation of the examples`;
 - use a natural reader-facing block:
 
 ```markdown

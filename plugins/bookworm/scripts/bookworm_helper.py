@@ -490,6 +490,55 @@ def reader_structure_audit(markdown: str) -> dict[str, object]:
     profile_section: dict[str, object] | None = None
     profile_sections: list[dict[str, object]] = []
 
+    visual_embed_pattern = re.compile(
+        r"(?:!\[\[[^\]]+\]\]|!\[[^\]]*\]\([^)]+\))"
+    )
+    action_only_visual_explanation = re.compile(
+        r"^(?:сравни|сопоставь|проверь|выбери|смотри|проследи|читай|найди|"
+        r"определи|разложи|compare|check|choose|look|trace|read|find|identify)\b",
+        re.IGNORECASE,
+    )
+
+    for index, line in enumerate(lines):
+        if not visual_embed_pattern.search(line):
+            continue
+        next_index = index + 1
+        while next_index < len(lines) and not lines[next_index].strip():
+            next_index += 1
+        if next_index >= len(lines) or re.match(r"^#{1,6}\s+", lines[next_index]):
+            warnings.append({
+                "type": "missing_visual_explanation",
+                "line": index + 1,
+            })
+            continue
+        explanation = lines[next_index].strip()
+        if visual_embed_pattern.search(explanation) or re.match(r"^\*\*.+\*\*$", explanation):
+            warnings.append({
+                "type": "missing_visual_explanation",
+                "line": index + 1,
+            })
+        elif action_only_visual_explanation.match(explanation):
+            warnings.append({
+                "type": "action_only_visual_explanation",
+                "line": next_index + 1,
+                "text": explanation,
+            })
+
+    for line_number, line in enumerate(lines, start=1):
+        if not re.match(r"^\s*\*\*.+\*\*\s*$", line):
+            continue
+        visible = re.sub(r"[*_`]", "", line).casefold()
+        continuation_count = len(re.findall(
+            r"\b(?:продолжени\w*|continued|continuation)\b",
+            visible,
+            re.IGNORECASE,
+        ))
+        if continuation_count >= 2:
+            warnings.append({
+                "type": "redundant_visual_continuation_title",
+                "line": line_number,
+            })
+
     for line_number, line in enumerate(lines, start=1):
         stripped = line.strip()
         fence = re.match(r"^(```+|~~~+)(.*)$", stripped)

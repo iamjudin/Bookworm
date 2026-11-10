@@ -34,6 +34,9 @@
   ordered procedure, or structured list. Plain prose cannot satisfy visual
   coverage. Progressive summary tables are not exact duplicates, though they
   may share one lossless consolidated reconstruction.
+- Meaning-bearing Digest images use source-aware titles and factual captions
+  that explain the preserved distinction or its relevance. Action-only captions
+  and repeated continuation wording are reader-review failures.
 - Multi-book Digest runs isolate inventory, ledger, note, questions, and gate
   result per book so one strong output cannot hide a shallow one.
 

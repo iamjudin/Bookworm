@@ -77,6 +77,15 @@ available. If it is unavailable, record rendering as unverified and review node
 count, label length, branching, and direction as limited evidence. Keep the
 existing rule against silently splitting one diagram.
 
+For a meaning-bearing image, use a concise source-aware title and follow the
+embed with a factual explanation of what it shows, which distinction it
+preserves, or why it matters in the surrounding argument. A single imperative
+such as `Compare`, `Check`, `Choose`, `Сравни`, `Проверь`, or `Выбери` does not
+perform that reader job. If a table or figure continues across source images,
+write the continuation marker once and identify the new rows, examples, or
+range. Avoid tautological titles such as `Таблица 3, продолжение. Продолжение
+примеров`.
+
 ## Review sequence
 
 Run deterministic cleanup first. Then perform an explicit semantic structure
@@ -104,3 +113,6 @@ or more profile fields are reported as `prose_table_profile_overlap`. These are
 coarse reader-review warnings, so inspect the actual meaning before merging.
 Aligned data left inside a `text` or `plain` fence is also reported for review
 because Obsidian cannot scan or reflow it like a Markdown table.
+Meaning-bearing embeds without an explanation, action-only image explanations,
+and titles that repeat a continuation marker are also reported for reader
+review.
