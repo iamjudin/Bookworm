@@ -4,6 +4,8 @@ All notable changes to Bookworm are documented here.
 
 ## Unreleased
 
+## 0.1.20 — 2026-11-10
+
 - Decoupled Digest coverage evidence from visible prose structure. Coverage now
   requires three relevant jobs per source group and all five jobs across the
   book without forcing every section into the same five-paragraph sequence.
