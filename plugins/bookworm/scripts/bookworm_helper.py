@@ -676,6 +676,267 @@ def reader_structure_audit(markdown: str) -> dict[str, object]:
     }
 
 
+DIGEST_COVERAGE_DIMENSIONS = (
+    "mechanism",
+    "motivation",
+    "example",
+    "limitation",
+    "application",
+)
+
+
+def _normalized_evidence(value: str) -> str:
+    return re.sub(r"\s+", " ", value).strip().casefold()
+
+
+def _markdown_sections(markdown: str) -> dict[str, str]:
+    """Return reader-facing Markdown sections keyed by normalized heading."""
+    lines = markdown.splitlines()
+    sections: dict[str, str] = {}
+    for index, line in enumerate(lines):
+        heading = MARKDOWN_HEADING_PATTERN.match(line)
+        if not heading:
+            continue
+        level = len(heading.group(1))
+        end = index + 1
+        while end < len(lines):
+            next_heading = MARKDOWN_HEADING_PATTERN.match(lines[end])
+            if next_heading and len(next_heading.group(1)) <= level:
+                break
+            end += 1
+        key = _reader_heading_text(heading.group(2))
+        sections[key] = "\n".join(lines[index:end])
+    return sections
+
+
+def digest_coverage_audit(
+    inventory: dict[str, object],
+    ledger: dict[str, object],
+    markdown: str,
+) -> dict[str, object]:
+    """Audit whether a book digest accounts for its source and supports later use.
+
+    The ledger is temporary workflow evidence. It keeps mechanical coverage
+    details out of the reader-facing note while making superficial compression
+    fail before vault handoff.
+    """
+    issues: list[dict[str, object]] = []
+    source_items = inventory.get("chapters") or inventory.get("sections")
+    if not isinstance(source_items, list) or not source_items:
+        return {
+            "issues": [{"type": "invalid_inventory", "message": "Source inventory has no sections"}],
+            "metrics": {},
+        }
+
+    inventory_by_id: dict[str, dict[str, object]] = {}
+    total_words = 0
+    for index, item in enumerate(source_items, start=1):
+        if not isinstance(item, dict):
+            issues.append({"type": "invalid_inventory_item", "item": index})
+            continue
+        source_id = item.get("file") or item.get("id")
+        word_count = item.get("word_count", 0)
+        if not isinstance(source_id, str) or not source_id.strip():
+            issues.append({"type": "missing_source_id", "item": index})
+            continue
+        if source_id in inventory_by_id:
+            issues.append({"type": "duplicate_source_id", "source": source_id})
+            continue
+        if not isinstance(word_count, int) or word_count < 0:
+            issues.append({"type": "invalid_source_word_count", "source": source_id})
+            word_count = 0
+        inventory_by_id[source_id] = item
+        total_words += word_count
+
+    if ledger.get("schema") != 1:
+        issues.append({"type": "invalid_coverage_schema"})
+    groups = ledger.get("groups")
+    excluded = ledger.get("excluded", [])
+    questions = ledger.get("questions")
+    if not isinstance(groups, list) or not groups:
+        issues.append({"type": "missing_coverage_groups"})
+        groups = []
+    if not isinstance(excluded, list):
+        issues.append({"type": "invalid_excluded_sources"})
+        excluded = []
+    if not isinstance(questions, list):
+        issues.append({"type": "missing_digest_questions"})
+        questions = []
+
+    note_sections = _markdown_sections(markdown)
+    accounted: dict[str, str] = {}
+    group_ids: set[str] = set()
+    used_note_sections: dict[str, str] = {}
+    used_evidence: dict[str, str] = {}
+
+    for index, group in enumerate(groups, start=1):
+        if not isinstance(group, dict):
+            issues.append({"type": "invalid_coverage_group", "group": index})
+            continue
+        group_id = group.get("id")
+        if not isinstance(group_id, str) or not group_id.strip():
+            issues.append({"type": "missing_group_id", "group": index})
+            group_id = f"group-{index}"
+        elif group_id in group_ids:
+            issues.append({"type": "duplicate_group_id", "group": group_id})
+        group_ids.add(group_id)
+
+        source_files = group.get("source_files")
+        if not isinstance(source_files, list) or not source_files:
+            issues.append({"type": "group_without_sources", "group": group_id})
+            source_files = []
+        for source_id in source_files:
+            if not isinstance(source_id, str) or source_id not in inventory_by_id:
+                issues.append({"type": "unknown_group_source", "group": group_id, "source": source_id})
+            elif source_id in accounted:
+                issues.append({
+                    "type": "source_accounted_twice",
+                    "source": source_id,
+                    "first": accounted[source_id],
+                    "second": group_id,
+                })
+            else:
+                accounted[source_id] = group_id
+
+        section_names = group.get("note_sections")
+        section_bodies: list[str] = []
+        if not isinstance(section_names, list) or not section_names:
+            issues.append({"type": "group_without_note_sections", "group": group_id})
+            section_names = []
+        for title in section_names:
+            if not isinstance(title, str):
+                issues.append({"type": "invalid_note_section", "group": group_id})
+                continue
+            key = _reader_heading_text(title)
+            if key not in note_sections:
+                issues.append({"type": "missing_note_section", "group": group_id, "section": title})
+                continue
+            if key in used_note_sections and used_note_sections[key] != group_id:
+                issues.append({
+                    "type": "note_section_reused",
+                    "section": title,
+                    "first": used_note_sections[key],
+                    "second": group_id,
+                })
+            used_note_sections[key] = group_id
+            section_bodies.append(note_sections[key])
+        group_text = _normalized_evidence("\n".join(section_bodies))
+
+        evidence = group.get("evidence")
+        if not isinstance(evidence, dict):
+            issues.append({"type": "missing_group_evidence", "group": group_id})
+            evidence = {}
+        for dimension in DIGEST_COVERAGE_DIMENSIONS:
+            excerpts = evidence.get(dimension)
+            if not isinstance(excerpts, list) or not excerpts:
+                issues.append({"type": "missing_coverage_dimension", "group": group_id, "dimension": dimension})
+                continue
+            for excerpt in excerpts:
+                if not isinstance(excerpt, str) or len(_normalized_evidence(excerpt)) < 24:
+                    issues.append({"type": "weak_coverage_evidence", "group": group_id, "dimension": dimension})
+                    continue
+                normalized = _normalized_evidence(excerpt)
+                if normalized not in group_text:
+                    issues.append({
+                        "type": "coverage_evidence_outside_group",
+                        "group": group_id,
+                        "dimension": dimension,
+                    })
+                if normalized in used_evidence and used_evidence[normalized] != group_id:
+                    issues.append({
+                        "type": "coverage_evidence_reused",
+                        "group": group_id,
+                        "first": used_evidence[normalized],
+                    })
+                used_evidence[normalized] = group_id
+
+    excluded_words = 0
+    for index, item in enumerate(excluded, start=1):
+        if not isinstance(item, dict):
+            issues.append({"type": "invalid_excluded_source", "item": index})
+            continue
+        source_id = item.get("source_file")
+        reason = item.get("reason")
+        if not isinstance(source_id, str) or source_id not in inventory_by_id:
+            issues.append({"type": "unknown_excluded_source", "source": source_id})
+            continue
+        if source_id in accounted:
+            issues.append({"type": "source_accounted_twice", "source": source_id})
+            continue
+        if not isinstance(reason, str) or len(reason.strip()) < 12:
+            issues.append({"type": "weak_exclusion_reason", "source": source_id})
+        accounted[source_id] = "excluded"
+        word_count = inventory_by_id[source_id].get("word_count", 0)
+        excluded_words += word_count if isinstance(word_count, int) else 0
+
+    for source_id in sorted(set(inventory_by_id) - set(accounted)):
+        issues.append({"type": "unaccounted_source", "source": source_id})
+    excluded_share = excluded_words / total_words if total_words else 0.0
+    if excluded_share > 0.20:
+        issues.append({"type": "excessive_source_exclusion", "share": round(excluded_share, 4)})
+
+    covered_source_items = sum(1 for owner in accounted.values() if owner != "excluded")
+    required_questions = min(6, (covered_source_items + 1) // 2)
+    if len(groups) < required_questions:
+        issues.append({"type": "insufficient_coverage_groups", "required": required_questions})
+    if len(questions) < required_questions:
+        issues.append({"type": "insufficient_digest_questions", "required": required_questions})
+    questioned_groups: set[str] = set()
+    question_dimensions: set[str] = set()
+    note_text = _normalized_evidence(markdown)
+    for index, question in enumerate(questions, start=1):
+        if not isinstance(question, dict):
+            issues.append({"type": "invalid_digest_question", "question": index})
+            continue
+        prompt = question.get("question")
+        group_id = question.get("group_id")
+        evidence = question.get("answer_evidence")
+        dimensions = question.get("dimensions")
+        if not isinstance(prompt, str) or len(prompt.strip()) < 20:
+            issues.append({"type": "weak_digest_question", "question": index})
+        if not isinstance(group_id, str) or group_id not in group_ids:
+            issues.append({"type": "unknown_question_group", "question": index, "group": group_id})
+        else:
+            questioned_groups.add(group_id)
+        if not isinstance(evidence, list) or len(evidence) < 2:
+            issues.append({"type": "insufficient_answer_evidence", "question": index})
+        else:
+            for excerpt in evidence:
+                if not isinstance(excerpt, str) or len(_normalized_evidence(excerpt)) < 16:
+                    issues.append({"type": "weak_answer_evidence", "question": index})
+                elif _normalized_evidence(excerpt) not in note_text:
+                    issues.append({"type": "missing_answer_evidence", "question": index})
+        if not isinstance(dimensions, list) or not dimensions:
+            issues.append({"type": "missing_question_dimensions", "question": index})
+        else:
+            for dimension in dimensions:
+                if dimension not in DIGEST_COVERAGE_DIMENSIONS:
+                    issues.append({"type": "unknown_question_dimension", "question": index, "dimension": dimension})
+                else:
+                    question_dimensions.add(dimension)
+
+    if len(questioned_groups) < required_questions:
+        issues.append({"type": "questions_do_not_span_groups", "required": required_questions})
+    missing_question_dimensions = sorted(set(DIGEST_COVERAGE_DIMENSIONS) - question_dimensions)
+    if missing_question_dimensions:
+        issues.append({"type": "questions_miss_dimensions", "dimensions": missing_question_dimensions})
+
+    covered_words = total_words - excluded_words
+    return {
+        "issues": issues,
+        "metrics": {
+            "source_items": len(inventory_by_id),
+            "accounted_source_items": len(accounted),
+            "coverage_groups": len(groups),
+            "covered_words": covered_words,
+            "total_words": total_words,
+            "covered_word_share": round(covered_words / total_words, 4) if total_words else 0.0,
+            "questions": len(questions),
+            "questioned_groups": len(questioned_groups),
+        },
+    }
+
+
 def citation_inventory(source: str) -> list[dict[str, str | int]]:
     """Return raw ChatGPT citations with the paragraph they annotate."""
     entries: list[dict[str, str | int]] = []
@@ -1790,6 +2051,11 @@ def main(argv: list[str]) -> int:
     reader_audit_cmd = sub.add_parser("audit-reader-structure")
     reader_audit_cmd.add_argument("path", type=Path)
 
+    digest_audit_cmd = sub.add_parser("audit-digest-coverage")
+    digest_audit_cmd.add_argument("--inventory", required=True, type=Path)
+    digest_audit_cmd.add_argument("--ledger", required=True, type=Path)
+    digest_audit_cmd.add_argument("--note", required=True, type=Path)
+
     handoff_cmd = sub.add_parser("handoff-refined-note")
     handoff_cmd.add_argument("--source", required=True, type=Path)
     handoff_cmd.add_argument("--refined", required=True, type=Path)
@@ -1879,6 +2145,19 @@ def main(argv: list[str]) -> int:
     elif args.command == "audit-reader-structure":
         markdown = args.path.read_text(encoding="utf-8")
         print(json.dumps(reader_structure_audit(markdown), ensure_ascii=False, indent=2))
+    elif args.command == "audit-digest-coverage":
+        inventory = json.loads(args.inventory.read_text(encoding="utf-8"))
+        ledger = json.loads(args.ledger.read_text(encoding="utf-8"))
+        if not isinstance(inventory, dict) or not isinstance(ledger, dict):
+            raise ValueError("Digest inventory and ledger must contain JSON objects")
+        report = digest_coverage_audit(
+            inventory,
+            ledger,
+            args.note.read_text(encoding="utf-8"),
+        )
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        if report["issues"]:
+            return 1
     elif args.command == "handoff-refined-note":
         destination = handoff_refined_note(
             args.source,

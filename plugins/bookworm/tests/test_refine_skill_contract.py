@@ -140,6 +140,9 @@ class RefineSkillContractTests(unittest.TestCase):
         self.assertIn("catalogue of tables", skill)
         self.assertIn("Ask several concrete questions", skill)
         self.assertIn("the reason for the step", skill)
+        self.assertIn("audit-digest-coverage", skill)
+        self.assertIn("self-contained artifact", skill)
+        self.assertIn("Source context still present", skill)
 
     def test_enrich_requires_a_specific_nonduplicating_contribution(self) -> None:
         skill = (ROOT / "skills" / "enrich" / "SKILL.md").read_text(encoding="utf-8")
@@ -234,11 +237,15 @@ class RefineSkillContractTests(unittest.TestCase):
 
     def test_digest_requires_chapter_coverage_not_word_ratio(self) -> None:
         skill = (ROOT / "skills" / "digest" / "SKILL.md").read_text(encoding="utf-8")
+        coverage = (ROOT / "references" / "digest-coverage.md").read_text(encoding="utf-8")
         self.assertIn("not by a compression percentage", skill)
         self.assertIn("mechanism", skill)
         self.assertIn("example", skill)
         self.assertIn("failure mode or limitation", skill)
         self.assertIn("practical implication", skill)
+        self.assertIn("Every source", coverage)
+        self.assertIn("one inventory, ledger, note and gate result per book", coverage)
+        self.assertIn("Do not exclude a substantive chapter", coverage)
 
     def test_bookworm_asks_for_ambiguous_vault_destination(self) -> None:
         for name in ("digest", "refine"):

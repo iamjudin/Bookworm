@@ -4,6 +4,16 @@ All notable changes to Bookworm are documented here.
 
 ## Unreleased
 
+## 0.1.19 — 2026-11-10
+
+- Added a blocking book-digest coverage gate so a polished overview cannot
+  pass as an independent working note when substantive chapters are missing.
+- Digest now preserves a temporary source inventory and coverage ledger with
+  exact final-note evidence for mechanisms, motivations, examples,
+  limitations, and application.
+- Book batches now keep inventory, drafting, validation, and handoff evidence
+  isolated per book, with later-use questions spanning up to six source groups.
+
 ## 0.1.18 — 2026-10-15
 
 - Changed nested Obsidian source tags from mandatory output to a remembered

@@ -13,7 +13,10 @@ an idea actually works, not just what the source was about.
 
 Turns a book or article into a working note: the main ideas, examples,
 limitations, and practical takeaways stay together so you can return to the
-material later.
+material later. For books, a blocking source-coverage gate checks that the
+finished note accounts for the substantive source sections, carries concrete
+reader evidence, and answers later-use questions across the book before
+handoff.
 
 ### Refine
 

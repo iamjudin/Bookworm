@@ -2,11 +2,19 @@
 
 ## Decisions
 
-- Every Bookworm-created note carries one nested Obsidian source-type tag in
-  YAML frontmatter: `bookworm/research`, `bookworm/book`, or
-  `bookworm/article`. Refine uses research, Digest classifies the source, and
-  Enrich preserves the existing type. Repeated runs merge tags without
-  duplication.
+- On the first handoff to a vault, Bookworm asks once whether to add a proposed
+  nested source-type tag: `bookworm/research`, `bookworm/book`, or
+  `bookworm/article`. The preference is remembered per vault. Refine uses
+  research, Digest classifies the source, Enrich preserves an existing type,
+  and repeated runs merge tags without duplication.
+
+- A book Digest is a self-contained working artifact, not a polished abstract.
+  Before handoff it must pass the blocking source-coverage gate using a
+  temporary inventory and ledger. Substantive source items must be accounted
+  for, up to six distinct reader groups must carry exact evidence for the five
+  reading jobs, and later-use questions must be answerable from the final note.
+- Multi-book Digest runs isolate inventory, ledger, note, questions, and gate
+  result per book so one strong output cannot hide a shallow one.
 
 - Digest, Refine, and Enrich share one reader structure contract. Tables are
   for compact comparisons and repeated short fields, lists are for independent

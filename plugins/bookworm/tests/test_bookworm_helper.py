@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from bookworm_helper import (
+    digest_coverage_audit,
     audit_refined_sources,
     citation_inventory,
     note_filename,
@@ -35,6 +36,211 @@ from bookworm_helper import (
 
 
 class RefineMarkdownTests(unittest.TestCase):
+    def test_digest_coverage_gate_accepts_independent_working_note(self) -> None:
+        inventory = {
+            "kind": "epub",
+            "chapters": [
+                {"file": "chapter-1.xhtml", "word_count": 1200},
+                {"file": "chapter-2.xhtml", "word_count": 900},
+            ],
+        }
+        note = """## Метод
+
+Механизм сначала сохраняет событие в журнале, затем отправляет его в резервную очередь.
+
+Такой порядок нужен, чтобы после сбоя восстановить причину и повторить отправку.
+
+В испытании из сорока запусков все прерванные операции удалось отправить повторно.
+
+Метод не гарантирует доставку, когда журнал отключён или резервная очередь переполнена.
+
+Применяй схему только при включённых журнале и очереди, затем проверяй фактическую доставку.
+"""
+        ledger = {
+            "schema": 1,
+            "groups": [{
+                "id": "method",
+                "title": "Метод",
+                "source_files": ["chapter-1.xhtml", "chapter-2.xhtml"],
+                "note_sections": ["Метод"],
+                "evidence": {
+                    "mechanism": ["Механизм сначала сохраняет событие в журнале, затем отправляет его в резервную очередь."],
+                    "motivation": ["Такой порядок нужен, чтобы после сбоя восстановить причину и повторить отправку."],
+                    "example": ["В испытании из сорока запусков все прерванные операции удалось отправить повторно."],
+                    "limitation": ["Метод не гарантирует доставку, когда журнал отключён или резервная очередь переполнена."],
+                    "application": ["Применяй схему только при включённых журнале и очереди, затем проверяй фактическую доставку."],
+                },
+            }],
+            "excluded": [],
+            "questions": [{
+                "question": "Почему порядок шагов важен и когда метод перестаёт работать?",
+                "group_id": "method",
+                "answer_evidence": [
+                    "Такой порядок нужен, чтобы после сбоя восстановить причину и повторить отправку.",
+                    "Метод не гарантирует доставку, когда журнал отключён или резервная очередь переполнена.",
+                ],
+                "dimensions": ["mechanism", "motivation", "example", "limitation", "application"],
+            }],
+        }
+
+        report = digest_coverage_audit(inventory, ledger, note)
+
+        self.assertEqual(report["issues"], [])
+        self.assertEqual(report["metrics"]["covered_word_share"], 1.0)
+
+    def test_digest_coverage_gate_rejects_clean_but_overcompressed_note(self) -> None:
+        inventory = {
+            "kind": "epub",
+            "chapters": [
+                {"file": "chapter-1.xhtml", "word_count": 1000},
+                {"file": "chapter-2.xhtml", "word_count": 1000},
+                {"file": "chapter-3.xhtml", "word_count": 1000},
+            ],
+        }
+        note = """## Обзор
+
+Книга предлагает полезный метод для работы с неопределённостью и повторными действиями.
+"""
+        ledger = {
+            "schema": 1,
+            "groups": [{
+                "id": "overview",
+                "source_files": ["chapter-1.xhtml"],
+                "note_sections": ["Обзор"],
+                "evidence": {
+                    "mechanism": ["Книга предлагает полезный метод для работы с неопределённостью и повторными действиями."],
+                },
+            }],
+            "excluded": [],
+            "questions": [],
+        }
+
+        self.assertEqual(reader_structure_audit(note)["issues"], [])
+        report = digest_coverage_audit(inventory, ledger, note)
+        issue_types = {issue["type"] for issue in report["issues"]}
+
+        self.assertIn("unaccounted_source", issue_types)
+        self.assertIn("missing_coverage_dimension", issue_types)
+        self.assertIn("insufficient_digest_questions", issue_types)
+
+    def test_digest_coverage_gate_rejects_one_overview_group_for_a_whole_book(self) -> None:
+        inventory = {
+            "kind": "epub",
+            "chapters": [
+                {"file": f"chapter-{index}.xhtml", "word_count": 1000}
+                for index in range(1, 9)
+            ],
+        }
+        note = """## Обзор
+
+Механизм связывает наблюдение, решение и повторную проверку результата.
+
+Связь нужна, чтобы решение опиралось на наблюдаемую причину, а не на догадку.
+
+В примере команда провела восемь проверок и изменила решение после четвёртой.
+
+Метод не работает, если наблюдения подменены итоговой оценкой без исходных данных.
+
+Для применения запиши наблюдение, выбери действие и проверь результат до следующего шага.
+"""
+        evidence = {
+            "mechanism": ["Механизм связывает наблюдение, решение и повторную проверку результата."],
+            "motivation": ["Связь нужна, чтобы решение опиралось на наблюдаемую причину, а не на догадку."],
+            "example": ["В примере команда провела восемь проверок и изменила решение после четвёртой."],
+            "limitation": ["Метод не работает, если наблюдения подменены итоговой оценкой без исходных данных."],
+            "application": ["Для применения запиши наблюдение, выбери действие и проверь результат до следующего шага."],
+        }
+        ledger = {
+            "schema": 1,
+            "groups": [{
+                "id": "whole-book",
+                "source_files": [item["file"] for item in inventory["chapters"]],
+                "note_sections": ["Обзор"],
+                "evidence": evidence,
+            }],
+            "excluded": [],
+            "questions": [{
+                "question": "Как устроен метод и при каком условии он перестаёт работать?",
+                "group_id": "whole-book",
+                "answer_evidence": [evidence["mechanism"][0], evidence["limitation"][0]],
+                "dimensions": ["mechanism", "motivation", "example", "limitation", "application"],
+            }],
+        }
+
+        report = digest_coverage_audit(inventory, ledger, note)
+        issue_types = {issue["type"] for issue in report["issues"]}
+
+        self.assertIn("insufficient_coverage_groups", issue_types)
+        self.assertIn("insufficient_digest_questions", issue_types)
+        self.assertIn("questions_do_not_span_groups", issue_types)
+
+    def test_digest_coverage_cli_blocks_a_failed_gate(self) -> None:
+        inventory = {
+            "chapters": [{"file": "chapter.xhtml", "word_count": 800}],
+        }
+        note = """## Глава
+
+Механизм превращает наблюдение в решение через явную проверку результата.
+
+Проверка нужна, чтобы отличить причинную связь от случайного совпадения.
+
+В примере команда повторила эксперимент десять раз перед изменением процесса.
+
+Подход не помогает, если результат нельзя наблюдать после выбранного действия.
+
+На практике сначала зафиксируй условие, затем действие и измеримый результат.
+"""
+        evidence = {
+            "mechanism": ["Механизм превращает наблюдение в решение через явную проверку результата."],
+            "motivation": ["Проверка нужна, чтобы отличить причинную связь от случайного совпадения."],
+            "example": ["В примере команда повторила эксперимент десять раз перед изменением процесса."],
+            "limitation": ["Подход не помогает, если результат нельзя наблюдать после выбранного действия."],
+            "application": ["На практике сначала зафиксируй условие, затем действие и измеримый результат."],
+        }
+        ledger = {
+            "schema": 1,
+            "groups": [{
+                "id": "chapter",
+                "source_files": ["chapter.xhtml"],
+                "note_sections": ["Глава"],
+                "evidence": evidence,
+            }],
+            "excluded": [],
+            "questions": [{
+                "question": "Почему нужна проверка и где заканчивается применимость подхода?",
+                "group_id": "chapter",
+                "answer_evidence": [evidence["motivation"][0], evidence["limitation"][0]],
+                "dimensions": ["mechanism", "motivation", "example", "limitation", "application"],
+            }],
+        }
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            inventory_path = root / "source-inventory.json"
+            ledger_path = root / "coverage-ledger.json"
+            note_path = root / "note.md"
+            inventory_path.write_text(json.dumps(inventory), encoding="utf-8")
+            ledger_path.write_text(json.dumps(ledger), encoding="utf-8")
+            note_path.write_text(note, encoding="utf-8")
+            command = [
+                sys.executable,
+                str(ROOT / "scripts" / "bookworm_helper.py"),
+                "audit-digest-coverage",
+                "--inventory", str(inventory_path),
+                "--ledger", str(ledger_path),
+                "--note", str(note_path),
+            ]
+
+            passed = subprocess.run(command, capture_output=True, text=True, check=False)
+            self.assertEqual(passed.returncode, 0, passed.stdout + passed.stderr)
+
+            ledger["groups"][0]["evidence"].pop("limitation")
+            ledger_path.write_text(json.dumps(ledger), encoding="utf-8")
+            failed = subprocess.run(command, capture_output=True, text=True, check=False)
+
+        self.assertEqual(failed.returncode, 1)
+        self.assertIn("missing_coverage_dimension", failed.stdout)
+
     def test_refine_leaves_source_untagged_until_vault_preference_is_known(self) -> None:
         result = refine_markdown("# Исследование\n\n## Выводы\n\nТекст.\n")
 

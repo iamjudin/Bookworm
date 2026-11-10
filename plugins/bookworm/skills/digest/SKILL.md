@@ -5,8 +5,9 @@ description: Digest books and standalone readable articles into Obsidian-ready w
 
 # Digest
 
-Read `../../references/reader-structure.md` before composing a note. Apply the
-shared contract while drafting each section, not only as final cleanup.
+Read `../../references/reader-structure.md` before composing a note. For every
+book, also read `../../references/digest-coverage.md`. Apply the shared contract
+while drafting each section, not only as final cleanup.
 
 ## Action Names
 
@@ -28,6 +29,10 @@ Prefer explicit invocation for the MVP, such as `$Bookworm`, `$Bookworm: Digest`
 If this skill is already explicitly invoked and the user attaches an EPUB with an empty or vague written request, assume the intended request is: create an Obsidian-ready working digest for that book. Do not ask "what should I do with this file?" unless there are multiple plausible non-digest tasks.
 
 Bookworm's goal is not a short summary. It creates a working book note that can later serve as Codex memory for Q&A, implementation help, and method application.
+
+The finished note must be a self-contained artifact for the book's essential
+model: a later chat should be able to explain and apply its substantive ideas
+without relying on the original run context or silently rereading the source.
 
 ## Activation
 
@@ -252,6 +257,12 @@ Preserve:
 
 Do not over-compress. If a person, case, term, or example is important, briefly explain it so the note is understandable without prior knowledge of the book.
 
+For a book, the fullness standard is blocking rather than advisory. Preserve
+the complete source inventory and a temporary coverage ledger described in
+`digest-coverage.md`, then pass `audit-digest-coverage` before asking for vault
+handoff. A clean reader-structure audit cannot substitute for this gate. Do not
+hand off a structurally tidy overview when the coverage audit fails.
+
 ## Figures And Visuals
 
 Images are first-class content.
@@ -295,16 +306,27 @@ If a visual is essential, technical, or a practical example that teaches impleme
 3. Detect a likely Obsidian vault with `scripts/bookworm_helper.py detect-vaults` when an output location is not given.
 4. Determine source language and visible heading language.
 5. Extract or plan important visual assets.
-6. Build a chapter, section, or article-argument map.
-7. Digest the source section by section, preserving enough context for future Q&A.
-8. Include important figures in place, with explanations.
-9. Run the internal quality gate.
-10. Run `audit-reader-structure` on the temporary Markdown and review every
+6. For a book, save the complete inspection result as `source-inventory.json`
+   and build coverage groups before drafting. For a batch, keep every book's
+   inventory, ledger, note and result isolated and finish the coverage gate for
+   one book before finalizing the next.
+7. Build a chapter, section, or article-argument map. Account for every source
+   item in a substantive group or a concrete non-substantive exclusion.
+8. Digest the source section by section, preserving enough context for future Q&A.
+9. Create `coverage-ledger.json` with exact final-note evidence for mechanism,
+   motivation, example, limitation and application in every group. Ask later-use
+   questions spanning the beginning, middle and end of the book.
+10. Run `audit-digest-coverage` for every book. Expand or correct the failing
+    note sections from the source until the audit passes. Never weaken the map
+    or exclude substantive material merely to pass.
+11. Include important figures in place, with explanations.
+12. Run the internal quality gate.
+13. Run `audit-reader-structure` on the temporary Markdown and review every
     reported issue without treating a clean report as proof of source coverage.
-11. Write one Obsidian-ready Markdown file plus local assets in the run directory.
-12. Prune generated assets so only embedded visuals and useful manifests remain with the final note.
-13. Ask for explicit handoff confirmation before creating or replacing the vault note; then verify copied embeds after confirmation.
-14. After confirmed vault copy and verification, remove temporary working files from the scratch workspace so repeated runs do not leave clutter.
+14. Write one Obsidian-ready Markdown file plus local assets in the run directory.
+15. Prune generated assets so only embedded visuals and useful manifests remain with the final note.
+16. Ask for explicit handoff confirmation before creating or replacing the vault note only after both audits pass; then verify copied embeds after confirmation.
+17. After confirmed vault copy and verification, remove temporary working files from the scratch workspace so repeated runs do not leave clutter.
 
 ## Internal Quality Gate
 
@@ -330,6 +352,9 @@ and the important exception remains visible. Ask several concrete questions of
 the finished note across different source sections. The answers must include
 the mechanism, the reason for the step, an example, a limitation, the condition
 of use, and the relevant source anchor when the source provides them.
+Record those questions and exact answer evidence in the temporary coverage
+ledger. Answer from the finished note alone. Source context still present in the
+conversation does not count as evidence that the artifact is self-contained.
 
 ## Copyright And Privacy
 

@@ -1,0 +1,108 @@
+# Digest Coverage Gate
+
+Use this gate for every book digest before vault handoff. It turns the existing
+fullness promise into temporary, machine-checked workflow evidence. It does not
+put diagnostic fields into the reader-facing note.
+
+## Preserve the source inventory
+
+Save the complete result of `inspect` as `source-inventory.json`. Every source
+file or source section in that inventory must be assigned once to a coverage
+group or explicitly excluded with a concrete reason. Cover pages, copyright,
+navigation and duplicate front matter may be excluded.
+Do not exclude a substantive chapter, worked exercise, appendix or case merely
+to pass the gate.
+
+For PDFs whose inspection has no section list, create an equivalent `sections`
+array from the actual table of contents or page ranges. Each entry needs a
+stable `id`, title and approximate `word_count`.
+
+## Build coverage groups before drafting
+
+A coverage group represents one reader job, usually one substantive chapter,
+method stage or tightly connected source argument. It records the source files
+that belong to it and the final note sections that carry its material. Several
+substantive chapters may share a group only when they form one inseparable
+argument and remain traceable through their source files.
+
+For larger inventories, the gate requires a representative set of up to six
+distinct groups across the substantive source. This prevents a whole book from
+passing as one polished overview while still allowing pairs of tightly
+connected chapters to share a reader-facing section.
+
+For a batch, keep one inventory, ledger, note and gate result per book. Complete
+the map, draft and gate for one book before finalizing the next. A passing book
+must not hide a shallow result for another book.
+
+## Record reader evidence
+
+Create `coverage-ledger.json` in the temporary run directory:
+
+```json
+{
+  "schema": 1,
+  "groups": [
+    {
+      "id": "chapter-01",
+      "title": "Reader-facing group title",
+      "source_files": ["OEBPS/Text/chapter01.xhtml"],
+      "note_sections": ["Chapter 1 — Reader-facing heading"],
+      "evidence": {
+        "mechanism": ["Exact excerpt from the final note"],
+        "motivation": ["Exact excerpt explaining why the step or idea exists"],
+        "example": ["Exact excerpt containing a concrete case or worked example"],
+        "limitation": ["Exact excerpt containing a failure mode, boundary or condition"],
+        "application": ["Exact excerpt showing how a reader can use or test the idea"]
+      }
+    }
+  ],
+  "excluded": [
+    {
+      "source_file": "OEBPS/Text/cover.xhtml",
+      "reason": "Cover page without substantive book content"
+    }
+  ],
+  "questions": [
+    {
+      "question": "A concrete later-use question spanning this source group",
+      "group_id": "chapter-01",
+      "answer_evidence": [
+        "Exact answer excerpt from the final note",
+        "Exact limitation or application excerpt from the final note"
+      ],
+      "dimensions": ["mechanism", "limitation", "application"]
+    }
+  ]
+}
+```
+
+Evidence excerpts must be exact, meaningful phrases from the named final note
+sections. Do not use headings, generic boilerplate or the same sentence for
+several groups. The five dimensions describe reading jobs and need not become
+visible labels in the note.
+
+Ask enough concrete questions to span up to six different groups across the
+beginning, middle and end of the source. Across the set, questions must test the
+mechanism, motivation, example, limitation and application. A question is
+answered only when the finished note contains the evidence, not when the model
+can recall the source from its working context.
+
+## Run the blocking audit
+
+```bash
+python3 scripts/bookworm_helper.py audit-digest-coverage \
+  --inventory /path/to/run/source-inventory.json \
+  --ledger /path/to/run/coverage-ledger.json \
+  --note /path/to/run/final-note.md
+```
+
+The command fails when source items are unaccounted, too much source material
+is excluded, a coverage group lacks a reader job, evidence is absent from its
+named note section, or later-use questions do not span the book. Resolve a
+failure by returning to the source and expanding or correcting the relevant
+section. Do not add empty labels, weaken the inventory or move substantive
+chapters into `excluded`.
+
+Passing this gate proves accounting and local evidence presence. It does not
+prove semantic accuracy, visual quality or source support. Keep the normal
+reader review, figure review and source-grounding checks after it.
