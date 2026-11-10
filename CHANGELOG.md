@@ -4,6 +4,8 @@ All notable changes to Bookworm are documented here.
 
 ## Unreleased
 
+## 0.1.22 — 2026-11-11
+
 - Digest visual captions now explain the visual's actual contribution instead
   of stopping at generic commands such as "Compare" or "Check". Reader review
   also flags missing explanations and tautological continuation titles.
